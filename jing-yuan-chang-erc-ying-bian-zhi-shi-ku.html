@@ -1,0 +1,1462 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light dark" />
+<link rel="icon" href="data:," />
+<title>晶圆厂 ERC 应变知识库</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=Noto+Sans+Mono:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+:root{
+--bg:#eceef1; --surface:#ffffff; --surface2:#f4f6f8; --ink:#1a2230; --muted:#5a6577;
+--line:#d5dae1; --accent:#b3261e; --accent-soft:#fbeae9; --amber:#8a5d00; --amber-soft:#fdf3d7;
+--teal:#0f5f5c; --teal-soft:#e2f0ef; --chip:#e7ebf0; --mark:#ffe27a; --shadow:0 1px 3px rgba(16,24,40,.08);
+color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark){
+:root{
+--bg:#0f1216; --surface:#171c24; --surface2:#1d232e; --ink:#e8ecf3; --muted:#9aa6b8;
+--line:#2b333f; --accent:#e0574f; --accent-soft:#3a2321; --amber:#e0aa3e; --amber-soft:#38300f;
+--teal:#4fb3ad; --teal-soft:#173330; --chip:#232b37; --mark:#7a6410; --shadow:0 1px 3px rgba(0,0,0,.4);
+}
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+font-family:"Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+font-size:16px;line-height:1.65;-webkit-text-size-adjust:100%;overflow-wrap:break-word}
+a{color:var(--teal)}
+mark{background:var(--mark);color:inherit;padding:0 1px;border-radius:2px}
+img,table,pre{max-width:100%}
+.wrap{max-width:900px;margin:0 auto;padding:20px 14px 56px}
+h1{font-size:1.45rem;line-height:1.35;margin:4px 0 14px;font-weight:900}
+.searchrow{position:sticky;top:0;z-index:40;background:var(--bg);padding:6px 0 10px}
+.searchrow input{width:100%;border:1px solid var(--line);border-radius:10px;padding:12px 14px;
+font:inherit;font-size:16px;background:var(--surface);color:var(--ink);min-height:50px}
+#count{font-size:.9rem;color:var(--muted);margin:2px 0 12px}
+details.entry{background:var(--surface);border:1px solid var(--line);border-radius:12px;
+margin-bottom:10px;box-shadow:var(--shadow);overflow:hidden}
+details.entry>summary{cursor:pointer;padding:14px 44px 14px 16px;font-weight:800;list-style:none;
+display:flex;gap:10px;align-items:center;min-height:52px;position:relative}
+details.entry>summary::-webkit-details-marker{display:none}
+details.entry>summary::after{content:"›";position:absolute;right:16px;top:50%;
+transform:translateY(-50%) rotate(90deg);font-size:1.3rem;color:var(--muted);font-weight:400}
+details.entry[open]>summary::after{transform:translateY(-50%) rotate(-90deg)}
+details.entry>summary:active{background:var(--surface2)}
+.entry-body{padding:6px 16px 16px;border-top:1px solid var(--line);min-width:0}
+.entry-body h4.vsub{margin:18px 0 6px;font-size:1rem;font-weight:800}
+.entry-body p{margin:8px 0}
+.entry-body table{margin:10px 0}
+table{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--line);
+border-radius:12px;overflow:hidden;font-size:.94rem}
+th,td{padding:9px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line);
+overflow-wrap:break-word;min-width:0}
+th{background:var(--surface2);font-weight:800}
+tr:last-child td{border-bottom:0}
+.blank{color:var(--amber);font-weight:700}
+.lv1{color:var(--accent);font-weight:900}.lv2{color:var(--amber);font-weight:900}.lv3{font-weight:900;color:var(--teal)}
+@media(max-width:640px){
+table{display:block;border:0;background:transparent;overflow:visible}
+table tbody{display:block}
+table tr{display:block;background:var(--surface);border:1px solid var(--line);
+border-radius:12px;margin-bottom:10px;box-shadow:var(--shadow);overflow:hidden}
+table tr:first-child:has(> th){display:none}
+table td{display:block;border-bottom:1px solid var(--line);padding:9px 14px}
+table td:last-child{border-bottom:0}
+table td:first-child{font-weight:800;background:var(--surface2)}
+}
+ul.tight{margin:6px 0;padding-left:1.3em}
+ul.tight li{margin:3px 0;overflow-wrap:break-word}
+ol.tight{margin:6px 0;padding-left:1.4em}
+ol.tight li{margin:3px 0;overflow-wrap:break-word}
+.callout{border-radius:10px;padding:12px 16px;font-size:.93rem;margin:12px 0}
+.callout.warn{background:var(--amber-soft);border:1px solid var(--amber)}
+.callout.red{background:var(--accent-soft);border:1px solid var(--accent)}
+.stage-name{font-weight:800;margin:14px 0 6px;padding:5px 10px;background:var(--surface2);
+border-radius:6px;display:inline-block;font-size:.92rem;max-width:100%}
+.node-list{list-style:none;margin:10px 0;padding:0}
+.node-list li{display:flex;gap:10px;padding:7px 0;border-bottom:1px dotted var(--line);align-items:flex-start;flex-wrap:wrap}
+.node-list li:last-child{border-bottom:0}
+.ntext{min-width:0;flex:1 1 10em;overflow-wrap:break-word}
+.node-list .idx{flex:0 0 auto;font-family:"Noto Sans Mono",monospace;font-size:.8rem;color:var(--muted);padding-top:3px;min-width:2em;text-align:right}
+.ntype{flex:0 0 auto;font-size:.72rem;font-weight:800;border-radius:5px;padding:1px 7px;margin-top:3px;white-space:nowrap}
+.ntype.start{background:var(--teal);color:#fff}
+.ntype.end{background:var(--ink);color:var(--bg)}
+.ntype.decision{background:var(--amber);color:#fff}
+.ntype.action{background:var(--chip);color:var(--muted)}
+.unit{flex:0 0 auto;font-size:.75rem;background:var(--chip);border-radius:5px;padding:1px 7px;margin-top:3px;color:var(--muted);white-space:nowrap}
+li.pending .ntext{color:var(--amber)}
+.pendtag{font-size:.72rem;font-weight:800;color:var(--amber);border:1px solid var(--amber);border-radius:5px;padding:0 6px;white-space:nowrap}
+.branches{background:var(--surface2);border-radius:10px;padding:10px 14px;margin:12px 0}
+.branches h5,.notesbox h5{margin:0 0 6px;font-size:.9rem}
+.branches ul{margin:0;padding-left:1.2em;font-size:.92rem}
+.notesbox{background:var(--amber-soft);border:1px solid var(--amber);border-radius:10px;padding:10px 14px;margin:12px 0}
+.notesbox ul{margin:0;padding-left:1.2em;font-size:.92rem}
+.check-list{list-style:none;margin:4px 0 10px;padding:0}
+.check-list li{display:flex;gap:9px;padding:6px 0;border-bottom:1px dotted var(--line);align-items:flex-start;font-size:.94rem;flex-wrap:wrap}
+.check-list li:last-child{border-bottom:0}
+.check-list li>span{min-width:0;overflow-wrap:break-word}
+.code{flex:0 0 auto;font-family:"Noto Sans Mono",monospace;font-size:.78rem;font-weight:600;background:var(--chip);border-radius:5px;padding:1px 7px;margin-top:2px}
+.ero-tree,.ero-tree ul{list-style:none;margin:0;padding-left:18px}
+.ero-tree{padding-left:0}
+.ero-tree li{position:relative;padding:3px 0 3px 4px;overflow-wrap:break-word}
+.ero-tree ul::before{content:"";position:absolute;left:6px;top:0;bottom:8px;border-left:2px solid var(--line)}
+.ero-tree>li{font-weight:900;font-size:1.05rem}
+.ero-tree li li{font-weight:700}
+.ero-tree li li li{font-weight:400}
+pre.plantext{white-space:pre-wrap;word-break:break-word;background:var(--surface2);border-radius:10px;
+padding:14px;font-family:"Noto Sans Mono",monospace;font-size:.8rem;line-height:1.6;max-height:70vh;overflow:auto}
+.flow-legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.82rem;color:var(--muted);margin:8px 0 4px}
+.flow-legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{display:inline-block;width:14px;height:14px;border-radius:3px;border:1.5px solid var(--line);flex:0 0 auto}
+.sw.start{background:var(--teal);border-color:var(--teal)}
+.sw.decision{background:var(--amber-soft);border-color:var(--amber);transform:rotate(45deg);border-radius:2px;width:11px;height:11px}
+.sw.end{background:var(--ink);border-color:var(--ink)}
+.sw.pend{background:var(--surface);border-color:var(--amber);border-style:dashed}
+.flow-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);
+border-radius:10px;background:var(--surface2);margin:8px 0 4px}
+.flow-scroll svg{display:block}
+.flow-scroll text{font-family:"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif}
+.flow-hint{font-size:.82rem;color:var(--muted);margin:2px 0 0}
+p.note{color:var(--muted);font-size:.92rem}
+[hidden]{display:none!important}
+.gate{min-height:100vh;min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:20px 14px}
+.gate-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);
+padding:28px 24px;width:100%;max-width:360px}
+.gate-card h2{margin:0 0 6px;font-size:1.25rem;font-weight:900}
+.gate-card .gate-sub{margin:0 0 18px;color:var(--muted);font-size:.93rem}
+.gate-form label{display:block;font-size:.9rem;font-weight:700;margin-bottom:6px}
+.gate-form input{width:100%;border:1px solid var(--line);border-radius:10px;padding:12px 14px;
+font:inherit;font-size:16px;background:var(--surface);color:var(--ink);min-height:50px;margin-bottom:12px}
+.gate-form button{width:100%;border:0;border-radius:10px;padding:12px 14px;font:inherit;font-weight:800;
+background:var(--accent);color:#fff;min-height:50px;cursor:pointer}
+.gate-form button:active{opacity:.85}
+.gate-err{color:var(--accent);font-size:.9rem;font-weight:700;margin:12px 0 0}
+.gatebar{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}
+.gatebar button{border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:8px;
+padding:7px 14px;font:inherit;font-size:.88rem;font-weight:700;cursor:pointer;min-height:40px}
+.gatebar button:active{background:var(--surface2)}
+@media print{.searchrow,.gate,.gatebar{display:none}details.entry{break-inside:avoid}}
+</style>
+</head>
+<body>
+<div id="gate" class="gate">
+<div class="gate-card">
+<h2>请输入密码</h2>
+<p class="gate-sub">输入密码后即可查看知识库内容。</p>
+<form class="gate-form" id="gateForm">
+<label for="gatePw">密码</label>
+<input type="password" id="gatePw" autocomplete="current-password" placeholder="请输入密码" />
+<button type="submit">进入</button>
+<p class="gate-err" id="gateErr" hidden>密码不正确，请再试一次。</p>
+</form>
+</div>
+</div>
+<div class="wrap" id="mainWrap" hidden>
+<h1>晶圆厂 ERC 应变知识库</h1>
+<div class="gatebar">
+<button type="button" id="lockBtn">锁定页面</button>
+</div>
+<div class="searchrow"><input type="search" id="q" placeholder="搜索条目内容…" aria-label="搜索" /></div>
+<p id="count"></p>
+<div id="list"></div>
+</div>
+<script>
+(function(){
+"use strict";
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function isPend(s){return s.indexOf('未辨清')>=0 || s.indexOf('待核')>=0;}
+function hl(s, q){
+var t = esc(s);
+if(!q) return t;
+var i = t.toLowerCase().indexOf(q.toLowerCase());
+if(i<0) return t;
+return t.slice(0,i) + '<mark>' + t.slice(i, i+q.length) + '</mark>' + t.slice(i+q.length);
+}
+
+function entryShell(kind, tagClass, tagText, title, meta, bodyHTML, id){
+return '<details class="entry" data-kind="'+kind+'" id="'+id+'">' +
+'<summary><span class="tag '+tagClass+'">'+tagText+'</span><span>'+esc(title)+'</span>' +
+'<span class="tag meta">'+esc(meta)+'</span></summary>' +
+'<div class="entry-body">'+bodyHTML+'</div></details>';
+}
+
+function matches(texts, q){ if(!q) return true; var low = q.toLowerCase();
+return texts.some(function(t){ return t.toLowerCase().indexOf(low)>=0;});}
+
+// ===== 主题要点 =====
+var GUIDE = [
+{title:'ERC 功能定位、五大功能与七大重点灾害', cat:'总览',
+text:'ERC 功能定位 五大功能 ERT Audit GMS FPS 防灾 减损 人安 厂安 机安 七大重点灾害 强烈地震 台风 火灾 化学品泄漏 气体泄漏 停电 人员伤害 AMC 洁净室火灾',
+html:'<span class="stage-name">ERC 五大功能</span>'
++'<table><tr><th>功能</th><th>说明</th></tr>'
++'<tr><td>ERC</td><td>负责监控厂区安全状况并提供应变设备与场地予以应变人员</td></tr>'
++'<tr><td>ERT</td><td>应变小组能正确地启动，并作出适当的行动方案</td></tr>'
++'<tr><td>Audit</td><td>厂区安全稽核能主动发掘厂内不安全因素，使工厂安全运作</td></tr>'
++'<tr><td>GMS</td><td>特殊气体监控系统：监控厂区气体供应流程与使用，避免人员暴露于危害的环境</td></tr>'
++'<tr><td>FPS</td><td>消防系统</td></tr></table>'
++'<span class="stage-name">ERC 功能定位</span>'
++'<p>防灾、减损、确保人安、厂安、机安。ERC 设置于办公室与无尘室交界处，24 小时监控厂区安全系统，必要时成立 ERT 进行紧急应变，并提供紧急应变器材供 ERT 人员应变使用。</p>'
++'<ul class="tight"><li><b>平时功能</b>：进行紧急应变训练；监督厂区环境及各项作业安全；提供相关器材借用，如可携式气体侦测器、红外线热显像仪…</li>'
++'<li><b>紧急状况功能</b>：紧急状况通报；广播人员疏散；成立 ERT 小组进行应变；提供应变器材供 ERT 应变使用</li></ul>'
++'<p>Note：ERC（Emergency Response Center）紧急应变中心、ERT（Emergency Response Team）紧急应变小组。</p>'
++'<span class="stage-name">七大重点灾害（Major Focus）</span>'
++'<ul class="tight">'
++'<li><b>强烈地震</b>：人员撤至室外；震后立即进行初步评估（已完成厂务与 ISEP 种子训练），以决定人员可否重入室内巡查〔部分字句未辨清〕</li>'
++'<li><b>台风</b>：对水电供应有威胁；加派人力驻厂值班应变</li>'
++'<li><b>火灾</b>：1. 洁净室区域火灾应立即进行现场灭火，同时人员撤出事故地点。2. 空调系统与排气系统进行应变操作：若人员直接灭火无效，火势扩大危及灭火人员，则撤出人员让自动灭火系统操作，ERT 与厂务专注于空调之操作需将烟雾局限于小区域〔部分字句未辨清〕。3. 洁净室外之火灾除自行抢救外，火势扩大应即寻求消防队支援</li>'
++'<li><b>化学品泄漏</b>：关断泄漏源、热区隔离人员，配备必要防护衣具再抢救；排出液体或冲洗排水勿入明沟造成环保问题；注意 chemical 对 wafer 的后续污染问题（即 AMC）</li>'
++'<li><b>气体泄漏</b>：关断泄漏源、热区紧急撤离人员，先确认人员安全与全力抢救伤患；配备必要防护衣具再抢救、再确认认定事故真因，人员重回工作岗位</li>'
++'<li><b>停电</b>：厂务确保紧急电源相关系统与 Life safety &amp; exhaust 系统运作正常；ISEP 确认 gas alarm 状况，fab 端当作泄漏救 wafer〔末句部分字句未辨清〕</li>'
++'<li><b>人员伤害</b>：厂内人员发生身体不适或伤害时，第一时间进行紧急救援，并依照人员伤害通报程序进行通报〔句首一字未辨清〕</li></ul>'},
+
+{title:'ERC 值班台安排（双值班台・每班五员）', cat:'值班',
+text:'值班台安排 On duty console arrangement 双 ERC 值班台 平面图 FAB 应变着装区 紧急应变集结区 厂商作业区 换鞋区 PPE 着装区 前进指挥站 P1 P2 P3 每班五员 电子看板 ESP 上线 Check list 28 项 天然灾害 地震 压降',
+html:'<span class="stage-name">ERC 平面图标示</span>'
++'<p>FAB、应变着装区、P2/P3 紧急应变集结区、P1 紧急应变集结区、ERC、厂商作业区、换鞋区。</p>'
++'<span class="stage-name">F18A ERC 规划说明</span><ol class="tight">'
++'<li>双 ERC 值班台，同一时间可处理两件异常，两边值班台监控功能一致（可监控 P1~P3）</li>'
++'<li>一个 PPE 着装区并设置 P2 无尘室前进指挥站</li>'
++'<li>P1 值班区主要处理天然灾害 ex 地震、压降…</li>'
++'<li>P2/3 值班区主要处理现场异常 ex Gas、Chemical…</li>'
++'<li>人员编制每班五员：P2/3 三员 &amp; P1 二员，并订定 ERC 值班工作 R&amp;R 及紧急应变 R&amp;R</li>'
++'<li>紧急应变采用电子看板辅助</li>'
++'<li>ESP 上线：a. 每日自动报表自动产出；b. ERC 器材借出 e 化；c. ERC 点检 e 化</li>'
++'<li>建置 F18A ERC 紧急应变 Check list（共 28 项）</li></ol>'},
+
+{title:'ERC 监控设备、应变器材与设施（第二 ERC／前进指挥站／4G 摄影机／视讯站）', cat:'设施',
+text:'监控设备 VESDA GMS CCTV A 级防护衣 消防衣 紧急遮断盘 第二 ERC 备援 卫星电话 笔记型电脑 前进指挥站 250m 10 分钟 Giga FAB 4G 行动摄影机 视讯站 5 个',
+html:'<span class="stage-name">监控设备与紧急应变器材</span>'
++'<p>紧急监控系统：VESDA、GMS、CCTV。紧急应变器材：A 级防护衣、消防衣、紧急遮断盘。</p>'
++'<span class="stage-name">第二 ERC 建置（ERC 备援）</span>'
++'<p>ERC 于紧急应变过程中是应变讯息之连络中心，IC（指挥官）在 ERC 可借以了解厂内事件状况，统筹指挥与协调意外事件救灾相关事宜；当事故规模扩大到会危及到 ERC 内人员安全，就必须启动第二 ERC 来继续统筹、指挥并发挥紧急应变中心的功能。</p>'
++'<p>tsmc 第二 ERC 设置规范：</p><ol class="tight">'
++'<li>可监控厂内消防系统与气体侦测系统状态</li>'
++'<li>设置实体电话线与电话</li>'
++'<li>设置二台笔记型电脑</li>'
++'<li>各类紧急应变器材</li>'
++'<li>设置卫星电话</li></ol>'
++'<p>（第二 ERC 实景照片日期戳 18/12/2020。）</p>'
++'<span class="stage-name">前进指挥站（强化远距紧急应变能量）</span>'
++'<p><b>目的</b>：F18A 因应目前 Giga FAB 厂区占地辽阔、整并纵深过长，为确保 ERT 成员有效远距紧急应变，设置前进指挥站有效运用资源处理灾害，将 ERT 应变能量有效延伸。</p>'
++'<p><b>做法</b>：定义前进指挥所离 ERC 距离或重装备行走需花费时间：距离 ERC &gt; 250m；重装备（A 级防护衣，消防衣）行走需花费 &gt; 10mins。</p>'
++'<p><b>解决远距应变的问题</b>：降低救灾应变范围有效人力运用及对厂区的影响；有效应用救灾器材，确保人员安全。</p>'
++'<p>厂区平面图标示 P2、P3、SUP、P1、B1 及数字 230、212、230、6〔平面图细部标注部分未辨清〕；照片标签：ERC、前进指挥站、前进指挥站视讯系统。</p>'
++'<span class="stage-name">4G 行动摄影机</span>'
++'<p><b>目的</b>：厂区每日风险性施工或紧急状况处理等因素，目前因受限于 CCTV 覆盖率因素，导致容易有盲点无法即时掌握现场状况，因此设置 4G 行动摄影机可即时监控与风险性施工或紧急状况处理。</p>'
++'<p><b>创新</b>：使用 4G 通讯，即时传送影像到紧急应变中心（ERC）。<b>使用方式</b>：设置于防护衣外，可将眼前画面回传 ERC。（照片时间戳 2021/01/01 16:12:07，穿戴防护衣影像回传画面。）</p>'
++'<span class="stage-name">视讯功能</span>'
++'<p>F18A 共有：ERC、前进指挥站、P1 厂务值班室、P2 厂务值班室、P3 厂务值班室，共 5 个紧急应变视讯站，可以视讯系统做多方即时通联。照片标签：P2 ERC、前进指挥站、P2 厂务值班、P1 厂务值班。</p>'},
+
+{title:'紧急应变训练年度活动（ERT 训练・季演练・年度排程）', cat:'训练',
+text:'紧急应变训练 年度活动 ERT 训练 PPE 穿戴 紧急应变演训 消防灭火 Q1 Q2 Q3 Q4 季演练 H.A.Z.M.A.T 无预警集结 年度疏散暨应变演练 竹山消防训练 年度消防训练 SCBA',
+html:'<span class="stage-name">ERT 训练</span><ol class="tight"><li>PPE 穿戴训练</li><li>紧急应变演训</li><li>消防灭火训练</li></ol>'
++'<span class="stage-name">年度活动排程</span>'
++'<p>ISEP ERC 每年排定各类紧急应变训练与演练，持续提升应变技能：</p><ul class="tight">'
++'<li><b>Q1</b>：PPE 穿戴练习 — 训练厂内 ERT 人数 &gt;1000 人（EE/FAC）；另有「竹山消防训练」</li>'
++'<li><b>Q2</b>：紧急应变演练、疏散演练 — 举办 50 场以上演练（含预演）</li>'
++'<li><b>Q3</b>：紧急应变演练 — 举办 50 场以上演练（含预演）；另有「年度消防训练」</li>'
++'<li><b>Q4</b>：年度疏散暨应变演练 — 举办 5 场以上演练（含预演）</li></ul>'
++'<p>小图标题「ERT PPE Training」，图内红色小字标签可辨「训练衣、A 级衣 + SCBA + 无线电」等字样〔其余小字未辨清〕。</p>'
++'<span class="stage-name">ERT 季演练</span>'
++'<p>借由实兵演练让 ERT 成员实际以 H.A.Z.M.A.T. 进行救灾，模拟厂区发生各类灾害应变，强化 ERT 应变能力与符合各类法规要求。照片标签（八张）：ERT Team up、火灾演练－无尘室、火灾演练－无尘室、火灾演练－非无尘室、毒化物演练、毒化物处理、ERT 无预警集结演练、化学品泄漏演练。</p>'
++'<span class="stage-name">年度疏散暨应变演练</span>'
++'<p>照片标签：厂务部发电机火灾演练、蚀刻部门毒气泄漏演练、EMT 伤患救援、全厂疏散演练。</p>'},
+
+{title:'ERC 值班规定：开门七件事与值班分工 R&R', cat:'值班',
+text:'开门七件事 值班规定 日常管理 值班名牌 系统隔离 NCS VESDA GMS 器材 状况交接 班长 副班长 班员 人力安排 无线电 视讯 Level-1 登录 值班分工 R&R ERIC CAR EEM 六氟灵 敌腐灵 CO2 变电站 电话三声',
+html:'<span class="stage-name">开门七件事（ERC 日常管理）</span><ol class="tight">'
++'<li>值班名牌更换，ERC 环境整理及 PPE 整理</li>'
++'<li>检查并确认系统隔离，解隔离状态正常（NCS/VESDA/GMS）</li>'
++'<li>检查并确认器材状况正常（纸带，P/D，各式器材）</li>'
++'<li>值班状况交接（Case）</li>'
++'<li>班长 ERC 人力及工作安排（1.C/R 2.Non-C/R 3.Level-1 4.紧急状况处理）</li>'
++'<li>测试并确认无线电通联，紧急视讯系统状况正常</li>'
++'<li>管理局特定 Level-1 作业登录</li></ol>'
++'<span class="stage-name">值班分工 R&amp;R — 原则</span>'
++'<p>人员配置原则：依值班分工分配每日例行工作，以利同仁明确清楚自己每日值班的职掌。定义 ERC 开门七件事，需要在值班交接前完成确认（已分配于以下分工 List）：1. 值班名牌更换，ERC 环境整理及 PPE 整理；2. 各 Site 正手执行检查并确认系统隔离，解隔离状态正常（NCS/VESDA/GMS）；3. 检查并确认器材状况正常（纸带，手持式侦测器，各式器材）；4. 值班状况交接（Case）；5. 班长 ERC 人力及工作安排；6. 测试并确认无线电通联，紧急视讯系统状况正常；7. 管理局特定 Level-1 作业登录。</p>'
++'<div class="callout warn">Note：P1~P3 系统只要有警报都要立即确认，电话严禁响超过三声才接听。</div>'
++'<span class="stage-name">班长（P2）分工</span><ol class="tight">'
++'<li>值班人力安排（名牌更换）</li>'
++'<li>Alarm phone call 调查</li>'
++'<li>Mail：Daily audit report、ERIC 未结案、假日高风险施工申请、每日特气送气登纪检查表</li>'
++'<li>缺失确认并送出（CAR/EEM）</li></ol>'
++'<span class="stage-name">副班长（P1）分工</span><ol class="tight">'
++'<li>ERIC 例行登录</li>'
++'<li>Mail：厂内 Daily 值班纪录</li>'
++'<li>晚会交接（16:30 简讯通知）</li>'
++'<li>晨会交接厂内/各厂异常报告整理 PPT</li></ol>'
++'<span class="stage-name">班员（P1）分工</span><ol class="tight">'
++'<li>交接前确认器材借出归还情况</li>'
++'<li>4G 摄影机、T-Phone、值班手机充电</li>'
++'<li>VMB 送酸，夜加查核</li>'
++'<li>每日施工报表制作</li>'
++'<li>每日 Level-1、设备高风险查核、PM 巡检</li>'
++'<li>晨会交接操盘</li>'
++'<li>六氟灵 &amp; 敌腐灵点检（P1）</li></ol>'
++'<span class="stage-name">班员（P2）分工</span><ol class="tight">'
++'<li>值班状况回报 &amp; 简讯发送</li>'
++'<li>Mail：厂商夜间作业申请统计、ERC 上网申报〝南科管理局</li>'
++'<li>南科管理局特殊作业申报</li>'
++'<li>每日 Level-1、设备高风险查核、PM 巡检（支援）</li>'
++'<li>晨会交接操盘</li>'
++'<li>六氟灵 &amp; 敌腐灵点检（P2）</li></ol>'
++'<span class="stage-name">班员（P3）分工</span><ol class="tight">'
++'<li>ERC Room 6S 环境整理、器材检点、PPE 整理、相机借用</li>'
++'<li>CO2 变电站解隔离</li>'
++'<li>每日 Level-1、设备高风险查核、PM 巡检</li>'
++'<li>晨会交接操盘</li>'
++'<li>六氟灵 &amp; 敌腐灵点检（P3）</li></ol>'},
+
+{title:'ERC 值班工作管制表（33 项全表）', cat:'值班',
+text:'值班工作管制表 33 项 全表 日班 夜班 假日班 礼拜天 Shift 正手 副手 Routine 人力安排 施工日报 ERIC 器材交接 火警系统隔离 晨会 缺失 子安哥 简讯 夜间加班 假日高风险施工 稽核巡检 OP report 六氟灵 敌腐灵 无线电测试 视讯测试 南科管理局 L1 高风险作业 daily audit report SPM Flex 纸带 复归火警 CO2 TSM EEM SCBA 气瓶',
+html:'<p>全表编号 1–33，实际列出 32 项（原表编号由 8 直接跳至 10，画面中无第 9 项）。逐行照录：</p>'
++'<table><tr><th>Item</th><th>班别</th><th>ERC 值班作业事项</th><th>Shift</th><th>说明</th></tr>'
++'<tr><td>1</td><td>日班</td><td>每日 ERC 人力安排（1.无尘室 2.外围 3.高风险作业 4.紧急状况处理）</td><td>正手</td><td>Routine</td></tr>'
++'<tr><td>2</td><td>日班</td><td>每日施工日报重新整理（EEM 重捞高风险作业）</td><td>正手</td><td>Routine</td></tr>'
++'<tr><td>3</td><td>日班</td><td>ERIC 登录器材交接，火警系统隔离</td><td>正手</td><td>Routine</td></tr>'
++'<tr><td>4</td><td>日班</td><td>晨会结束后缺失确认及发送（EEM 或 TSM）</td><td>副手</td><td>Routine</td></tr>'
++'<tr><td>5</td><td>日班</td><td>值班相关资料整理（高风险、夜间加班、器材交接、天花板、槽车...）以及 ERIC 上纪录确认</td><td>正手</td><td>Routine</td></tr>'
++'<tr><td>6</td><td>日班</td><td>18:00 当日值班状况回报主管及巡检缺失（简讯）</td><td>正手</td><td>Routine</td></tr>'
++'<tr><td>7</td><td>日班</td><td>简讯送出后五分钟内 call 子安哥回报值班状况与缺失</td><td>正手</td><td>Routine</td></tr>'
++'<tr><td>8</td><td>日班</td><td>18:00 当日夜间加班 mail</td><td>正手</td><td>Routine</td></tr>'
++'<tr><td>10</td><td>日班</td><td>周五整理 [统计假日（六.日）高风险施工申请] mail 给我们部门主管及值班人员了解六日工程</td><td>正手</td><td>Routine</td></tr>'
++'<tr><td>11</td><td>日班</td><td>稽核巡检、主题巡检与高风险作业查核</td><td>副手</td><td>Routine</td></tr>'
++'<tr><td>12</td><td>假日日班</td><td>09:00 回报主管 夜间值班状况及 ERC 巡检缺失（简讯）</td><td>正手</td><td>Routine</td></tr>'
++'<tr><td>13</td><td>假日日班</td><td>简讯送出后五分钟内 call 子安哥回报值班状况与缺失</td><td>正手</td><td>Routine</td></tr>'
++'<tr><td>14</td><td>礼拜天</td><td>OP report</td><td>副手</td><td>Routine</td></tr>'
++'<tr><td>15</td><td>假日日班</td><td>六氟灵 &amp; 敌腐灵点检（六日）</td><td>副手</td><td>Routine</td></tr>'
++'<tr><td>16</td><td>夜班</td><td>值班相关资料整理（槽车、器材交接...）以及 ERIC 上纪录确认</td><td>正手</td><td>Routine</td></tr>'
++'<tr><td>17</td><td>夜班</td><td>21:00 执行无线电测试以及视讯测试</td><td>正手</td><td>Routine</td></tr>'
++'<tr><td>18</td><td>夜班</td><td>南科管理局通报 L1 高风险作业（局限空间、施工架组拆、吊车吊挂...等作业）纪录</td><td>正手</td><td>Routine</td></tr>'
++'<tr><td>19</td><td>夜班</td><td>每日厂商 &amp; 设备所申请施工日报资料的整理（过 12 点）</td><td>正手</td><td>Routine</td></tr>'
++'<tr><td>20</td><td>夜班</td><td>F18 ISEP daily audit report Mail 制作</td><td>正手</td><td>Routine</td></tr>'
++'<tr><td>21</td><td>夜班</td><td>F18 厂内事件（N/A）、厂内异常（N/A）、不可抗力（N/A）值班记录，高风险作业现场观察照片（XX 件）&amp; 他厂事件（N/A）值班记录制作</td><td>正手</td><td>Routine</td></tr>'
++'<tr><td>22</td><td>夜班</td><td>07:00 F18 ISEP daily audit report 执行报告制作 Mail 寄出（假日五六日三天礼拜一统一寄出）</td><td>正手</td><td>先 Mail 给 ISEP 内部</td></tr>'
++'<tr><td>23</td><td>夜班</td><td>F18 厂内事件（N/A）、厂内异常（N/A）、不可抗力（N/A）值班记录，高风险作业现场观察照片（XX 件）&amp; 他厂事件（N/A）值班记录 mail 寄出</td><td>正手</td><td>Routine</td></tr>'
++'<tr><td>24</td><td>夜班</td><td>复归火警系统</td><td>正手</td><td>Routine</td></tr>'
++'<tr><td>25</td><td>夜班</td><td>SPM Flex 纸带检查（每日，距离有效期限一周内即更换新品）</td><td>正手</td><td>Routine</td></tr>'
++'<tr><td>26</td><td>夜班</td><td>ERC 环境整理 &amp; PPE 整理</td><td>副手</td><td>Routine</td></tr>'
++'<tr><td>27</td><td>夜班</td><td>稽核巡检、主题巡检</td><td>副手</td><td>Routine</td></tr>'
++'<tr><td>28</td><td>夜班</td><td>复归 CO2 系统，隔离 CO2 系统</td><td>副手</td><td>Routine</td></tr>'
++'<tr><td>29</td><td>夜班</td><td>TSM &amp; EEM 建立缺失</td><td>副手</td><td>Routine</td></tr>'
++'<tr><td>30</td><td>夜班</td><td>07:00 夜班值班状况回报主管及巡检缺失（简讯）</td><td>正手</td><td>Routine</td></tr>'
++'<tr><td>31</td><td>夜班</td><td>简讯送出后五分钟内 call 子安哥回报值班状况与缺失</td><td>副手</td><td>Routine</td></tr>'
++'<tr><td>32</td><td>夜班</td><td>六氟灵 &amp; 敌腐灵点检（五六日）</td><td>副手</td><td>Routine</td></tr>'
++'<tr><td>33</td><td>夜班</td><td>整理 ERC 内器材，PPE，SCBA 气瓶更换（每日）</td><td>正手</td><td>Routine</td></tr></table>'},
+
+{title:'ERC 紧急应变 R&R（班长／副班长／班员职责）', cat:'应变',
+text:'紧急应变 R&R 启动时机 Team up 班长 副班长 班员 职责 IC Checklist 环境量测 点位确认 CCTV 简讯发送 报告撰写 ISEP Account Leader 4G 摄影 安播广播',
+html:'<span class="stage-name">启动与配置原则</span><ul class="tight">'
++'<li><b>启动时机</b>：任何异常或持续之气体读值、火警警报、漏液、化学品沾染、人员受伤通报...等应变</li>'
++'<li><b>人员配置原则</b>：应变时原则上班长在 ERC 指挥，副班长负责现场，特殊情况班长与副班长可对调，并请求 Leader 支援</li>'
++'<li><b>全员协同应变</b>：应变时打破 P1~P3 编制限制，人力抽调加入应变，由班长统筹指挥 ERC 及现场应变人力，现场应变人力需资深人员搭配浅人员（日班发生时，当日人员需第一时间加入配合班长之指挥应变）</li>'
++'<li><b>ERC Team up</b>：状况达异常等级或持续性不正常状况，班长要求 IC 至 ERC 了解状况 Team up，使用 IC check list</li>'
++'<li><b>现场 Team up</b>：现场处理重点为人员安全、现场管制、环境侦测、状况回报，要求责任单位 Team up，使用 4G 摄影</li>'
++'<li><b>事故处理及原因调查</b>：由权责单位负责，ISEP Account sponsor/ERC 成员给予必要之安全协助</li></ul>'
++'<span class="stage-name">班长（P2）职责</span><ol class="tight">'
++'<li>统筹应变指挥分工</li>'
++'<li>请副班长及一位班员配合现厂应变</li>'
++'<li>协助 IC 在 ERC Team up 填写 IC Checklist</li>'
++'<li>指挥留守 ERC 班员启动通报程序</li></ol>'
++'<span class="stage-name">副班长（P1）职责</span><ol class="tight">'
++'<li>现场应变，回报班长现场状况</li>'
++'<li>现场救灾组 Team up</li>'
++'<li>指挥环境量测、点位确认</li>'
++'<li>确认现场人员安全</li>'
++'<li>建议穿戴适当的 PPE</li></ol>'
++'<span class="stage-name">班员（P1）职责</span><ol class="tight">'
++'<li>应变时担任 ERC 执行正手</li>'
++'<li>通报 Account/Leader/ISEP 主管</li>'
++'<li>配合 IC/班长应变时序图正确填写</li>'
++'<li>简讯发送</li>'
++'<li>报告撰写</li>'
++'<li>填写 ERC 应变 Check list</li></ol>'
++'<span class="stage-name">班员（P3）职责（其一）</span><ol class="tight">'
++'<li>应变时担任 ERC 执行副手</li>'
++'<li>执行必要安播广播〔原文如此〕</li>'
++'<li>协助通报相关单位</li>'
++'<li>填写应变 Check List</li>'
++'<li>CCTV 操作，电话接听</li></ol>'
++'<span class="stage-name">班员（P3）职责（其二）</span><ol class="tight">'
++'<li>配合副班长准备现场应变器材</li>'
++'<li>携带 4G 摄影机、无线电</li>'
++'<li>区域管制</li>'
++'<li>环境量测、点位确认</li>'
++'<li>协助 ERT PPE 正确穿戴</li></ol>'
++'<p>（原图下方并列两个标题同为「班员（P3）」的职责框，内容不同，照原样并录。）</p>'},
+
+{title:'紧急应变组织图（Emergency Response Organization）', cat:'组织',
+text:'Emergency Response Organization 紧急应变组织图 事故指挥官 安全幕僚 紧急应变中心 厂务组 保全组 疏散组 MFG 救灾组 搜寻小组 处理小组 管制小组 除污小组 支援小组 急救组 EMT 计划组 Planner 公关组 财务组 后勤组 A-RMS-08-03-210 值班经理 资深设备工程师',
+html:'<p>左上红字注记：一般时间：厂长、副厂长或代理人；假日：值班经理/副理；夜间：资深设备工程师。</p><ul class="tight">'
++'<li><b>事故指挥官</b></li>'
++'<li><b>安全幕僚</b>（指挥官指定事故单位人员）</li>'
++'<li><b>紧急应变中心</b>（工安环保部）</li>'
++'<li><b>厂务组</b>（厂务部经理）：公用系统：电力系统、空调系统、化学品系统、水系统；厂务区：酸房、库房、办公区</li>'
++'<li><b>保全组</b>（警卫队负责）</li>'
++'<li><b>疏散组</b>（MFG 经理）：制造部 课长/领班</li>'
++'<li><b>救灾组</b>（相关设备）：下辖搜寻小组、处理小组、管制小组、除污小组、支援小组</li>'
++'<li><b>急救组 EMT</b>（健康中心）：制造部 合格急救员；急救 First aid、照护 Take care、搬运 Carry</li>'
++'<li><b>计划组 Planner</b>（工安环保部及 RMESHD 负责）</li>'
++'<li><b>公关组 Public Relation</b>（公共关系部负责）</li>'
++'<li><b>财务组 Financial</b>（财务部及采购人员负责）</li>'
++'<li><b>后勤组</b></li></ul>'
++'<p>图下标示：「一、二级状况」与「三级状况启动」。文件编号：A-RMS-08-03-210。</p>'},
+
+{title:'应变工具：28 种应变状况 Check list 与应变 e 看板（AS IS → TO BE）', cat:'工具',
+text:'28 种应变状况 Check list 火灾 气体泄漏 Gas TLV ppb ppm Trend Chart GMS 隔离 AMC YED 邱闵锋 陈宗彦 热显像仪 ACV PUMP 色带 stain Chemical Leakage Checklist 化学品泄漏处理流程 应变看板 AS IS TO BE e 看板 白板',
+html:'<p>TSMC 制定各类紧急应变程序与 Check list 提供指挥官救灾资讯，共 28 种应变状况。以下为火灾与气体泄漏两张 Check list 全文（表头栏位：填表人／发生日期：西元 年 月 日）。</p>'
++'<span class="stage-name">火灾 Check list — 状况简述</span><ul class="tight"><li>（本栏空白待填）</li></ul>'
++'<span class="stage-name">火灾 — 事件发生及应变确认</span><ul class="tight">'
++'<li>发生时间：</li>'
++'<li>确认火警警报来源：□NCS □VESDA □人员通报</li>'
++'<li>□是□现场启动警铃与广播，□是□否切断自动广播进行安抚广播</li>'
++'<li>确认火警地点：□有□无明火〔红字，字句未辨清〕</li>'
++'<li>确认消防系统是否伴随其他警报：□消防 PUMP □FS □PS □NCS&amp;VESDA 同时作动</li>'
++'<li>警报类别详细内容（注解 1）</li></ul>'
++'<span class="stage-name">火灾 — ERT 成立及通报程序</span><ul class="tight">'
++'<li>通报时间：　通报消防工程师：</li>'
++'<li>初步状况通知（10 分钟内）：□Leader、□副理、□ESH 工程师：</li>'
++'<li>通报事故部门主管：　／　假日值班主管：</li>'
++'<li>此 CASE □有□无需要 ERT Team up</li>'
++'<li>ERC 依状况判定标准（一级、二级、三级）通报相关人员（注解 2）</li>'
++'<li>达异常/事件等级 □是，请 Follow 简讯通报基准发送简讯。□否</li>'
++'<li>□是□否影响 AMC，并通知 YED □邱闵锋 经理 □陈宗彦 经理</li>'
++'<li>厂区发生火灾同时造成有无异常烟流 or 火势扩及相邻厂区：</li>'
++'<li>烟雾 ERC 即刻启动中央危机指挥中心通报（应变手册 1-16）</li></ul>'
++'<span class="stage-name">火灾 — 现场处理</span><ul class="tight">'
++'<li>ERC 通知现场 □设备/□厂务/□厂商/□其他 姓名：　公/卡号：</li>'
++'<li>ERC 携手携带 □热显像仪：　°C、□HC 侦测器读值：</li>'
++'<li>确认现场 □PM □施工 □其他：　并要求停止一切动作</li>'
++'<li>确认现场洒水头 □有□无破裂洒水，立即关闭该区 ACV，编号：</li>'
++'<li>确认 NCS 电动/柴油 PUMP 有无异常启动，立即关闭该 PUMP，位置：</li>'
++'<li>检查环境无异常，火警警报查无原因，ERC 持续追踪 24 小时 □正常 □异常</li></ul>'
++'<span class="stage-name">火灾 — 后续处理</span><ul class="tight">'
++'<li>初步调查结果：</li>'
++'<li>后续状况回报：□Leader、□副理、□消防工程师 □ESH 工程师：</li>'
++'<li>ERIC 记录/报告整理</li></ul>'
++'<span class="stage-name">火灾 — 备注</span><ul class="tight">'
++'<li>注 1：1.NCS 纪录起火区域及类别（Fire Detector/CO2/Inergen/手动报警机/机台 CO2/UVIR/ACV 等）2.VESDA 纪录主机编号连锁 3.人员姓名/连络电话</li>'
++'<li>注 2：一级通报：副总、公关、法务、财务、厂长、TB、Corporate ESH；二级通报：公关、法务、财务、厂长、TB、Corporate ESH；三级通报（进 ERIC 异常）厂长、财务、TB、Corporate ESH；三级通报（未进 ERIC 异常）事故部门主管、ISEP 部门主管</li>'
++'<li>表尾：通报注册〔栏名未辨清〕／现场处理人员／leader／V1</li></ul>'
++'<span class="stage-name">气体泄漏 Check list — 状况简述</span><ul class="tight">'
++'<li>读值出现时间：　Gas（注 1）：　TLV：　／　□ppb □ppm</li>'
++'<li>房号：　确认 Trend Chart 并截图</li>'
++'<li>读值多少：　□ppb □ppm　Pre-alarm 值：　□ppb □ppm</li>'
++'<li>泄漏地点或机台：</li>'
++'<li>确认警报真实性 □真实泄漏 □系统误动作 □人员作业干扰 □其他：</li>'
++'<li>确认 GMS 隔离状态，达红灯无法确认是误动作须立刻解隔离</li>'
++'<li>为预防警报再发，滤蕊有达放完，先暂时隔离 GMS 单一回路 Interlock funtion〔原文拼字如此〕</li>'
++'<li>询问现场有无人员作业，通知 □设备或□厂务人员 时间：　姓名：　工号：</li>'
++'<li>通报 GMS 工程师：</li></ul>'
++'<span class="stage-name">气体泄漏 — ERT 成立及通报程序</span><ul class="tight">'
++'<li>初步状况通知（10 分钟内）：□Leader、□副理、□ESH 工程师：</li>'
++'<li>通报事故部门主管：　／　假日值班主管：</li>'
++'<li>此 CASE □有□无需要 ERT Team up</li>'
++'<li>ERC 依状况判定标准（一级、二级、三级）通报相关人员（注 2）</li>'
++'<li>达异常/事件等级 □是，请 Follow 简讯通报基准发送简讯。□否</li>'
++'<li>联络 AMC 确认 AMC 状况 □是□否正常　AMC 值班人员：</li>'
++'<li>□否 □是影响 AMC，并通知 YED □邱闵锋 经理 □陈宗彦 经理（注 3）</li></ul>'
++'<span class="stage-name">气体泄漏 — 现场处理</span><ul class="tight">'
++'<li>确认现场 □PM □施工□其他：　并要求停止一切动作</li>'
++'<li>确认现场环境 □无□有读值：　□ppb □ppm</li>'
++'<li>以管测试交叉比对读值真实性〔首字未辨清〕</li>'
++'<li>现场要用盘（GC/VMB/Gas Box）检测漏源时是否穿戴正确 PPE</li>'
++'<li>量测：□机台 Gas Box □VMB □GC □GI〔未辨清〕□其他　□无□有读值：　□ppb □ppm</li>'
++'<li>调阅现场机台 LOG 及历史警报记录并拍照纪录</li>'
++'<li>比对机台时间与 ERC 系统时间差：机台时间比 ERC □快□慢　分　秒</li>'
++'<li>若需撕纸 DOD 纸带，确认读值为零才可执行</li>'
++'<li>□是□否使用 PPE 柜，记录 PPE 使用项目及数量：</li>'
++'<li>通知 User：　将使用过应变器材清洗善后，归还 ERC</li>'
++'<li>联络废资课人员：　处理废弃物</li>'
++'<li>若需撕纸 DOD 纸带，确认读值为零才可执行</li></ul>'
++'<span class="stage-name">气体泄漏 — 后续处理</span><ul class="tight">'
++'<li>初步调查结果：</li>'
++'<li>后续状况回报：□Leader、□副理</li>'
++'<li>ERIC 记录/报告整理/确认色带 stain</li></ul>'
++'<span class="stage-name">气体泄漏 — 备注</span><ul class="tight">'
++'<li>注 1：泄漏气体若为毒化物须联络环保工程师进厂是否通报主管机关（括号内气体清单小字未辨清）</li>'
++'<li>注 2：一级通报：副总、公关、法务、财务、厂长、TB、Corporate ESH；二级通报：公关、法务、财务、厂长、TB、Corporate ESH；三级通报（进 ERIC 异常）厂长、财务、TB、Corporate ESH；三级通报（未进 ERIC 异常）事故部门主管、ISEP 部门主管</li>'
++'<li>注 3：通报 YED 只要以下其中一项（日班立即通知，22:00~08:00 发生则于隔日 08:00 通知）1.环境侦测动作〔字句未辨清〕 2.同时两点（含）以上读值 3.冲洗泄漏〔字句未辨清〕</li>'
++'<li>表尾：专业注册〔栏名未辨清〕／现场处理人员／leader／V1</li></ul>'
++'<span class="stage-name">应变程序与 Check list（文件页）</span>'
++'<p>左：ERT 紧急应变注意事项－Chemical Leakage Checklist（文件编号 A-RMS-08-03-210；ERC 汇整 ARMG0803210-03/VER.2）——表单内文为缩图，字体过小，未能逐字辨识〔未辨清〕。右：tsmc 化学品泄漏处理流程（文件编号 A-RMS-08-03-210）——流程图节点为缩图，字体过小，未能逐字辨识〔未辨清〕。</p>'
++'<span class="stage-name">AS IS：传统固定式应变白板</span><ul class="tight">'
++'<li>纸本更新资料，不环保且费时费力</li>'
++'<li>IC 无法定点掌握完整资讯</li>'
++'<li>应变资讯寻找不易</li></ul>'
++'<p>（照片档名小字：Security_C_084806_IMC_0102_FAB18P1.png〔近似，未辨清〕）</p>'
++'<span class="stage-name">TO BE：紧急应变 e 看板</span><ul class="tight">'
++'<li>应变资讯方便切换，包含流程、Checklist、Layout、通报流程等</li>'
++'<li>应变资讯即时更新并能随时切换查询</li>'
++'<li>摆脱传统固定式白板，提升机动性</li></ul>'
++'<p>照片为「F18A 应变 e 看板」画面，含 Chapter 1–6 区块，其中 Chapter 4 Checklist、Chapter 5 紧急应变流程、Chapter 6 灾害通报流程等小字部分未辨清；照片档名小字未辨清。</p>'},
+
+{title:'ISEP 巡检计划（PDCA）、巡检强化与建物安全责任区', cat:'巡检',
+text:'ISEP 巡检计划 PDCA Level 1 开工巡检 Level 2 例行抽检 装机作业查核 建物责任区 主题式巡检 逐月排程 小蜜蜂 装机巡检强化 稽核能力提升 W203 W212 Action 四特管 建物安全员责任区分配 郭川铭 陈圣旺 小房间矩阵 装机机台分布图 例行性巡检路线',
+html:'<span class="stage-name">ISEP 巡检计划 — PDCA</span>'
++'<p>目的：为减少厂区重度缺失、持续加强作业安全，以达到防灾减损为目的。Follow up：ERC 周、月报检讨。</p>'
++'<table><tr><th>#</th><th>类别</th><th>执行人员</th><th>执行方式</th></tr>'
++'<tr><td>1</td><td>Level 1 开工巡检</td><td>ERC 副手（EUV 为主）</td><td>开工检查 100%</td></tr>'
++'<tr><td>2</td><td>Level 2 例行抽检</td><td>ERC 副手</td><td>每日抽查 20%</td></tr>'
++'<tr><td>3</td><td>装机作业查核</td><td>ERC 副手</td><td>每日抽查 6 件</td></tr>'
++'<tr><td>4</td><td>区域例行性巡检</td><td>ERC 副手（夜班）</td><td>依规划路线</td></tr>'
++'<tr><td>5</td><td>建物责任区巡检</td><td>ERC（加班）</td><td>区域负责人每月 1 次专案巡检</td></tr>'
++'<tr><td>6</td><td>常态式主题稽核</td><td>ESH 工程师</td><td>槽车灌充作业 &gt;10%、开盘作业查核 &gt;30%</td></tr>'
++'<tr><td>7</td><td>高风险区域施工巡检</td><td>ESH 工程师</td><td>抽查每日区域 &gt;20%</td></tr>'
++'<tr><td>8</td><td>主题式巡检</td><td>ERC 副手</td><td>依排定计划对厂区进行（计划类与时事类）</td></tr></table>'
++'<p>备份简报版本差异：第 6、7 类执行人员作「小蜜蜂」，执行方式作「小蜜蜂槽车灌充作业 &gt;10%、小蜜蜂开盘作业查核 &gt;30%」与「小蜜蜂抽查每日区域 &gt;20%」，其余相同。</p>'
++'<span class="stage-name">主题式巡检排程（与安全工程师讨论后排定）</span>'
++'<table><tr><th>月</th><th>主题稽核（计划）</th><th>主题稽核（滚动）</th></tr>'
++'<tr><td>1 月</td><td>年度防震设备检查</td><td>高架地板开口</td></tr>'
++'<tr><td>2 月</td><td>梯凳 &amp; A 字梯检查</td><td>防火填塞</td></tr>'
++'<tr><td>3 月</td><td>Safety interlock 安全查核（厂务/设备）</td><td>禁水发火〔未辨清〕</td></tr>'
++'<tr><td>4 月</td><td>槽车灌充作业</td><td>地震防护</td></tr>'
++'<tr><td>5 月</td><td>安全锚锭查核（防坠/吊具/推车）〔部分未辨清〕</td><td>自动门螺丝〔未辨清〕</td></tr>'
++'<tr><td>6 月</td><td>VMB、G/C、LDS 安全查核（LOTO）</td><td>Fire load</td></tr>'
++'<tr><td>7 月</td><td>防火区划检查</td><td>避难逃生</td></tr>'
++'<tr><td>8 月</td><td>长期存放区/短期暂存区检查（fire loading）</td><td>LDS 气柜</td></tr>'
++'<tr><td>9 月</td><td>疏散动线检查</td><td>高架作业</td></tr>'
++'<tr><td>10 月</td><td>安全门、防火门功能检查</td><td>动火作业</td></tr>'
++'<tr><td>11 月</td><td>Local supply 钢瓶、Drum 桶、药剂更换检查〔部分未辨清〕</td><td>LOTO</td></tr>'
++'<tr><td>12 月</td><td>槽车灌充作业</td><td>SDS</td></tr></table>'
++'<p>备份简报版本差异：5 月计划栏作「安全锚锭检查（防夹块/吊具/推车）」、11 月作「Local supply 钢瓶、Drum 桶、药品更换作业」；滚动栏仅显示 1 月「高架地板开口」，其余月份栏位在该页画面未显示文字。</p>'
++'<span class="stage-name">装机巡检强化专案</span>'
++'<p>目的：掌握厂内装机状况，提升装机巡检效率。方法：</p><ul class="tight">'
++'<li>[倩瑜] 每双周更新装机清单、Layout &amp; 巡检排程</li>'
++'<li>[ERC] 每班依排程巡检（包含主机台 &amp; Sub-Fab 相对应位置），并填写巡检记录</li>'
++'<li>检查（01）重点 — 日班：施工纪律 — 施工单/工具箱会议/三巡表、高架/开口/搬运作业防护、有机溶剂/电器使用安全；夜班：环境安全 — 开口防护/标示、物料摆放整齐/减少 Fire Loading、逃生动线畅通、无阻挡消防设施</li>'
++'<li>记录填写 — 无缺失：于 Excel 表格 Key「0」，代表完成巡检；有缺失：于 Excel 表格 Key「缺失件数」，并至 EEM 开立缺失单（备注 [装机巡检]）</li>'
++'<li>资料夹路径：Projvr67 &gt; F18I02 &gt; 05-&gt; 08-主题稽核 &gt; 19.装机作业查核；档案：装机巡检记录表_20220114、装机巡检排程_20220114</li>'
++'<li>记录表范例（Phase／Tool ID／Location ID／Dep.／1/16（日）／1/16（夜））：P3B／CFFCMX／CFC-F-02／WET2／0；P3B／CFFGML／CFC-F-02／WET2／0；P3B／CWMTAJ／CWT-B-09-P／PVD1／0；P3B／CWMTAK／CWT-B-10-P／PVD1／1</li></ul>'
++'<span class="stage-name">ERC 巡检稽核能力提升计划</span>'
++'<p>目的：提升 ERC 巡检稽核能力，能确实发现潜在风险，达到防灾减损的目的。目标：两个月内使 ERC 新进同仁在巡检稽核能力达到与班长及副班长水平。方法：</p><ol class="tight">'
++'<li>E-test 双周进行一巡检主题训练所有同仁 -- 易远</li>'
++'<li>月会分享发现重大缺失经验（请副手分享，每月 3 人）-- 圣文</li>'
++'<li>每周对以下稽核重点，副手配合全安人员或副班长现场稽核学习（2hrs）-- 圣旺 &amp; 博文</li></ol>'
++'<table><tr><th>周别</th><th>主题项目</th></tr>'
++'<tr><td>W203</td><td>（全安）高架地板开口</td></tr>'
++'<tr><td>W204</td><td>（全安）逃生避难指示灯、逃生动线逃生障碍</td></tr>'
++'<tr><td>W205</td><td>（全安）暂存区 6S，fire load，整理整顿</td></tr>'
++'<tr><td>W206</td><td>（副班长）Fire load、Fire cut</td></tr>'
++'<tr><td>W207</td><td>（副班长）Safety interlock</td></tr>'
++'<tr><td>W208</td><td>（副班长）机台动作护盖、安全辅具检查（防灾块/吊具/推车）</td></tr>'
++'<tr><td>W209</td><td>（全安）防震设施检查</td></tr>'
++'<tr><td>W210</td><td>（全安）槽车灌充作业</td></tr>'
++'<tr><td>W211</td><td>（全安）VMB、G/C、LDS 安全查核（LOTO）</td></tr>'
++'<tr><td>W212</td><td>（副班长）Local supply 钢瓶、Drum 桶、钢瓶更换作业</td></tr></table>'
++'<p>01/17 巡检稽核能力提升（邮件截图）：寄件者 Will Syue 薛博文；收件者 田 F18A-ISEP-02；副本 Gavin Chuang 庄子安、S.H. Feng 冯宣皓、Donald Tseng 曾国华、J.H. Chung 钟季桓、S.W. Chen 陈圣旺；内文：01/17 ERC 巡检稽核能力提升，训练人员：宗亿、经鸿、佳宏、文贤、崇华，由全安/正玮现场稽核教学〔人名部分字未辨清〕；下方为现场稽核教学照片。</p>'
++'<span class="stage-name">Action — 稽核深度强化</span>'
++'<p>提升 ERC 巡检稽核能力，能确实发现潜在风险，达到防灾减损的目的。</p><ul class="tight">'
++'<li><b>特别厂商特别管</b>：对缺失高厂商加强稽核辅导</li>'
++'<li><b>特别机台特别管</b>：对重点高风险设备定期检查</li>'
++'<li><b>特别区域特别管</b>：对重点区域风险高区域</li>'
++'<li><b>特别事特别管</b>：双周主题稽核，依时事更换主题</li></ul>'
++'<table><tr><th>安全设施</th><th>人员纪律</th><th>化学品/气体使用管理</th><th>5S</th></tr>'
++'<tr><td>Safety interlock 查核</td><td>天花板作业安全</td><td>实验室查核</td><td>暂存区查核</td></tr>'
++'<tr><td>Parts clean room 查核</td><td>高架地板作业安全</td><td>禁水发火性物质安全查核</td><td></td></tr>'
++'<tr><td>梯凳 &amp; A 字梯检查</td><td>码头区作业安全查核</td><td>槽车灌充查核</td><td></td></tr>'
++'<tr><td>疏散动线查核</td><td>开盘作业查核</td><td>VMB、G/C、LDS 安全查核（LOTO）</td><td></td></tr>'
++'<tr><td>防火区划填塞检查</td><td>TGCM 作业查核</td><td></td><td></td></tr>'
++'<tr><td>安全门、防火门功能查核</td><td>FAB 钢瓶更换作业安全查核</td><td></td><td></td></tr>'
++'<tr><td>Fire loading</td><td>设备厂商装机作业安全查核</td><td></td><td></td></tr>'
++'<tr><td></td><td>设备 PM 作业与 PPE 查核</td><td></td><td></td></tr></table>'
++'<span class="stage-name">建物安全责任区 — F18A ERC 巡检计划</span>'
++'<p>检查重点：人员资格、人员纪律、标准程序、标准 PPE、危害物排除/两段隔离（Outgasing）、设备/设施安全、公共危险物品、Fire cut、Fire load。栏位：巡检分类／频率／区域／主要执行班别／执行细项／Owner／（任务）CCTV／（范围）CCTV／P1 副手／P2 副手／P3 副手／加班（V 为负责标记）。</p>'
++'<table><tr><th>巡检分类</th><th>频率</th><th>区域</th><th>主要执行班别</th><th>执行细项</th><th>Owner</th><th>负责标记</th></tr>'
++'<tr><td>作业安全巡检</td><td>开工巡检 &amp; 施工中巡检</td><td>危害作业/高风险施工作业查核</td><td>日班</td><td>〔细项小字未辨清〕</td><td>班员</td><td>P1 V、P2 V、P3 V</td></tr>'
++'<tr><td>区域安全巡检</td><td>每班重点</td><td>特别危害区域（CCTV）</td><td>日班/夜班</td><td>办公区、HPM 2F Gas room、HPM 2F Chemical room、HPM 1F Solvent room、HPM 1F Drum ASRS、码头区</td><td>班长/副班长〔未辨清〕</td><td>（任务）CCTV V、（范围）CCTV V</td></tr>'
++'<tr><td>区域安全巡检</td><td>每班重点</td><td>频繁化学品作业区</td><td>日班</td><td>办公区、无尘室 Part Clean（MP、CMP、Tube）、CWR 区、EUV 区</td><td>班员</td><td>P1 V、P2 V、P3 V</td></tr>'
++'<tr><td>区域安全巡检</td><td>每周重点</td><td>频繁大量气体/化学品作业区</td><td>夜班</td><td>HPM 1F、HPM 2F（白色）、Gas yard、BSGS、ASRS、Lorry room、Gas yard、东侧、CMP 封装区、各大厂区、SUP ASRS、实验室、仓储、CUP、FAB 顶楼、4F 机房区 Ceiling、HPM 3F 小房间等区、电镀〔后段小字部分未辨清〕</td><td>班员</td><td>P1 V、P2 V、P3 V</td></tr>'
++'<tr><td>区域安全巡检</td><td>每月重点（每月第一、三周）</td><td>无尘室作业区</td><td>夜班</td><td>Bank room、无尘室外侧走道、光罩区、Side room、Penthouse（东西南北区）</td><td>班员</td><td>P1 V、P2 V、P3 V</td></tr>'
++'<tr><td>区域安全巡检</td><td>每季重点</td><td>厂区周边区域</td><td>日班</td><td>CO2 变电站、警卫室、油压区、物流区、物料认可区、电梯机房、垃圾场旁、杂草丛草、成品区 Office B2、〔尾段小字未辨清〕</td><td>专职 ERC</td><td>加班 V</td></tr>'
++'<tr><td>专案/主题巡检</td><td>专案</td><td>每月一主题</td><td>日班/夜班</td><td>Interlock、防震、Fire load、暂存区、避难逃生</td><td></td><td>（范围）CCTV V、P1 V、P2 V、P3 V</td></tr>'
++'<tr><td>P4 专案</td><td>每周两天</td><td>无尘室作业区 3F</td><td>夜班</td><td>无尘室 FAB 3F &amp; HPM 3F</td><td>班员</td><td>P1 V、P2 V</td></tr>'
++'<tr><td>建物责任区（NEW）</td><td>每周一天</td><td>个人建物责任区</td><td>夜班</td><td>各责任区小房间、Interlock、防震、Fire load、暂存区、环境安全疑虑</td><td>ALL ERC</td><td>（任务）CCTV V、（范围）CCTV V、P1 V、P2 V、P3 V、加班 V</td></tr></table>'
++'<span class="stage-name">ERC 例行性巡检路线</span>'
++'<p>「F18A P1&amp;2&amp;3&amp;4 例行巡检区域」表，栏为周一至周日，列为：（距离）CCTV 巡检、（范围）CCTV 巡检、日班 班员 1/2/3、备注地区 &amp; 主题巡检、夜班 班员 1/2/3。格内多为区域名称（P1/2/3 HPM 2F Gas room、P1/2/3 HPM 1F Drum ASRS、P1/2/3 HPM 2F Chemical room、P1/2/3 HPM 1F Solvent room、P1/2/3 HPM 1F Lorry room、P1/2/3 槽车灌充区、P1/2/3 备注地区等）与夜班各栋别（P1 非无尘室 2F/3F、P2 CUP/BSGS、P3 非无尘室 4F 等）及每周重点（SUP ASRS、CCD Room/Gas yard（夜）、CMP 厂务区（夜）、Office 小房间（夜）、ASRS（夜）、公用（夜）、废水处理区（夜）、电镀室/电解版（夜）等）。本表字体极小，逐格内容多处未能完整辨识〔未辨清〕，以上为可辨识之结构与项目。页尾小字：范例巡检区域：CO2 变电站、警卫室、油压区、物料存放区、电梯机房、垃圾场、成品区 Office B2-一吋水浮雕小房间〔小字，部分未辨清〕。</p>'
++'<span class="stage-name">F18A-P1/2/3 建物安全员责任区分配</span>'
++'<table><tr><th>建物名称</th><th>建物安全员</th></tr>'
++'<tr><td>办公栋 &amp; F18A 厂区道路（含太阳能停车场、小房间：外部会议室、行李房、空调机房...等）</td><td>郭川铭</td></tr>'
++'<tr><td>P1 无尘室 B1F/1F（含 EBO、小房间：卫浴室...等）</td><td>陈圣文</td></tr>'
++'<tr><td>P1 无尘室 2F/3F（含 C/R 管制 FO1、FC1、CS、FS1、SUP 3F）</td><td>黄建桦</td></tr>'
++'<tr><td>P1 非无尘室 1/2F（含 HPM &amp; Lorry、变电站、小房间：实验室、锅炉室、Pump 室...等）</td><td>赖建安/林佳宏</td></tr>'
++'<tr><td>P1 非无尘室 B1F/B2F（含变电站、小房间：TEM 实验室、水课控制室、锅炉室、脱气机房、化学品房...等）</td><td>王杰瀚</td></tr>'
++'<tr><td>P1 非无尘室 4F/RF（含警卫、变电站、小房间：空调机房...等）</td><td>王俊元</td></tr>'
++'<tr><td>P1 SUP（含警卫 CS、ASRS、车房（成品）、变电站、CCD、小房间：锅炉室、晶圆粉碎室...等）</td><td>林俊谚</td></tr>'
++'<tr><td>P1 CUP/BSGS/Gas Yard（含警卫 FC1、Lorry、污泥厂房、CCD、变电站、小房间：Pump 室、纯化室...等）</td><td>林育志</td></tr>'
++'<tr><td>P2 无尘室 B1F/1F（含小房间：卫浴室...等）</td><td>吴易达</td></tr>'
++'<tr><td>P2 无尘室 2F/3F（含 C/R 管制 FS2、FF1、FF2、FF5、FF6）</td><td>陈圣旺</td></tr>'
++'<tr><td>P2 非无尘室 1/2F（含 HPM &amp; Lorry、变电站、小房间：实验室、锅炉室、Pump 室...等）</td><td>李致颉/苏名泛</td></tr>'
++'<tr><td>P2 非无尘室 B1F/B2F（含变电站、小房间：TEM 实验室、水课控制室、锅炉室、脱气机房、化学品房...等）</td><td>刘宜泓</td></tr>'
++'<tr><td>P2 非无尘室 4F/RF（含警卫、变电站、小房间：空调机房...等）</td><td>王睿廉</td></tr>'
++'<tr><td>P2 CUP/BSGS/Gas Yard（含警卫 FC2、Lorry、污泥厂房、CCD、变电站、小房间：Pump 室、纯化室...等）</td><td>方献毅</td></tr>'
++'<tr><td>P3 无尘室 B1F/1F（含 EBO、小房间：卫浴室...等）</td><td>黄世谋</td></tr>'
++'<tr><td>P3 无尘室 2F/3F（含 C/R 管制 FO2、FF3、FF4、FF7、FF8）</td><td>薛博文</td></tr>'
++'<tr><td>P3 非无尘室 1/2F（含 HPM &amp; Lorry、变电站、小房间：实验室、锅炉室、Pump 室...等）</td><td>卓耘隆/徐经鸿</td></tr>'
++'<tr><td>P3 非无尘室 B1F/B2F（含变电站、小房间：TEM 实验室、水课控制室、锅炉室、脱气机房、化学品房...等）</td><td>黄光辉</td></tr>'
++'<tr><td>P3 非无尘室 4F/RF（含警卫、变电站、小房间：空调机房...等）</td><td>李宗儒</td></tr>'
++'<tr><td>P3 CUP/BSGS/Gas Yard（含警卫 FC3、Lorry、污泥厂房、CCD、变电站、小房间：Pump 室、纯化室...等）</td><td>王柏钧</td></tr></table>'
++'<p>（建物名称括号内细项小字系依画面辨识，个字或有未辨清处。）</p>'
++'<span class="stage-name">建物安全员责任区内小房间矩阵</span>'
++'<p>列（建物名称，共 20 列）：P1 无尘室 B1F/1F、P1 无尘室 2F/3F、P1 非无尘室 1/2F、P1 非无尘室 B1F/B2F、P1 非无尘室 4F/RF、P1 SUP、P1 CUP/BSGS/Gas Yard、P2 无尘室 B1F/1F、P2 无尘室 2F/3F、P2 非无尘室 1/2F、P2 非无尘室 B1F/B2F、P2 非无尘室 4F/RF、P2 CUP/BSGS/Gas Yard、P3 无尘室 B1F/1F、P3 无尘室 2F/3F、P3 非无尘室 1/2F、P3 非无尘室 B1F/B2F、P3 非无尘室 4F/RF、P3 CUP/BSGS/Gas Yard（矩阵首列另含办公栋 &amp; F18A 厂区道路）。栏（危害类别，共 25 栏）：实验室、易燃物、毒化物、Lorry Room、化学品室、小房间储藏室、禁水性储藏室、气体房、ASRS、余气烧房〔栏名未辨清〕、变电站、CCD、纯化室、一般/空调机房、EBO、污泥厂房、车间/储物间、水课控制室、鼓风料部屋〔栏名未辨清〕、消防 PUMP/铭版室〔栏名未辨清〕、Pent house、电梯机房、广播保安、新增区（C/R、办公室）、会议室。格值：每格以 H／M／L 标示该建物对应类别之风险等级；页下注：环境风险等级 H &gt; M &gt; L。各格 H/M/L 与栏位之逐格对应，因录影解析度不足以可靠对位，未能逐格确认〔未辨清〕，不逐格臆录。</p>'
++'<span class="stage-name">装机机台分布图（P3／P2／P1）</span>'
++'<p>图例：绿＝1 台；黄＝2~3 台；粉红＝&gt;3 台。</p><ul class="tight">'
++'<li><b>P3（3F／1F 平面）</b>：3F 绿（1 台）：CIB-A、CET-C、CET-F、CTF-D、CBS-A、CPH-F、CET-G、CET-H、CTF-H、CCM-C〔部分代码未辨清〕；3F 黄（2~3 台）：CTF-A、CTF-C、CBS-B、CPH-C、CWT-B、CTF-Q、CTF-P、CTF-O、CTF-N、CEP-C、CTF-I、CTF-L、CTF-M、CBS-G、CCM-A、CCM-B、CFC-D、CFC-E；3F 粉红（&gt;3 台）：CIM-A、CET-E、CWT-C、CTF-J、CCU-B；1F 绿（1 台）：CDI-E、CDI-F（其余未着色标签为平面位置代码，多处小字未辨清）</li>'
++'<li><b>P2</b>：3F 绿：BIM-A、BIB-A、BIB-C、BPH-K；3F 黄：BCU-D；1F 绿：BFB-B、BIM-C、BDI-D（其余未着色标签为平面位置代码）</li>'
++'<li><b>P1</b>：1F 绿：AFB-D（其余标签均未着色，为平面位置代码）</li></ul>'},
+
+{title:'紧急通报规定：简讯系统、重大突发事件通报流程与 CMT', cat:'通报',
+text:'紧急通报 简讯系统 冯富栢 4974 陈东煌 766-0316 重大突发事件通报流程 第一时间通报负责人 中央危机处理小组 CMT Crisis Management Team 1st 简讯 2nd 简讯 CEO 董事长 副总 厂区紧急通报程序 庄子安 728-5802 房汉文 黄中一 王俞敏 高孟华 孔培仪 南科管理局 06-5051010 毒化灾害处理中心 通报执行流程 传染病 Wellness',
+html:'<span class="stage-name">简讯系统（FAB18A 简讯系统画面）</span>'
++'<p>系统页首：Hello，冯富栢（023908），今天是 07/15，星期五｜登出。导览：首页、简讯系统、报表查询、基本设定、系统管理。</p>'
++'<p>最新简讯发送纪录：</p>'
++'<table><tr><th>发送时间</th><th>灾害类别</th><th>级别</th><th>严重度</th><th>发送内容</th><th>发送状态</th></tr>'
++'<tr><td>2022/07/15 09:00</td><td>一般讯息通知简讯</td><td>F18A 热危害风险应变通知（第三级）</td><td>轻度</td><td>F18A 厂户外热指数已达第 3 级管理，请完成高温户外检核〔后段未辨清〕ERC</td><td>完成发送</td></tr>'
++'<tr><td>2022/07/15 07:10</td><td>一般讯息通知简讯</td><td>F18A 每日值班状况回报</td><td>轻度</td><td>7/14 夜班值班状况：正常、新增缺失共 3 笔（中*1、轻*2）</td><td>完成发送</td></tr>'
++'<tr><td>2022/07/14 19:20</td><td>一般讯息通知简讯</td><td>F18A 每日值班状况回报</td><td>轻度</td><td>7/14 日班值班状况：NCS 警报*1、零级地震*1，新增缺失共 5 笔（中*4、轻*1）</td><td>完成发送</td></tr></table>'
++'<ul class="tight"><li>最新公告（公告时间／公告内容／公告单位）：无资料</li>'
++'<li>右栏：简讯发送</li>'
++'<li>待办事项：FAB18 未设定电话人员 4974；一周内更新群组 12</li>'
++'<li>Call Help：陈东煌 766-0316</li>'
++'<li>ISEP 紧急使用状况：未使用</li>'
++'<li>HR 最后更新日期（栏位）</li></ul>'
++'<span class="stage-name">台积公司重大事件通报作业要点</span>'
++'<p>流程：重大突发事件 → 厂处长（通报负责人）→（电话）→ 直属组织副总（电话（事件确立 1 小时以内）；得依实际的事件状况性质调整时间）→ CEO 及董事长。简讯 x2：1st 简讯：事件确立 1 小时内简讯通报；2nd 简讯：事件确立 6 小时内简讯状态更新。第一次被通报人 → MC members／中央危机处理小组 CMT。注：CMT 会议得面对面或线上会议（Teams）进行；状态更新则得 Teams 或 email 等方式。</p>'
++'<p>说明：</p><ol class="tight">'
++'<li>通报负责人可依事件的实际状况调整通报时间，例如不需因为简讯、电话通报而影响人员抢救与伤患等等</li>'
++'<li>事件未升级为中央危机，通报负责人仍须向被通报人发送 2nd 简讯或以电子邮件行状态更新</li>'
++'<li>地震 1st 简讯由中央 ERC 发送；2nd 简讯由各厂 ERC 或 CMT 自行状态更新；传染病/职业病等事件，不强制发送 2nd 简讯</li>'
++'<li>考量四级地震（&lt;60gal）对人员安全风险较低，仅需执行简讯通报（1hr/6hr），若发生四级地震（≥60gal）则电话与简讯通报并行</li></ol>'
++'<span class="stage-name">第一时间通报负责人表</span>'
++'<table><tr><th>危机种类</th><th>第一时间通报负责人</th><th>第一时间被通报直属组织副总</th></tr>'
++'<tr><td>地震/火灾</td><td>厂区：ISEP 部经理 → 厂长</td><td>Operations 副总</td></tr>'
++'<tr><td>地震/火灾</td><td>工区：NFED 处长</td><td>FAC 副总</td></tr>'
++'<tr><td>缺电</td><td>FAC 处长</td><td>FAC 副总</td></tr>'
++'<tr><td>IT 服务</td><td>系统负责处长（IT System Owner）</td><td>直属组织副总</td></tr>'
++'<tr><td>资安</td><td>Information Security Division 处长</td><td>IM 副总</td></tr>'
++'<tr><td>环保安全卫生（传染病）</td><td>厂区环安卫/传染病公共安全：厂长</td><td>Operations 副总</td></tr>'
++'<tr><td>环保安全卫生（传染病）</td><td>工区伤亡/公共安全：NFED 处长</td><td>FAC 副总</td></tr>'
++'<tr><td>环保安全卫生（传染病）</td><td>厂区猝死/自杀：HRAS 处长</td><td>HR 副总</td></tr>'
++'<tr><td>环保安全卫生（传染病）</td><td>厂区食物中毒：HROC 处长</td><td>IM 副总〔对应栏位未辨清〕</td></tr>'
++'<tr><td>环保安全卫生（传染病）</td><td>废弃物：MSCM 处长</td><td>〔未辨清〕</td></tr>'
++'<tr><td>非工作场所</td><td>当事直属厂处级主管</td><td>直属组织副总</td></tr></table>'
++'<p>另一页版本差异：地震、火灾分列两列（负责人均作「厂区：ISEP 部经理 → 厂长／工区：FD 处长」，被通报均为 Operations 副总）；废弃物列被通报栏作 IM 副总〔对应栏位未辨清〕。</p>'
++'<span class="stage-name">中央危机处理小组（Crisis Management Team, CMT）</span><ul class="tight">'
++'<li><b>CEO</b>：担任指挥官、指挥 C4 与 C 降低损害〔字句部分未辨清〕（另一页作：指挥 C4 与 CMT 降低损害）</li>'
++'<li><b>RM</b>：协助中央危机程序有效运行、加速危机处理、协调 CMT 决策事项</li>'
++'<li><b>HR</b>：汇总厂区人员状况、医疗协助、后勤支援与员工沟通处理对策</li>'
++'<li><b>OP</b>：汇整危机状况与处置并向指挥官报告处理进度</li>'
++'<li><b>IM</b>：汇总 IT or Supply Chain 相关状况与处置；协助厂区生产线尽速复归</li>'
++'<li><b>CPO</b>：汇整生产计划与客户共同因应危机；及时（至少每天）向 OC 汇报（另一页作：订定处理目标与对策）</li>'
++'<li><b>EAS/CSV</b>：拟定沟通计划与回应〔后段未辨清〕（另一页作：拟定沟通计划与客户共同因应危机）</li>'
++'<li><b>PR</b>：汇整影响状况、拟定计划回应、并汇报政府、法人、媒体与舆论状况〔字句部分未辨清〕</li>'
++'<li><b>Legal &amp; FIN</b>：提供法务咨询、财务评估辅助决策</li>'
++'<li><b>C-ESH</b>：视危机类别、协助危机处理</li>'
++'<li><b>Q&amp;R、TD/ATMD</b>：视危机类别、协助危机处理</li></ul>'
++'<span class="stage-name">F18A 厂区紧急通报程序〈含重大突发事件〉（2021.10.05 更新）</span>'
++'<p>起点：状况发生 → 值班人员 → 中央 ERC（天然灾害）。</p>'
++'<p><b>三级状况</b>（值班人员通报）：</p><ul class="tight">'
++'<li>ERC 经理/Leader/安全工程师（庄子安 经理 728-5802、陈圣旺 副理 728-5805〔姓名未辨清〕）→ ISEP 部经理（冯圣皓 经理 728-5800〔姓名未辨清〕）→ 通报副总・ISEP TB Chairman</li>'
++'<li>事件单位主管/假日值班经理 → 事件部门经理</li>'
++'<li>视状况成立 ERT → 事故指挥官（IC）</li>'
++'<li>财务 彭学彦〔姓名未辨清〕</li>'
++'<li>注：*ERIC 登录异常或事件，等级属于三级需通知财务</li></ul>'
++'<p><b>二级状况</b>：</p><ul class="tight">'
++'<li>30 分内通知：厂长；ISEP TB Chairman 房汉文 处长；Corporate ESH 黄中一、王俞敏；公关 高孟华、孔培仪；财务 高丰祥、林佳萍、彭学彦〔姓名未辨清〕</li>'
++'<li>45 分内通知：1. 厂外事件自行决定是否通报副总 2. 天然灾害需通报至副总〔后段被页缘裁切〕</li></ul>'
++'<p><b>一级状况</b>：</p><ul class="tight">'
++'<li>15 分内电话通知：厂长；ISEP TB Chairman 房汉文 处长；Corporate ESH 黄中一、王俞敏；支援邻厂 F16A-ISEP 714-119、F14B-ISEP 754-119</li>'
++'<li>30 分内电话通知：副总；法务〔姓名未辨清〕；公关 高孟华、孔培仪；财务 高丰祥、林佳萍、彭学彦；南科管理局（劳检单位）06-5051010；南科消防队 06-5052995；毒化灾害处理中心 06-6572813；环保报案专线 0800066666、县市服务专线 1999、环保局 24 小时紧急电话 06-6572916#222；南科保警分队 06-5051405</li>'
++'<li>24 小时内通报：董事长及总裁</li>'
++'<li>★ 发生重大突发事件，包含非死亡、重大职灾及全厂断电事件</li>'
++'<li>注记：火灾无法扑灭 → 列管毒化物质、有污染厂区外河道或造成人员伤害住院治疗需通报；人员死亡、送医 3 人以上、真实火灾无法扑灭、列管毒化物质有污染之虞需通报</li></ul>'
++'<p><b>非工作场所重大意外灾害</b>：</p><ul class="tight">'
++'<li>员工于厂外发生死亡或重度伤害 → 通报各厂中控室或总机 06-5056688、728-110 → 通报 ERC → ISEP 主管</li>'
++'<li>30 分内电话通知：厂长；ISEP TB Chairman 房汉文；HR Account Manager 张进益；Corporate ESH〔下段被页缘裁切〕→ 45 分内电话通知：自行决定是否通报副总</li>'
++'<li>日间（08:30–22:00）：30 分钟内电话通知；夜间（22:00–08:30）：先发 Mail 简讯通报〔后段未辨清〕</li></ul>'
++'<p><b>左下分级说明（小字，逐项概要，个别字句未辨清）</b>：</p><ul class="tight">'
++'<li>「三」级：1. 厂区范围内或邻近厂区异常状况（如邻近其他相同相关单位之状态紧急通报 warning 传承）2. 化学品泄漏或化学品泄漏 3. 地震震度一至三级 4. 装载区大规模之地表或水大量泄漏动作 5. 停电或台湾地区跳电及跳电事件 6. 台风来袭前及来袭事件 7. 发生符合环保事件（主管机关未开立环保罚单，如回收水事件及泥水制水外溢或污染环境之虞者）8. 其他经认定需要通报者（即时 IP 主管判断）</li>'
++'<li>「二」级：1. 范围不限本厂真实火灾（邻近厂区异常泄漏至厂内 chamber，如气体钢瓶、tool、VMB 及 Gas box 之事件，将有可能造成近似 Alarm 警报）2. 化学品泄漏造成全区疏散 3. 一人因职业伤害住院治疗（含假日及夜间）4. 地震震度四级或五级事件 5. 厂内一般机械外部事件（真实火灾大量发生，厂内可控制）〔含红字长句，部分未辨清〕6. 停电或台湾跳电或全厂跳电 7. 跳电造成全厂跳电 8. 员工或包商工伤死亡（含上下班途中、公司办公内、公司或部门举办之事件活动、公出差旅途中，发生死亡）〔尾段未辨清〕</li></ul>'
++'<span class="stage-name">重大突发事件通报执行流程</span>'
++'<p>图例：红箭头＝中央 ERC 简讯通报；蓝箭头＝主管电话通报；绿箭头＝厂址 ERC 简讯通报。</p>'
++'<p><b>四级以上地震 → 厂址 ERC</b>：</p><ol class="tight">'
++'<li>依简讯通报原则发送简讯（需含中央 ERC）→ 中央 ERC（F12A/F14A）1 小时内收集各厂资讯统一发送简讯</li>'
++'<li>ISEP 部经理电话通报 → 电话通报厂长 → 电话通报直属组织副总 → [注 1] 1 小时内电话通报至 CEO/董事长</li>'
++'<li>ISEP 主管 6 小时内汇整事件发展 2nd 通报简讯并向厂长报告 → 厂址 ERC 发送 2nd 简讯</li>'
++'<li>（以上通往）简讯回报 董事长/CEO、CMT/MC 成员</li></ol>'
++'<p><b>火灾/职安卫 → 厂址 ERC</b>：</p><ol class="tight">'
++'<li>依简讯通报原则发送简讯</li>'
++'<li>ISEP 部经理电话通报 → 电话通报厂长 → 电话通报直属组织副总 → [注 1] 1 小时内电话通报至 CEO/董事长</li>'
++'<li>ISEP 主管 1 小时内汇整事件发展 1st 通报简讯并向厂长报告 → 厂址 ERC 发送 1st 简讯 → 简讯回报 董事长/CEO、CMT/MC 成员</li>'
++'<li>[注 2] ISEP 主管 6 小时内汇整事件发展 2nd 通报简讯并向厂长报告 → 厂址 ERC 发送 2nd 简讯</li></ol>'
++'<span class="stage-name">重大突发事件通报执行程序（传染病）</span>'
++'<p>图例：蓝箭头＝主管电话通报；绿箭头＝厂址 ERC 简讯通报。</p>'
++'<p><b>传染病 → 厂址 Wellness</b>：</p><ol class="tight">'
++'<li>电话通报 ERC → ERC 电话通报 ISEP 部经理 → 电话通报厂长 → 电话通报直属组织副总 → [注 1] 1 小时内电话通报至 CEO/董事长</li>'
++'<li>厂址 Wellness 1 小时内以 mail 或社群将讯息内发给厂址 ERC、由 ERC 转发 1st 简讯通报 → 厂址 ERC → 厂址 ERC 发送 1st 简讯 → 简讯回报 董事长/CEO、CMT/MC 成员</li>'
++'<li>[注 3/注 4] 提醒 ISEP 主管汇整 6 小时内汇整事件发展 2nd 通报简讯并向厂长报告 → 厂址 ERC 发送 2nd 简讯</li></ol>'
++'<p>注：</p><ul class="tight">'
++'<li>[注 1] 电话在 1 小时内（依实际事件的属性及急迫性调整）向上通报至总裁及董事长</li>'
++'<li>[注 2] 若为厂际事件，因属突发事件，不强制发送第二封简讯，由通报负责人视情况而定</li>'
++'<li>[注 3] 通防范误发突发事件，不强制发送第二封简讯，由通报负责人视情况而定〔字句未辨清〕</li>'
++'<li>[注 4] 第二封简讯主要的更新内容为疫情/匡列/门禁隔离/交通情况/后续采检安排/消毒/沟通等情况，可辅以 email/PPT 等说明</li></ul>'},
+
+{title:'人员受伤通报分级（Class 1／2／3）与 R&R', cat:'通报',
+text:'人员受伤 R&R 通报分级 Class 3 轻 Class 2 中 Class 1 重 健康中心 First Aid 厂外伤害 厂外车祸 救护车进厂 猝死 食物中毒 职灾 住院 ERIC 纪录 电话通知 简讯通知 佳蕙 邱瑞舆 周羿君 庄雅婷 陈素兰 林品辰 张进益 房汉文 吴荣泰 黄秀真 许识琪 周于庭 郑雨贤 南科管理局 重度伤害 失能',
+html:'<span class="stage-name">人员受伤 R&amp;R 及通报流程矩阵</span>'
++'<table><tr><th></th><th>轻</th><th>中</th><th>重</th></tr>'
++'<tr><td>厂内/个人因素</td><td>健康中心 First aid</td><td>健康中心、权责单位、ISEP 关心协助、ERC 启动通报</td><td>健康中心、权责单位、ISEP 协助处理、ERC 启动通报</td></tr>'
++'<tr><td>厂外/个人因素</td><td>权责单位</td><td>权责单位、ERC 被告知后启动通报</td><td>权责单位、HR、ERC 被告知后启动通报</td></tr>'
++'<tr><td>厂内/工作因素</td><td>健康中心、权责单位、ISEP 了解状况</td><td>健康中心、权责单位、ISEP 协助处理、ERC 启动通报</td><td>健康中心、权责单位、ISEP 协助处理、ERC 启动通报</td></tr>'
++'<tr><td>厂外/工作因素</td><td>权责单位</td><td>权责单位、ERC 被通知后启动通报</td><td>权责单位、ERC 被通知后启动通报</td></tr></table>'
++'<p>（页尾标示：Security C – TSMC Security）</p>'
++'<span class="stage-name">通报分级说明（自行分类）</span><ul class="tight">'
++'<li><b>Class 3_轻</b>：状况轻微且属个人或工作因素</li>'
++'<li><b>Class 2_中</b>：状况中等需注意关心与通报</li>'
++'<li><b>Class 1_重</b>：状况严重相关单位需立即做出应对措施并通报（重大突发处理原则）</li></ul>'
++'<span class="stage-name">Class 3_轻 — 通报方式表</span>'
++'<p><b>情境：用药纪录（无送医）</b></p><ul class="tight">'
++'<li>电话：1. 健康中心 2. 设备机台造成伤害（需通知单位 Account）3. Health 工程师（佳蕙）4. ISEP 副理 5. 该单位主管</li>'
++'<li>简讯：NA</li><li>ERIC 纪录：ERIC-讯息（用药纪录）</li></ul>'
++'<p><b>情境：厂外车祸（返家休养）</b></p><ul class="tight">'
++'<li>电话：1. 健康中心 2. Health 工程师（佳蕙）3. 该单位 Account 4. ISEP 副理 5. 该单位主管</li>'
++'<li>简讯：NA</li><li>ERIC 纪录：ERIC-讯息（其他）</li></ul>'
++'<p><b>情境：厂外车祸（留院观察/住院治疗）</b></p><ul class="tight">'
++'<li>电话：1. 健康中心 2. Health 工程师（佳蕙）3. 该单位 Account 4. ISEP 主管（含部经理，由副理通报）5. 该单位主管</li>'
++'<li>简讯：1. ISEP 所有同仁 2. 该部门/单位主管 3. HR 主管（邱瑞舆、周羿君、庄雅婷、陈素兰、林品辰）</li>'
++'<li>ERIC 纪录：ERIC-讯息（其他）</li></ul>'
++'<p><b>情境：个人因素－至健康中心（返回工作岗位）</b></p><ul class="tight">'
++'<li>电话：1. 健康中心 2. Health 工程师（佳蕙）3. ISEP 副理 4. 该单位主管</li>'
++'<li>简讯：NA</li><li>ERIC 纪录：ERIC-讯息（其他）</li></ul>'
++'<p><b>情境：个人因素－轻（救护车进厂）</b></p><ul class="tight">'
++'<li>电话：1. 健康中心 2. Health 工程师（佳蕙）3. ISEP 主管（含部经理，由副理通报）4. 该单位主管</li>'
++'<li>简讯：1. ISEP 主管 2. 该单位主管 3. Co-ESH/黄中一、王俞敏 4. HR 主管（邱瑞舆、周羿君、林品辰、庄雅婷）</li>'
++'<li>ERIC 纪录：ERIC-讯息（其他）</li></ul>'
++'<span class="stage-name">Class 2_中 — 通报方式表</span>'
++'<p><b>情境：First Aid（自行送医）</b></p><ul class="tight">'
++'<li>电话：1. 健康中心 2. 设备机台造成伤害通知单位 Account 3. Health 工程师（佳蕙）4. ISEP 副理 5. 该单位主管</li>'
++'<li>简讯：NA</li><li>ERIC 纪录：ERIC-讯息（用药纪录）</li></ul>'
++'<p><b>情境：First Aid（救护车进厂）</b></p><ul class="tight">'
++'<li>电话：1. 健康中心 2. 设备机台造成伤害，注：需通知单位 Account，不是则通知 Health 工程师（佳蕙）3. ISEP（含部经理，由副理通报）4. 该单位主管 5. 南科管理局</li>'
++'<li>简讯：1. ISEP 所有同仁 2. 该部门/单位主管 3. Co-ESH/黄中一、王俞敏 4. HR 主管（邱瑞舆、周羿君、林品辰、庄雅婷）5. 厂处长以上主管 6. 财务、公关</li>'
++'<li>ERIC 纪录：ERIC-讯息（其他）</li></ul>'
++'<p><b>情境：个人因素－中（救护车进厂）生命迹象微弱</b></p><ul class="tight">'
++'<li>电话：1. 健康中心 2. Health 工程师（佳蕙）3. ISEP 主管（含部经理，由副理通报）4. 该单位主管</li>'
++'<li>简讯：1. ISEP 所有同仁 2. 该部门/单位主管 3. Co-ESH/黄中一、王俞敏 4. HR 主管（邱瑞舆、周羿君、庄雅婷、陈素兰、林品辰）5. 厂处长以上主管 6. 财务、公关；E-Mail 通知：厂（副）处与相关主管</li>'
++'<li>ERIC 纪录：ERIC-讯息（其他）</li></ul>'
++'<p><b>情境：厂外伤害－重（员工于非工作场所，如上下班途中、公司宿舍内、公司或部门办理的户外活动、公务差旅途中，以及〔未辨清〕发生死亡（意外事故/猝死）及重度伤害）</b></p><ul class="tight">'
++'<li>电话：1. 健康中心 2. Health 工程师（佳蕙）3. ISEP 主管 &amp; leader 4. ISEP 主管通知厂长 5. 厂长通知副总 6. 该单位主管</li>'
++'<li>简讯：简讯通知（1 小时 &amp; 6 小时）1. ISEP 所有同仁 2. 事件该部门/单位主管 3. 厂处长以上主管 4. 厂长 &gt; 副总 &gt; 董事长（MC+MC back up）5. ISEP TB/房汉文 处长、吴荣泰 部经理 6. Co-ESH/黄中一、王俞敏 7. 财务、法务、公关 8. HR 主管（张进益、邱瑞舆、周羿君、庄雅婷、陈素兰、林品辰）9. 会计主管（黄秀真、许识琪、周于庭、郑雨贤）；Follow 重大突发事件通报流程</li>'
++'<li>ERIC 纪录：ERIC-讯息（其他）</li></ul>'
++'<p>页尾黄色注：重度伤害：包含永久全失能、永久部分失能及暂时全失能，例如丧失意识/昏迷达 8 小时以上、肢体残缺或器官功能丧失。</p>'
++'<span class="stage-name">Class 1_重 — 通报方式表</span>'
++'<p><b>情境：First Aid（需住院）事件 &amp; 二级状况 1 人职灾需住院</b></p><ul class="tight">'
++'<li>电话：1. 健康中心 2. 设备机台造成伤害通知该单位 Account 3. 通知 Health 工程师（佳蕙）4. ISEP 主管 5. 该单位主管 6. 厂处长</li>'
++'<li>简讯：1. ISEP 所有同仁 2. 事件该部门/单位主管 3. 厂处长以上主管 4. ISEP TB/房汉文 处长、吴荣泰 部经理 5. Co-ESH/黄中一、王俞敏 6. 财务、公关 7. HR 主管（张进益、邱瑞舆、周羿君、庄雅婷、陈素兰、林品辰）8. 会计主管（黄秀真、许识琪、周于庭、郑雨贤）</li>'
++'<li>ERIC 纪录：ERIC-事件（职灾 or 人员伤害）</li></ul>'
++'<p><b>情境：事件 &amp; 二级状况（3. 发生灾害在 1 人以上，经医师诊断需住院治疗（不包含留院观察））〔栏名部分未辨清〕</b></p><ul class="tight">'
++'<li>电话：1. 健康中心 2. 设备机台造成伤害通知该单位 Account 3. 通知 Health 工程师（佳蕙）4. ISEP 主管 5. 该单位主管 6. 厂处长</li>'
++'<li>简讯：同上 1–8</li>'
++'<li>ERIC 纪录：ERIC-事件（职灾 or 人员伤害）</li></ul>'
++'<p><b>情境：事件 &amp; 一级状况（1. 发生死亡灾害时（重大事件）2. 同一灾害发生工作者永久全失能、永久部分失能及暂时全失能之总人数达 3 人以上（若重度伤害 1 人以上即属于重大突发事件））</b></p><ul class="tight">'
++'<li>电话：1. 健康中心 2. 设备机台造成伤害通知该单位 Account、通知 ISEP 主管 &amp; Health 工程师（佳蕙）3. 该单位主管 4. 南科管理局 5. 主管机关（保警、环保局、毒灾中心）</li>'
++'<li>简讯：1. ISEP 所有同仁 2. 事件该部门/单位主管 3. 厂处长以上主管 4. 厂长 &gt; 副总 &gt; 董事长 5. ISEP TB/房汉文 处长、吴荣泰 部经理 6. Co-ESH/黄中一、王俞敏 7. 财务、公关、法务 8. HR 主管（张进益、邱瑞舆、周羿君、庄雅婷、陈素兰、林品辰）9. 会计主管（黄秀真、许识琪、周于庭、郑雨贤）10. 中央 ERC；Follow 重大突发事件通报流程</li>'
++'<li>ERIC 纪录：ERIC-事件（职灾 or 人员伤害）</li></ul>'
++'<p><b>情境：个人因素－重（救护车进厂）厂内猝死、到院后不治、3 人食物中毒（二级状况）</b></p><ul class="tight">'
++'<li>电话：1. 健康中心 2. 通知 Health 工程师（佳蕙）3. ISEP 主管 4. 该单位主管 5. 南科管理局 6. 主管机关（保警、卫生局）</li>'
++'<li>简讯：1. ISEP 所有同仁 2. 事件该部门/单位主管 3. 厂处长以上主管 4. 厂长 &gt; 副总 &gt; 董事长 5. ISEP TB/房汉文 处长、吴荣泰 部经理 6. Co-ESH/黄中一、王俞敏 7. 财务、法务、公关 8. HR 主管（张进益、邱瑞舆、周羿君、庄雅婷、陈素兰、林品辰）9. 会计主管（黄秀真、许识琪、周于庭、郑雨贤）；Follow 重大突发事件通报流程</li>'
++'<li>ERIC 纪录：ERIC-讯息（其他）</li></ul>'
++'<span class="stage-name">个人因素身体不适（救护车进厂）</span>'
++'<p><b>Class_3 轻（生命迹象稳定）</b></p><ul class="tight">'
++'<li>电话通知：1. 健康中心 2. Health 工程师 3. ISEP 主管 4. 该单位主管</li>'
++'<li>简讯通知：1. ISEP 主管 2. 该单位主管 3. Co-ESH/黄中一、王俞敏 4. HR 主管（邱瑞舆、周羿君、林品辰、庄雅婷）</li></ul>'
++'<p><b>Class_2 中（生命迹象微弱）</b></p><ul class="tight">'
++'<li>电话通知：1. 健康中心 2. Health 工程师 3. ISEP 主管 4. 该单位主管</li>'
++'<li>简讯通知：1. ISEP 所有同仁 2. 该部门/单位主管 3. Co-ESH/黄中一、王俞敏 4. HR 主管（邱瑞舆、周羿君、庄雅婷、陈素兰、林品辰）5. 厂处长以上主管 6. 财务、公关；E-Mail 通知：厂（副）处与相关主管</li></ul>'
++'<p><b>Class_1 重（厂内猝死、到院后不治、多人食物中毒）</b></p><ul class="tight">'
++'<li>电话通知：1. 健康中心 2. Health 工程师 3. ISEP 主管 4. ISEP 主管通知厂长 5. 厂长通知副总 6. 该单位主管 7. 南科管理局 8. 主管机关（保警、卫生局）9. 中央 ERC（含通报表）；E-Mail 通知：厂（副）处与相关主管</li>'
++'<li>简讯通知（1 小时 &amp; 6 小时）：1. ISEP 所有同仁 2. 事件该部门/单位主管 3. 厂处长以上主管 4. 厂长 &gt; 副总 &gt; 董事长（MC+MC back up）5. ISEP TB/房汉文 处长、吴荣泰 部经理 6. Co-ESH/黄中一、王俞敏 7. 财务、法务、公关 8. HR 主管（张进益、邱瑞舆、周羿君、庄雅婷、陈素兰、林品辰）9. 会计主管（黄秀真、许识琪、周于庭、郑雨贤）；Follow 重大突发事件通报流程</li></ul>'
++'<span class="stage-name">个人因素身体不适（至健康中心）</span>'
++'<p><b>Class_3 轻（返回工作岗位）</b> → 电话通知：1. 健康中心 2. Health 工程师 3. ISEP 主管 4. 该单位主管 → 简讯通知：N/A。</p>'
++'<span class="stage-name">厂外伤害</span>'
++'<p><b>Class_3 轻（生命迹象稳定、返家休养）</b></p><ul class="tight">'
++'<li>电话通知：1. 健康中心 2. Health 工程师 3. 该单位 Account 4. ISEP 副理 5. 该单位主管</li>'
++'<li>简讯通知：N/A</li></ul>'
++'<p><b>Class_2 中（人员住院、生命迹象微弱）</b></p><ul class="tight">'
++'<li>电话通知：1. 健康中心 2. Health 工程师 3. 该单位 Account 4. ISEP 主管 5. 该单位主管；E-Mail 通知：厂（副）处与相关主管</li>'
++'<li>简讯通知：1. ISEP 所有同仁 2. 该部门/单位主管 3. HR 主管（邱瑞舆、周羿君、庄雅婷、陈素兰、林品辰）</li></ul>'
++'<p><b>Class_1 重（到院后不治、厂外死亡（协助发送）、重度伤害）</b></p><ul class="tight">'
++'<li>电话通知：1. 健康中心 2. Health 工程师 3. ISEP 主管 4. ISEP 主管通知厂长 5. 厂长通知副总 6. 该单位主管；E-Mail 通知：厂（副）处与相关主管</li>'
++'<li>简讯通知（1 小时 &amp; 6 小时）：1. ISEP 所有同仁 2. 事件该部门/单位主管 3. 厂处长以上主管 4. 厂长 &gt; 副总 &gt; 董事长（MC+MC back up）5. ISEP TB/房汉文 处长、吴荣泰 部经理 6. Co-ESH/黄中一、王俞敏 7. 财务、法务、公关 8. HR 主管（张进益、邱瑞舆、周羿君、庄雅婷、陈素兰、林品辰）9. 会计主管（黄秀真、许识琪、周于庭、郑雨贤）；Follow 重大突发事件通报流程</li></ul>'
++'<p>红字注：二级状况：员工于非工作场所（如上下班途中、公司宿舍内、公司或部门举办的厂外活动、公务差旅至公司者）发生死亡（含猝死/自杀）及重度伤害（属于重大突发事件，但重大突发事件不包含住院治疗）。</p>'
++'<span class="stage-name">First Aid（含工伤）</span>'
++'<p><b>Class_2 中（救护车进厂）</b></p><ul class="tight">'
++'<li>电话通知：1. 健康中心 2. 该单位 Account（设备机台造成伤害）3. 通知 Health 工程师 4. ISEP 主管 5. 该单位主管 6. 南科管理局</li>'
++'<li>简讯通知：1. ISEP 所有同仁 2. 该部门/单位主管 3. Co-ESH/黄中一、王俞敏 4. HR 主管（邱瑞舆、周羿君、林品辰、庄雅婷）5. 厂处长以上主管 6. 财务、公关</li></ul>'
++'<p><b>Class_1 重（1 人职灾需住院）</b></p><ul class="tight">'
++'<li>说明：发生灾害在 1 人以上，送医后经医院诊断通知需住院治疗（不包含留院观察）</li>'
++'<li>电话通知：1. 健康中心 2. 该单位 Account（设备机台造成伤害）3. 通知 Health 工程师 4. ISEP 主管 5. 该单位主管 6. 厂处长；E-Mail 通知：厂（副）处与相关主管</li>'
++'<li>简讯通知：1. ISEP 所有同仁 2. 该部门/单位主管 3. 厂处长以上主管 4. ISEP TB/房汉文 处长、吴荣泰 部经理 5. Co-ESH/黄中一、王俞敏 6. HR 主管（邱瑞舆、周羿君、庄雅婷、陈素兰、林品辰）7. 财务、公关 8. 会计主管（黄秀真、许识琪、周于庭、郑雨贤）</li></ul>'
++'<p><b>Class_1 重（重大突发事件）</b></p><ul class="tight">'
++'<li>红字注：1. 发生死亡灾害时。（重大突发事件）2. 同一灾害发生工作者永久全失能、永久部分失能及暂时全失能之总人数达 3 人以上时。（若重度伤害 1 人以上即属于重大突发事件）</li>'
++'<li>电话通知：1. 健康中心 2. 该单位 Account（设备机台造成伤害）3. 通知 Health 工程师 4. ISEP 主管 5. 该单位主管 6. 南科管理局 7. 主管机关（保警、环保局、毒灾中心）8. 中央 ERC（含通报表）；E-Mail 通知：厂（副）处与相关主管</li>'
++'<li>简讯通知（1 小时 &amp; 6 小时）：1. ISEP 所有同仁 2. 事件该部门/单位主管 3. 厂处长以上主管 4. 厂长 &gt; 副总 &gt; 董事长 5. ISEP TB/房汉文 处长、吴荣泰 部经理 6. Co-ESH/黄中一、王俞敏 7. 财务、法务、公关 8. HR 主管（张进益、邱瑞舆、周羿君、庄雅婷、陈素兰、林品辰）9. 会计主管（黄秀真、许识琪、周于庭、郑雨贤）10. 中央 ERC（简易事故通报表）；Follow 重大突发事件通报流程</li></ul>'
++'<p><b>Class_3 轻（用药纪录、无送医）</b></p><ul class="tight">'
++'<li>电话通知：1. 健康中心 2. 单位 Account（设备机台造成伤害）3. Health 工程师 4. ISEP 主管 5. 该单位主管</li>'
++'<li>简讯通知：N/A</li></ul>'
++'<p><b>Class_2 中（自行送医）</b></p><ul class="tight">'
++'<li>电话通知：1. 健康中心 2. 单位 Account（设备机台造成伤害）3. Health 工程师 4. ISEP 主管 5. 该单位主管</li>'
++'<li>简讯通知：N/A</li></ul>'},
+
+{title:'呼叫救护车送医原则（TMAH／HF／强酸碱）与说帖范例', cat:'救护',
+text:'呼叫救护车 送医原则 119 竹科员诊 TMAH 四甲基氢氧化铵 HF 氢氟酸 强酸 强碱 PH 接触面积 护理师 说帖范本 台北荣总毒物中心 体表面积 疼痛时间 民间救护车',
+html:'<p>人员意外伤害呼叫救护车送医原则 — <b>119（含竹科员诊）</b>。</p>'
++'<span class="stage-name">1. 化学品伤患 — 符合下列条件者</span>'
++'<table><tr><th>分类</th><th>化学品</th><th>浓度</th><th>症状</th><th>接触范围大小</th></tr>'
++'<tr><td>第一类</td><td>TMAH（四甲基氢氧化铵）、含氟及酚类</td><td>不分</td><td>不分</td><td>不分</td></tr>'
++'<tr><td>第二类</td><td>HF（氢氟酸）</td><td>≥20% 或不知浓度</td><td>不分</td><td>不分</td></tr>'
++'<tr><td>第二类</td><td>HF（氢氟酸）</td><td>&lt;20%</td><td>不分</td><td>≥1%（伤患单手掌含手指）</td></tr>'
++'<tr><td>第三类</td><td>强酸（PH≤4）、强碱（PH≥10）</td><td>不分</td><td>有</td><td>≥1%（伤患单手掌含手指）</td></tr></table>'
++'<ul class="tight">'
++'<li>*护理师呼叫救护车前，ERC/ISEP 需提供化学品名称及浓度资讯（未及时提供将依不知浓度呼叫）</li>'
++'<li>2）其他未列表但须尽速就医者</li></ul>'
++'<span class="stage-name">2. 非化学品伤患</span><ul class="tight">'
++'<li>非化学品伤患，护理师专业判断评估需尽速就医者</li>'
++'<li>民间救护车因有时间与能力限制，非属上述情形者，可视情况调度使用</li>'
++'<li>ERC 询问呼叫救护车内容时间：在救护程序完成后口头提供</li></ul>'
++'<span class="stage-name">化学品接触伤患呼叫救护车说帖</span>'
++'<p>说帖范本：</p>'
++'<div class="template">您好，这里是台积○○○厂区，地址：○○○，目前有 ___ 位伤患，接触浓度 ___%○○○化学品，意识 ___，接触部位（范围）：___，需要救护车，请由○○路的○○哨口入厂，入厂时请勿鸣笛，谢谢！</div>'
++'<p>范例：</p>'
++'<div class="template">您好，这里是台积 F12P3 厂区，地址：研新二路 6 号，目前有 1 位伤患，接触浓度 2.38%TMAH 化学品，意识清醒，接触部位（范围）：左手臂约 5*5cm，需要救护车，请由○○路的○○哨口入厂，入厂时请勿鸣笛，谢谢！</div>'
++'<span class="stage-name">TMAH 及 HF 真实案例整理</span>'
++'<p>超过浓度以及对应体表面积，具生命危险：</p>'
++'<table><tr><th>物质种类</th><th>浓度（%）</th><th>出现疼痛时间</th><th>暴露体表面积（%）</th></tr>'
++'<tr><td>TMAH*</td><td>25%</td><td></td><td>7%</td></tr>'
++'<tr><td>TMAH*</td><td>8.75%</td><td></td><td>12%</td></tr>'
++'<tr><td>TMAH*</td><td>4%</td><td></td><td>9%</td></tr>'
++'<tr><td>TMAH*</td><td>2.38%</td><td></td><td>25%</td></tr>'
++'<tr><td>HF</td><td>anhydrous</td><td></td><td>1%</td></tr>'
++'<tr><td>HF</td><td>70%</td><td></td><td>5%</td></tr>'
++'<tr><td>HF</td><td>50–70%</td><td></td><td>7%</td></tr>'
++'<tr><td>HF</td><td>20–50%</td><td></td><td>10%</td></tr>'
++'<tr><td>HF</td><td>&lt;20%</td><td></td><td>20%</td></tr>'
++'<tr><td>HF</td><td>不明</td><td>1–8 h</td><td>10%</td></tr>'
++'<tr><td>HF</td><td>不明</td><td>24 h</td><td>20%</td></tr>'
++'<tr><td>HF</td><td>不明</td><td>&lt;1 h</td><td>&lt;7%</td></tr></table>'
++'<p>*TMAH 根据致死个案报告。资料来源：台北荣总毒物中心。</p>'},
+
+{title:'疏散程序规定（震度／GMS／火灾／停电判定）', cat:'疏散',
+text:'疏散程序规定 地震 震度 gal 无尘室疏散 TE key in Vendor 清洁人员 餐厅 SUP 码头 设备工程师 ERC 成立 ERT 气体警报 GMS HiHi Alarm 火灾 停电 Life Safety 集合点 Office FAB CUP 逃生楼梯 电梯 ERC 广播',
+html:'<table><tr><th>状况</th><th>说明</th><th>动作</th><th>地点</th></tr>'
++'<tr><td>地震（震度 1~4 级（小）（25~59 gal））</td><td>震度</td><td>不需疏散</td><td>—</td></tr>'
++'<tr><td>地震（震度 4 级（大）（60 gal 以上））</td><td>震度</td><td>无尘室疏散</td><td>1. 无尘室 TE key in 2. Vendor &amp; 清洁人员：餐厅/SUP 1F 码头 3. 设备工程师：ERC 成立 ERT</td></tr>'
++'<tr><td>地震（震度 5 级以上）</td><td>震度</td><td>疏散</td><td>1. #1 Office 2F 集合点 2. #2 FAB 南侧餐厅 3. #3 处~#5 CUP 集合点</td></tr>'
++'<tr><td>气体警报</td><td>GMS 读值达到 HiHi Alarm</td><td>疏散</td><td>1. 无尘室 TE key in 2. Vendor &amp; 清洁人员：餐厅 3. 设备工程师：ERC 成立 ERT</td></tr>'
++'<tr><td>火灾</td><td>现场发生真实火灾且火势无法控制</td><td>疏散</td><td>1. #1 Office 2F 集合点 2. #2 FAB 南侧餐厅 3. #3 处~#5 CUP 集合点</td></tr>'
++'<tr><td>停电</td><td>Life Safety 系统是否异常：否</td><td>不需疏散</td><td>—</td></tr>'
++'<tr><td>停电</td><td>Life Safety 系统是否异常：是</td><td>疏散</td><td>1. 无尘室 TE key in 2. Vendor &amp; 清洁人员：餐厅 3. 设备工程师：ERC 成立 ERT</td></tr></table>'
++'<p><b>说明</b>：</p><ol class="tight">'
++'<li>特殊情形（如厂内异味，部分区域停电），但 Life Safety 监测系统正常，则由现场主管决定是否疏散</li>'
++'<li>疏散时请走逃生楼梯、勿搭乘电梯</li>'
++'<li>如有其他状况，请依紧急应变中心（ERC）广播内容进行后续动作</li></ol>'},
+
+{title:'2021 巡检缺失统计、高风险区域查核与落实工安', cat:'巡检',
+text:'2021 建物安全责任区 年度统计 缺失统计 ERC 个人件数 每月报告 check list 高风险区域查核 A-RMS-07-03-213 高风险区域数量 ISEP Q1 583 件 469 件 重度缺失 缺失分析 TFAC Module FAC 课别排名 落实工安 ISEP 检讨改善 风险盘查 施工安全管理 系统完成日 发火性 禁水性物质 清单',
+html:'<span class="stage-name">2021 建物安全责任区年度统计</span>'
++'<p>巡检结果共 339 件，重度缺失 1 件、中度缺失 30 件、轻度缺失 234 件、建议改善 74 件。2021 建物责任区巡检件数结果（堆叠图，图例：建议改善／轻度缺失／中度缺失／重度缺失／总计）：Office 7 件；P1 122 件；P2 101 件；P3 109 件。</p>'
++'<span class="stage-name">2021 建物责任区巡检 ERC 个人件数</span>'
++'<p>个人件数结果（总计，降幂）：王俊元 27、刘宜泓 26、王睿廉 25、郭川铭 25、赖建安 24、李宗儒 22、黄光辉 20、王杰瀚 19、李致颉 18、林俊谚 18、黄建桦 16、吴易达 14、卓耘隆 13、黄世谋 13、陈圣旺 12、陈圣文 11、薛博文 11、林育志 10、钟昆璋 9〔姓名未辨清〕、郭冠廷 6。</p>'
++'<span class="stage-name">每月报告 — 范例</span><ul class="tight">'
++'<li>建物安全查核专案 — 11 月建物安全查核稽核结果：总共 52 件缺失（重度*0 件、中度*3 件、轻度*19 件、建议改善*19 件）〔数字小字，部分未辨清〕；1. 重度缺失（NA）；2. 中度缺失 x3（项目小字未辨清，含 AMHS、电力、水课等字样）</li>'
++'<li>建物安全查核专案 — 建物查核专案缺失统计（长条图）与 Check list 缴交纪录表（小字未辨清）</li>'
++'<li>建物安全查核专案 — 近三个月结果统计图（9/10/11 月份结果折线图）</li>'
++'<li>中度缺失（表格与缺失照片，小字未辨清）</li></ul>'
++'<span class="stage-name">各责任区 check list</span>'
++'<p>左：F18A 建物责任区巡检 check list 表单截图（编号 1–28 列，分类含一般区域、危险区域、BIO 区、本体建筑、无尘室 B1F、化学药品（平面）、Fire Loading 等；各列检查项目小字未辨清；表尾 Leader 栏）。右：档案路径 10- &gt; 00-ERC 建物安全员 &gt; 建物责任区巡检 check list &gt; P1；名称清单：</p><ul class="tight">'
++'<li>建物责任区巡检 check list_(CR) P1 FAB 1F、B1F</li>'
++'<li>建物责任区巡检 check list_(CR) P1 FAB 2F、3F</li>'
++'<li>建物责任区巡检 check list_(NCR) P1 FAB 2F、1F &amp; HPM</li>'
++'<li>建物责任区巡检 check list_(NCR) P1 FAB 4F RF</li>'
++'<li>建物责任区巡检 check list_(NCR) P1 FAB B1F、B2F</li>'
++'<li>建物责任区巡检 check list_P1 CUP BSGS GAS YARD</li>'
++'<li>建物责任区巡检 check list_办公栋及厂区道路</li></ul>'
++'<span class="stage-name">高风险区域查核管理</span>'
++'<p>目的：确实掌握高风险区域施工件数、现场抽查施工状况、降低厂内施工风险。作法：系统查询当日高风险区域件数纪录于晨会交接大盘，ERC 至现场查核并记录于 ESP 系统。巡检作法：全检高风险区域是否上锁管制。高风险区域分类：</p><ul class="tight">'
++'<li>易燃易爆化学品及特定危害气体作业场所（HPM、Lorry）：① 易燃性及毒性气体房 ② 氧气及氢气槽车区 ③ 溶剂房及废溶剂房 ④ 氧气及氢气纯化室 ⑤ 柴油储槽 ⑥ 瓦斯站</li>'
++'<li>高压电力设备场所（电气室）：① 69KV/161KV 电缆室 ② GIS room 及主变压器场所 ③ 高压变电站（&gt;600V）④ 紧急发电机房</li>'
++'<li>高处坠落之虞作业场所（Ceiling）：① 无尘室挑空区（猫道外）② 冷却水塔（Cooling tower）③ 外墙及无围墙屋顶（含烟囱）</li></ul>'
++'<p>文件编号：A-RMS-07-03-213。</p>'
++'<span class="stage-name">高风险区域数量</span>'
++'<table><tr><th>区域</th><th>GC 小房间</th><th>变电站/发电机房/GIS Room/CCD Room/161KV 电缆室</th><th>Ceiling/猫道/护笼爬梯</th></tr>'
++'<tr><td>P1 区域 小计</td><td>84</td><td>102</td><td>22</td></tr>'
++'<tr><td>P2 区域 小计</td><td>82</td><td>75</td><td>17</td></tr>'
++'<tr><td>P3 区域 小计</td><td>75</td><td>75</td><td>17</td></tr>'
++'<tr><td>P1~P3 区域</td><td>241</td><td>252</td><td>56</td></tr></table>'
++'<span class="stage-name">ISEP 巡检缺失统计 — 2021 Q1</span><ul class="tight">'
++'<li>ISEP 巡检缺失：共 583 件（ERC：469 件、全安：111 件、ESH：3 件）</li>'
++'<li>稽核比例：ERC：80%、全安：19%、ESH：1%</li>'
++'<li>巡检稽核件数（月别总件数）：Apr-20 299、May-20 262、Jun-20 312、Jul-20 257、Aug-20 294、Sep-20 272、Oct-20 267、Nov-20 180、Dec-20 124、Jan-21 204、Feb-21 166、Mar-21 213；2021Q1 合计 583</li></ul>'
++'<span class="stage-name">ERC 人员缺失统计 — 2021 Q1</span><ul class="tight">'
++'<li>ERC 巡检缺失总计：共 469 件（重度：5 件、中度：39 件、轻度：425 件）</li>'
++'<li>缺失平均值为 24 件</li>'
++'<li>缺失分级统计-2021 Q1（个人总计，降幂）：45、45、41、37、36、35、34、32、25、21、19、19、16、15、10、8、6、6、6、4、3、3、2、1（姓名轴标签字体过小，未能可靠逐一对应〔未辨清〕）</li>'
++'<li>下半部为巡检缺失月统计（Jan-21／Feb-21／Mar-21 三线折线与数据表，小字未辨清）</li></ul>'
++'<span class="stage-name">2021 Q1 重度缺失（5 笔）</span>'
++'<p>较多缺失单位：WET1。缺失类别四笔为设施安全（机安）、一笔人员作业纪律。</p>'
++'<table><tr><th>稽核日期</th><th>Site</th><th>稽核地点</th><th>部门</th><th>课别</th><th>稽核者</th><th>班别</th><th>状态</th><th>稽核说明</th><th>月份</th></tr>'
++'<tr><td>2021/1/6</td><td>P1</td><td>P1A FAB 2F</td><td>PVD2</td><td>奈米 PVD 薄膜技术二课</td><td>王俊元</td><td>N</td><td>open</td><td>P1A FAB 2F 2UJ 不合格梯凳放置区域未划出，厂区现在亦无上锁管制且未申请暂存区，已通知奈米 PVD 薄膜技术二课值班/班杰旻知悉〔尾段小字未辨清〕</td><td>Jan-21</td></tr>'
++'<tr><td>2021/1/22</td><td>P1</td><td>P1A HPM 3F</td><td>WET1</td><td>奈米 Wet Clean 技术一课</td><td>陈圣旺</td><td>N</td><td>open</td><td>P1A HPM 3F Tool ID：ARWRS8 机台正常运转中，CSB1（NH4OH）及 CSB2（H2O2）interlock bypass，通知奈米 Wet Clean 技术一课值班/班务知悉</td><td>Jan-21</td></tr>'
++'<tr><td>2021/2/3</td><td>P2</td><td>P2B FAB 3F</td><td>ETC3</td><td>奈米蚀刻技术一课</td><td>刘宜泓</td><td>D</td><td>open</td><td>P2B FAB 3F Tool ID：BEMEAA 执行 PM 巡检发现，开 Chamber 时安全锁未锁上，有夹伤风险，当下立即改善，已通知奈米蚀刻技术一课知悉</td><td>Feb-21</td></tr>'
++'<tr><td>2021/2/12</td><td>P2</td><td>P2A FAB 1F</td><td>WET1</td><td>奈米 Wet Clean 技术一课</td><td>黄品修</td><td>N</td><td>open</td><td>P2A FAB 1F Tool ID：BDSTS8 机台正常运转中，门板 interlock bypass，通知奈米 Wet Clean 技术一课值班/班知悉</td><td>Feb-21</td></tr>'
++'<tr><td>2021/3/26</td><td>P1</td><td>P1A FAB 3F</td><td>ETC1</td><td>奈米蚀刻技术五课</td><td>吴易达</td><td>N</td><td>open</td><td>建物安全查核专案 P1A FAB 3F TOOL：AESRT1 Chamber PM2，Interlock 失效（上盖锁扣连结处螺丝未锁，上盖若打开 Interlock 不会作动），已通知 ETC1-EE5 值班/班柏纬知悉〔人名小字未辨清〕</td><td>Mar-21</td></tr></table>'
++'<p>（原表栏位另含「巡检结果：异常」「Follow up：重度缺失」，五笔相同。）</p>'
++'<span class="stage-name">2021 Q1 缺失分析 — 依类别分</span><ul class="tight">'
++'<li>缺失类别：设施安全：268 件、环境安全：164 件、人员纪律：151 件</li>'
++'<li>缺失比例：设施安全：46%、环境安全：28%、人员纪律：26%</li>'
++'<li>Q1 合计 583 件；月别：Jan 204、Feb 166、Mar 213</li>'
++'<li>折线（月别 × 类别）：Jan — 设施 85、人员纪律 64、环境 55；Feb — 设施 78、环境 50、人员纪律 38；Mar — 设施 105、环境 59、人员纪律 49</li></ul>'
++'<span class="stage-name">2021 Q1 缺失分析 — 依部门分类</span><ul class="tight">'
++'<li>各部门缺失分析：TFAC：307 件、Module：230 件、Hook up：29 件、Others：17 件</li>'
++'<li>圆饼图比例：FAC 53%、Module 39%、Hookup 5%、Others 3%</li></ul>'
++'<span class="stage-name">2021 Q1 缺失分析 — TFAC</span><ul class="tight">'
++'<li>TFAC 缺失分析：设施安全：65%、环境安全：24%、人员纪律：11%</li>'
++'<li>厂务缺失以设施安全（机安）最多：1. 设施固定：管夹松脱或缺少、支撑架松脱、固定螺丝松脱；2. 电线/管路：电线绝缘包覆不确实、管路未 CAP</li>'
++'<li>设施安全细分圆饼：设施固定 59%、电线、管路 14%、标示 9%、安全门 9%、机台盘门 3%、推车防护 3%、消防 2%、其他 1%</li></ul>'
++'<span class="stage-name">2021 Q1 缺失分析 — FAC 缺失课别排名</span>'
++'<p>FAC 缺失排名：气化一课、机械三课、电力三课。FAC 缺失分级统计-2021/Q1（轻度/中度/重度/总计）：</p>'
++'<table><tr><th>课别</th><th>轻度</th><th>中度</th><th>重度</th><th>总计</th></tr>'
++'<tr><td>气化一课</td><td>38</td><td>1</td><td>0</td><td>39</td></tr>'
++'<tr><td>机械三课</td><td>32</td><td>5</td><td>0</td><td>37</td></tr>'
++'<tr><td>电力三课</td><td>29</td><td>3</td><td>0</td><td>32</td></tr>'
++'<tr><td>机械二课</td><td>30</td><td>2</td><td>0</td><td>32</td></tr>'
++'<tr><td>气化二课</td><td>28</td><td>2</td><td>0</td><td>30</td></tr>'
++'<tr><td>机械一课</td><td>27</td><td>2</td><td>0</td><td>29</td></tr>'
++'<tr><td>气化三课</td><td>24</td><td>3</td><td>0</td><td>27</td></tr>'
++'<tr><td>电力一课</td><td>25</td><td>2</td><td>0</td><td>27</td></tr>'
++'<tr><td>水处理一课</td><td>13</td><td>2</td><td>1</td><td>16</td></tr>'
++'<tr><td>水处理二课</td><td>10</td><td>3</td><td>0</td><td>13</td></tr>'
++'<tr><td>电力二课</td><td>10</td><td>1</td><td>0</td><td>11</td></tr>'
++'<tr><td>水处理三课</td><td>10</td><td>0</td><td>0</td><td>10</td></tr>'
++'<tr><td>〔末位课别名未辨清〕</td><td>3</td><td>1</td><td>0</td><td>4</td></tr></table>'
++'<span class="stage-name">2021 Q1 缺失分析 — Module</span><ul class="tight">'
++'<li>Module 缺失分析：环境安全：45%、人员纪律：28%、设施安全：27%</li>'
++'<li>缺失以环境安全（6S）为最多：1. 暂存区缺失：暂存区未申请、过期未展延；2. 5S 缺失：废弃物未清除、物料未整理整顿</li>'
++'<li>环境安全细分圆饼：暂存区 55%、5S 31%、不安全环境 13%、防火区划 1%</li></ul>'
++'<span class="stage-name">2021 Q1 缺失分析 — 设备缺失课别排名</span><ul class="tight">'
++'<li>设备缺失课别排名：PVD1、CVD1、CVD2</li>'
++'<li>设备缺失分级统计-2021/Q1（总计，降幂）：PVD1 23、CVD1 19、CVD2 18、ETC2 18、ETC3 18、ME 18、ETC1 15、WET1 13、DIF1 11、DIF2 10、LIT3 10、PVD2 10、LIT2 9、EPI 8、WET2 8、ETC4 6、LIT1 5、LIT4 3、TMASK2 3、CMP1 1、CMP2 1、MASKM 1、TMASK3 1（轻度/中度/重度分级明细在原图表数据列，小字未逐格辨清）</li></ul>'
++'<span class="stage-name">2021 Q1 缺失分析（四圆饼图）</span><ul class="tight">'
++'<li>Q1 总览：设施安全 46%、环境安全 28%、人员纪律 26%（备份简报页码 28 未以独立画面出现）</li>'
++'<li>环境安全细分：暂存区 43%、5S 27%、防火区划 16%、不安全环境 14%</li>'
++'<li>设施安全细分：设施固定 54%、标示 13%、电线、管路 12%、安全门 6%、机台盘门 5%、推车防护 3%、其他 3%、梯凳 2%、消防 2%</li>'
++'<li>人员纪律细分：不安全行为 36%、推车防护 22%、PPE 14%、微颗检验 13%〔标签未辨清〕、表单 12%、网路防护 3%〔标签未辨清〕</li></ul>'
++'<span class="stage-name">落实工安 — F18A 检讨与改善</span>'
++'<p>资深副总于 4/8 对 FAC/ISEP 主管沟通会议的讯息，请各厂进行「落实工安」：</p><ol class="tight">'
++'<li>近日公司内外工安事故频传，从这些工安事故，看到大家轻忽工安的重要性。若形成忽视工安的意识及文化，以致发生重大工安事件，将对公司营运造成非常严重的伤害</li>'
++'<li>工安是每一个人的责任，也是最重要的第一道防线。我们在工作上要落实每一个工安环节，不可有任何马虎的心态</li>'
++'<li>如果有主管要求不遵守工安规定，要勇于说 NO，并反应给上一层主管，因为安全第一</li>'
++'<li>发现同仁或厂商有不安全行为须立即纠正，态度要坚决</li>'
++'<li>对于不合理的 OI 或作业规定，要举手反映以求改善，避免因窒碍难行，而去回避规定，造成工安风险</li>'
++'<li>主管要花时间以身言教持续教育同仁对工安的了解及落实</li>'
++'<li>再次强调工安没有任何妥协的余地，我们一定要说到做到，彻底落实</li></ol>'
++'<span class="stage-name">落实工安 — ISEP 检讨与改善</span><ul class="tight">'
++'<li><b>Approach 1：检讨改善施工/厂商安全管理</b> — 盘查目前管理系统未落实部分，检讨与改善；加强现场二次工具箱会议稽核，督促现场人员提高风险管理；针对 Level-2 施工类 &amp; 高风险区域施工工程加强查核</li>'
++'<li><b>Approach 2：强化高风险区域与危害物 LOTO 稽核</b> — 盘查厂内稽核巡检内容与提出再强化项目；加强高风险区域巡检及查核单位人员门禁管制；加强 HPM 供应设施 LOTO</li>'
++'<li><b>Approach 3：解决厂内窒碍难行与潜在隐忧</b> — 问题解决：LSC interlock disable &amp; DNS CO2 延迟喷放；加强管理：列管 10 项潜在风险，再强化风险防范 in 2021</li></ul>'
++'<span class="stage-name">F18A 风险盘查及改善</span>'
++'<table><tr><th>项目</th><th>问题说明</th><th>风险</th><th>CA</th><th>PA</th><th>影响单位</th></tr>'
++'<tr><td>问题</td><td>LSC interlock by pass（EPI/高压炉管）</td><td>火灾</td><td>安全复归</td><td>定期检测</td><td>Mech/EPI/DIF-Fur.</td></tr>'
++'<tr><td>问题</td><td>DNS CO2 延迟喷放防护不足</td><td>火灾</td><td>安全复归</td><td>定期检测</td><td>WET1</td></tr>'
++'<tr><td>须注意</td><td>2m 以上 A 字梯作业及鹰架作业（重新检视大于 3m 加强管制）</td><td>坠落</td><td>再检查</td><td>NA</td><td>TFAC, HK, AMHS</td></tr>'
++'<tr><td>须注意</td><td>FAB 使用高空工作车上载道（重新检视现场防坠管理）</td><td>坠落</td><td>再检查</td><td>NA</td><td>AMHS</td></tr>'
++'<tr><td>须注意</td><td>禁水/发火供应设备安全资源/自动遮断装置未定期自动安全检查</td><td>机安</td><td>修正管理程序</td><td>定期检测</td><td>TFAC, Module</td></tr>'
++'<tr><td>须注意</td><td>CO2 防护区内施工安全防护管制</td><td>缺氧</td><td>管制喷放功能</td><td>评估改为非蔓延性〔字句未辨清〕</td><td>TFAC</td></tr>'
++'<tr><td>须注意</td><td>N2 EFEM 人员进入缺氧风险</td><td>缺氧</td><td>管制人员进入</td><td>BKM 列入 OI</td><td>Module</td></tr>'
++'<tr><td>须注意</td><td>炉管机台 N2 Load lock by pass 功能未取消</td><td>缺氧</td><td>加强人员管理</td><td>设施改造</td><td>DIF-Fur.</td></tr>'
++'<tr><td>须注意</td><td>EDWARDS EUV H2D 真空氢气稀释处理系统易燃、易爆运转安全追踪</td><td>火灾</td><td>加强管理控制</td><td>定期防护功能测试</td><td>LIT EUV</td></tr>'
++'<tr><td>须注意</td><td>WLS/SWLS 公告合规性检讨（未申请公危处理场所，最大储存量超量风险）</td><td>法规</td><td>减量控制</td><td>澄清法规列入 OI</td><td>TFAC</td></tr>'
++'<tr><td>须注意</td><td>发火/禁水性钢瓶储存安全（P3 核可大于 1 倍管制量，但 OI 无管理办法）</td><td>法规</td><td>小于管制量</td><td>新增管理程序</td><td>LWM/Module</td></tr></table>'
++'<span class="stage-name">F18A 施工安全管理强化</span>'
++'<p>问题分析：2020 施工及稽核缺失件数统计，Level 2/一般施工缺失率偏高。</p><ul class="tight">'
++'<li>F18A 相较于他厂缺失率较高，应为落实查核及查核人力-工安小蜜蜂较多</li>'
++'<li>初步分析 F18A 缺失分布一般施工 &gt; Level-2 &gt; Level-1，应为 tsmc 监督人力资源相关</li>'
++'<li>三图对照：L1 施工累积缺失件数统计，缺失率：0.0026 — L1 特别管理：三方由 tsmc 工程负责人 + 厂商监工 + ISEP 三方会同检查，缺失率低；L2 施工累积缺失件数统计，缺失率：0.0040 — L2 加强管理：二方由 tsmc 工程负责人 + 厂商监工，只二方管理，其缺失率趋高；一般工程施工累积缺失统计，缺失率：0.0048 — 一般施工：监督资源不足，由 tsmc 工程负责人 + 厂商监工施工前中后管理资源较少</li>'
++'<li>检讨改善：加强二次工具箱会议功能 &amp; 施工现场监督及查核 — 流程：施工前协议组织会议 → 一次工具箱会议 → 施工风险再确认（↑ 现场二次工具箱会议）→ 施工中巡检稽核（↑ 提高查核率 &amp; 4G 远端监督）→ 收工检查</li></ul>'
++'<span class="stage-name">系统完成日表（HPM 侧）</span>'
++'<p>栏：System／Item／各区完成日（Done＝已完成，NA＝不适用）。列与 HPM 侧栏位如下：</p>'
++'<table><tr><th>System</th><th>Item</th><th>L10(Lorry)</th><th>HPM L10</th><th>HPM L20</th><th>L30(C/R)</th><th>HPM L40</th><th>HPM LRF</th><th>FAB LB2</th></tr>'
++'<tr><td>消防</td><td>Sprinkler</td><td>Done</td><td>Done</td><td>Done</td><td>Done</td><td>Done</td><td>Done</td><td>Done</td></tr>'
++'<tr><td>消防</td><td>Hydrant</td><td>Done</td><td>Done</td><td>Done</td><td>Done</td><td>Done</td><td>Done</td><td>Done</td></tr>'
++'<tr><td>消防</td><td>Fire detector</td><td>Done</td><td>Done</td><td>Done</td><td>Done</td><td>Done</td><td>Done</td><td>Done</td></tr>'
++'<tr><td>消防</td><td>VESDA</td><td>NA</td><td>NA</td><td>NA</td><td>Done</td><td>Done</td><td>NA</td><td>NA</td></tr>'
++'<tr><td>消防</td><td>10P CO2</td><td>Done</td><td>Done</td><td>Done</td><td>Done</td><td>Done</td><td>Done</td><td>2020/8/31</td></tr>'
++'<tr><td>消防</td><td>100P CO2</td><td>Done</td><td>Done</td><td>Done</td><td>Done</td><td>Done</td><td>Done</td><td>2020/8/31</td></tr>'
++'<tr><td>消防</td><td>CO2 system</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td><td>Done</td><td>Done</td><td>NA</td></tr>'
++'<tr><td>消防</td><td>Foam system</td><td>Done</td><td>Done</td><td>Done</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td></tr>'
++'<tr><td>消防</td><td>PBL</td><td>Done</td><td>Done</td><td>Done</td><td>Done</td><td>Done</td><td>Done</td><td>Done</td></tr>'
++'<tr><td>毒气侦测</td><td>环状线路结构</td><td>NA</td><td>NA</td><td>Done</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td></tr>'
++'<tr><td>毒气侦测</td><td>盘（RIO/MCU/PDP）</td><td>NA</td><td>Done</td><td>Done</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td></tr>'
++'<tr><td>毒气侦测</td><td>地震仪</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td></tr>'
++'<tr><td>毒气侦测</td><td>DOD</td><td>NA</td><td>NA</td><td>Done</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td></tr>'
++'<tr><td>毒气侦测</td><td>Riken</td><td>Done</td><td>Done</td><td>Done</td><td>NA</td><td>Done</td><td>NA</td><td>Done</td></tr>'
++'<tr><td>毒气侦测</td><td>FTIR</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td></tr>'
++'<tr><td>毒气侦测</td><td>EMO</td><td>NA</td><td>Done</td><td>Done</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td></tr>'
++'<tr><td>毒气侦测</td><td>LAU</td><td>Done</td><td>Done</td><td>Done</td><td>NA</td><td>NA</td><td>NA</td><td>Done</td></tr>'
++'<tr><td>紧急设备</td><td>PA</td><td>Done</td><td>Done</td><td>Done</td><td>Done</td><td>Done</td><td>Done</td><td>Done</td></tr>'
++'<tr><td>紧急设备</td><td>Calamity（紧急排烟系统）</td><td>NA</td><td>NA</td><td>NA</td><td>Done</td><td>NA</td><td>NA</td><td>NA</td></tr>'
++'<tr><td>紧急设备</td><td>照明</td><td>Done</td><td>Done</td><td>Done</td><td>Done</td><td>Done</td><td>Done</td><td>Done</td></tr>'
++'<tr><td>紧急设备</td><td>紧急照明</td><td>Done</td><td>2020/8/21</td><td>Done</td><td>Done</td><td>Done</td><td>Done</td><td>Done</td></tr>'
++'<tr><td>紧急设备</td><td>逃生指示灯</td><td>Done</td><td>2020/8/21</td><td>Done</td><td>Done</td><td>Done</td><td>Done</td><td>Done</td></tr>'
++'<tr><td>紧急设备</td><td>避难出口指示灯</td><td>Done</td><td>2020/8/21</td><td>Done</td><td>Done</td><td>Done</td><td>NA</td><td>Done</td></tr>'
++'<tr><td>紧急设备</td><td>无线电</td><td>Done</td><td>Done</td><td>Done</td><td>Done</td><td>Done</td><td>Done</td><td>Done</td></tr>'
++'<tr><td>紧急设备</td><td>CCTV</td><td>2020/9/1</td><td>2020/9/1</td><td>2020/9/1</td><td>2020/9/15</td><td>2020/9/1</td><td>2020/9/1</td><td>2020/9/1</td></tr>'
++'<tr><td>紧急设备</td><td>冲身洗眼器</td><td>Done</td><td>Done</td><td>Done</td><td>Done</td><td>NA</td><td>NA</td><td>Done</td></tr></table>'
++'<p>FAB 侧栏位（FAB LB1 (C/R)、FAB L10 (C/R)、FAB L10 (non-C/R)、FAB L20 (CR)、FAB L30 (CR)、FAB L40、FAB LRF）多为 Done/NA；可辨识之日期：FAB L20 (CR) 紧急照明/逃生指示灯/避难出口指示灯三列为 2020/8/21；FAB L10 (non-C/R) 同三列为 2020/8/21；CCTV 列：LB1 2020/9/1、L10 (C/R) 2020/9/15、L10 (non-C/R) 2020/9/1、L20 2020/9/15、L30 2020/9/15、L40 2020/9/1、LRF 2020/9/1。</p>'
++'<span class="stage-name">发火性安全需求文件</span>'
++'<p>文件标头（Security C – TSMC Secret）：防水毯：CMS+UV/IR〔未辨清〕；发火性：巨积是 VESDA+UV/IR（未来会修改成 VESDA+thermal）〔字句未辨清〕。主表栏：区域／无尘室办公中央供应系统〔栏名未辨清〕／无尘室内大空间化学供应系统（LDS）／无尘室内设备内小剂量供应〔栏名未辨清〕；列「安全需求」编号条列，可辨识者：</p><ul class="tight">'
++'<li>中央供应栏：1. 过去火灾大部分为 2hrs 防火完整区隔〔后段未辨清〕 2. 场所定义最具好阻〔未辨清〕 3. 环境总换气新鲜空气、通风换气（1 cfm/ft2）4. 本区环境消防灭火器（何：D 类干粉、哈龙—CO2）5. 高架拆卸操作容易需要材质 6. 装载侦烟探测器或火焰探测器或热准型线型系统</li>'
++'<li>LDS 栏：1. 气瓶平台与供应室、Local 次之（特殊机制维修产品提供计算资料、超过 SMOC 管制）、禁止放置于地下室 2. 2hrs 防火完整、不燃材料建造房间、self close 防火门、高感度侦烟器、通风换气（1cfm/ft2）、环境总换气新鲜空气 3. 场所定义最具好阻〔未辨清〕 4. LDS 环境消防灭火器、专用搬运推车附应变器材 5. 箱型钢瓶柜、二次承漏盘、自动泄漏侦测与自动关断系统、自动关断阀 6. 发火性液体钢瓶总最高存量上限为 20L、大容量系统为 UV/IR 与高感度侦烟器 7. 低浓度排放水排放泄漏侦测器（何：Gas type detector）8. 发火性液体输送管线为双套管设计</li>'
++'<li>小剂量栏：1. 禁止放置于地下室、附应变器材与避难推车 2. 发火性液体最高存量上限为 2〔单位未辨清〕、系统为 UV/IR 与高感度侦测器 3. 设置自动泄漏侦测器（何：Gas type detector）4. 发火性液体输送管线为双套管设计</li>'
++'<li>表下注：1. 确认钢瓶泄漏处理〔后段未辨清〕 2. 禁水性定义如：化学品泄漏处理、防火毯、推车、Pumping line 顶标示或挂牌〔后段未辨清〕</li></ul>'
++'<span class="stage-name">机台别禁水性/发火性物质与侦测配置表</span>'
++'<p>栏位：部门／单位名称／Model／禁水性物质品名／机台量／累积（用量）／特性／GMS curve・蓝标／现况（2016/09/20）／Fire detector／干粉／Leak sensor（V＝有）。</p>'
++'<table><tr><th>部门</th><th>单位名称</th><th>Model</th><th>物质品名</th><th>机台量</th><th>累积</th><th>特性</th><th>侦测相关</th><th>Fire detector</th></tr>'
++'<tr><td>PVD</td><td>PVD</td><td>ASM Producer</td><td>TMA</td><td>250g</td><td>X</td><td>发火性</td><td>GMS：NA；现况 VESDA+UV/IR</td><td>Smoke detector</td></tr>'
++'<tr><td>PVD</td><td>PVD</td><td>AMAT Endura II (CVD TiN)</td><td>TDMAT</td><td>2200g</td><td>X</td><td>禁水性</td><td>GMS：TDMAT/NH3；现况 GMS+UV/IR</td><td>UV/IR</td></tr>'
++'<tr><td>PVD</td><td>PVD</td><td>AMAT Endura II (TILB)</td><td>ALEXA TEAL</td><td>300g</td><td>X</td><td>发火性</td><td>GMS：NA；现况 VESDA or UV/IR</td><td>Smoke detector</td></tr>'
++'<tr><td>PVD</td><td>PVD</td><td>AMAT Endura II (TiN)</td><td>Titanium Tetrachloride (TiCl4)</td><td>1400g</td><td>30KG</td><td>禁水性</td><td>GMS：HCl；现况 GMS+UV/IR</td><td>（空白）</td></tr>'
++'<tr><td>PVD</td><td>PVD</td><td>Endura II (TaNx4)〔未辨清〕</td><td>PDMAT</td><td>200g</td><td>X</td><td>禁水性</td><td>GMS：NH3；现况 GMS+UV/IR</td><td>（空白）</td></tr>'
++'<tr><td>CVD</td><td>CVD</td><td>LAM EMMA</td><td>TMA</td><td>3 KG</td><td>20.4 KG</td><td>发火性</td><td>GMS：NA；现况 VESDA+TERMAL/IR (UV/IR)</td><td>UV/IR/VESDA</td></tr>'
++'<tr><td>CVD</td><td>CVD</td><td>ASM Eagle XP8</td><td>SAM24</td><td>4 L</td><td>18.6 L</td><td>禁水性</td><td>GMS：SiH4/Hydride；现况 GMS+UV/IR</td><td>侦漏侦测器</td></tr>'
++'<tr><td>CVD</td><td>CVD</td><td>AMAT Producer GT</td><td>TSA</td><td>NA</td><td>20 KG</td><td>禁水性</td><td>GMS：SiH4/Hydride；现况 GMS+UV/IR</td><td>侦漏侦测器/UV/IR</td></tr>'
++'<tr><td>CVD</td><td>CVD</td><td>ASM Eagle XP8</td><td>TDMAT</td><td>4 L</td><td>30 L</td><td>禁水性</td><td>GMS：TDMAT/NH3；现况 GMS+UV/IR</td><td>UV/IR</td></tr>'
++'<tr><td>DIF</td><td>DIF-1</td><td>TEL Indy+</td><td>LTO-520</td><td>NA</td><td>13.2Kg (19 slm)〔注记未辨清〕</td><td>禁水性</td><td>GMS：NH3/NH3；现况 GMS+UV/IR</td><td>（空白）</td></tr>'
++'<tr><td>DIF</td><td>DIF-1</td><td>Formular</td><td>LTO-520</td><td>NA</td><td>13.2Kg (19 slm)〔注记未辨清〕</td><td>禁水性</td><td>GMS：NH3/NH3；现况 GMS+UV/IR</td><td>（空白）</td></tr></table>'
++'<p>表左下参考清单：TSA (SiH4)；ALEXA TEAL（更换前）GMS 不用测；SAM24 (SiH4)；TDMAT (NH3)；PDMAT (NH3)；DMA (HCl)；MCS (AsH3)；5%MMS (SiH4)；TMA GMS 不用测；LTO-520 (NH3)。</p>'
++'<span class="stage-name">发火性物质安全控制矩阵</span>'
++'<p>栏（部门/机型/安全控制）：DIF1 — TEL HK Dep (MiM) TMA、TEMAZ；CVD — LAM EMMA TMA、AMAT Producer TSA；ASM PEALD SAM24；PVD — ASM HK TMA、AMAT TIL8 Alexa、AMAT TiSix TDMAT、AMAT ALD TaN PDMAT。标头行：台积设备认证（新机台，认证中）、厂商认证、近期设备入员变动 &amp; 新增。列（人/机/料/法/环）：</p><ul class="tight">'
++'<li>人・厂商认证：认证中／Y／Y（厂务 TCM）／不适用（其余栏）／Y（PDMAT 栏）</li>'
++'<li>机・液态双套供应管（负压监控关断）：Y／不适用／供应管与 Gas box 风管共管／不适用（其余栏）</li>'
++'<li>机・侦测器监控（自动关断）：各栏均 Y</li>'
++'<li>机・五级地震关断来源：N（评估）（前段栏）／不适用（后段栏）</li>'
++'<li>机・Vent pump 防火火监控保护：N (3/E)／N（评估）／Y／Y／Y（后段栏多为 Y）</li>'
++'<li>机・Dry pump 防火火监控保护：Y／Y／Y／N（评估）／N（评估）1 台有装／N（评估）／Y／Y／Y</li>'
++'<li>机・Gas divert (foreline) 压力异常：Y／Y／Y／不适用／Y／不适用／Y／Y／Y</li>'
++'<li>机・烟雾 or 液体侦测（自动关断）：各栏均 Y</li>'
++'<li>机・专属运送推车（蛭石 + 防火毯）：Y (3/E)／其余各栏 Y</li>'
++'<li>料・钢瓶更换：设备高风险管制、人员作业前需完成设备高风险认证（全栏共通）</li>'
++'<li>法・管路作业 (trouble shooting)：发火性管路作业不授权，与 ISEP 共同鉴别风险，明定 SOP（作业部经理需同意）（全栏共通）</li>'
++'<li>环・铁甲衣 + 自动干粉灭火：Y／Y／Y／Y (P56 CO2、P7 干粉)／(CO2 灭火)／不适用（后段栏）</li>'
++'<li>环・应变器材（D 类灭火器 + 蛭石 + 防火毯）：各栏均 Y</li></ul>'
++'<p>（个别格值系依画面辨识，少数格未辨清。）</p>'
++'<span class="stage-name">禁水性物质 2 级清单</span>'
++'<p>栏位：物质类别／厂别／使用单位／化学品中文名／英文名・规格／危害标示（右栏，含 B. 易燃物、G. 腐蚀性物质、C. 警告、F. 加压气体、H. 健康危害、I. 水环境危害、A. 急毒性物质等代码，逐列对应未逐一辨清）。</p>'
++'<table><tr><th>厂别</th><th>使用单位</th><th>中文名</th><th>英文名/规格</th></tr>'
++'<tr><td>TSMC</td><td>—</td><td>五（二甲氨基）钽</td><td>PDMAT_SMS_200G/BT</td></tr>'
++'<tr><td>TSMC</td><td>—</td><td>甲基矽 + 氢气混合气〔名称未辨清〕</td><td>5.175%NMMS/Ar+-0.075% / 84A/1800psig〔规格未辨清〕</td></tr>'
++'<tr><td>F12P4/5</td><td>CMP&amp;PVD PVD FEOL</td><td>三（二甲基氨基）矽烷</td><td>3DMAS</td></tr>'
++'<tr><td>F12P6</td><td>RDPC-CVD-2 CVD 二课</td><td>四（二甲基氨基）钛</td><td>LS2 (TDMAT)</td></tr>'
++'<tr><td>F12P4/5</td><td>CVD&amp;EPI EPI 一课</td><td>甲基矽混合气〔名称未辨清〕</td><td>20% SiH3CH3/He〔未辨清〕</td></tr>'
++'<tr><td>F12P6</td><td>F12CVD-2 奈米 CVD 薄膜制程四课</td><td>双（二乙基氨基）矽烷</td><td>SAM24 (BDEAS)</td></tr>'
++'<tr><td>F12P1/2</td><td>F12PVD-1 奈米金属薄膜技术一课</td><td>四（乙基甲基氨基）锆（IV）</td><td>Tetrakis(ethylmethylamino)zirconium(IV)</td></tr>'
++'<tr><td>FAB1AA</td><td>F14A-DIF1 奈米扩散制程一课</td><td>六氯二矽烷</td><td>Hexachlorodisilane</td></tr>'
++'<tr><td>FAB1AA</td><td>F14A-DIF1 奈米扩散制程一课</td><td>六氯矽烷〔名称未辨清〕</td><td>Hexachlorodisilane</td></tr>'
++'<tr><td>FAB2</td><td>F2-MTE-1 扩散设备课</td><td>辛烷</td><td>Octane</td></tr>'
++'<tr><td>FAB2</td><td>F2-MTE-1 扩散设备课</td><td>四（乙甲基氨基）铪</td><td>Tetrakis Ethylmethylamino Hafnium</td></tr>'
++'<tr><td>F12P4/5</td><td>SMDP CVD/PVD/HK/DIF</td><td>四（甲基乙基氨基）锆</td><td>Tetrakis(methylethylamino)zirconium</td></tr>'
++'<tr><td>F12P4/5</td><td>SMDP Epi/Thermal/Implant</td><td>双环戊二烯镁</td><td>Bis(cyclopentadienyl)magnesium</td></tr>'
++'<tr><td>F12P4/5</td><td>SMDP Epi/Thermal/Implant</td><td>三乙基化镓</td><td>TRIETHYLGALLIUM OPTOGRADE(TM)</td></tr>'
++'<tr><td>FAB2</td><td>TEM 穿透式电镜七课</td><td>双酚 A 环氧树脂</td><td>Epoxy Bond 110 - Part A</td></tr>'
++'<tr><td>FAB2</td><td>TEM 穿透式电镜七课</td><td>硬化剂</td><td>Epoxy Bond 110 - Part B</td></tr></table>'
++'<span class="stage-name">发火性液体清单</span>'
++'<table><tr><th>厂别</th><th>使用单位</th><th>中文名</th><th>英文名/规格</th></tr>'
++'<tr><td>F12P4/5</td><td>CMP&amp;PVD PVD FEOL</td><td>烷基金属化合物</td><td>ALDK1</td></tr>'
++'<tr><td>F12P6</td><td>ETD&amp;CMP&amp;PVD PVD FEOL</td><td>三乙基铝</td><td>Triethylaluminum</td></tr>'
++'<tr><td>F12P6</td><td>CMP&amp;PVD PVD FEOL</td><td>二甲基氢化铝</td><td>Dimethylaluminum hydride</td></tr>'
++'<tr><td>F12P4/5</td><td>ETD-RDPC-CVD-PVD-DIF</td><td>三甲基铝</td><td>TMA (EMMA), 3 2KG/BT〔规格未辨清〕</td></tr>'
++'<tr><td>F12P4/5</td><td>ETD1/MRD Thin Film/Diffusion Research</td><td>三丁基磷</td><td>TBP (Tertiarybutylphosphine)</td></tr>'
++'<tr><td>F12P4/5</td><td>ETD1 先进技术研发一课</td><td>三甲基锑</td><td>TMSb (Trimethylantimony)</td></tr>'
++'<tr><td>F12P4/5</td><td>ETD1/MRD Thin Film/Diffusion Research</td><td>三甲基镓</td><td>TMGa (Trimethylgallium)</td></tr>'
++'<tr><td>F12P4/5</td><td>ETD1 先进技术研发一课</td><td>三甲基铟</td><td>TMIn (Trimethylindium)</td></tr>'
++'<tr><td>F12P4/5</td><td>ETD1/MRD Thin Film/Diffusion Research</td><td>三乙基镓</td><td>TEGa (Triethylgallium)</td></tr>'
++'<tr><td>F12P4/5</td><td>ETD1 先进技术研发一课</td><td>三乙基锑</td><td>Triethylantimony</td></tr>'
++'<tr><td>F12P4/5</td><td>F12PVD-2 奈米 PVD 薄膜制程五课</td><td>高纯度三乙基铝</td><td>ATHENA</td></tr>'
++'<tr><td>F12P4/5</td><td>MRD Thin Film/Diffusion Research</td><td>三丁基胂</td><td>Tertiarybutylarsine</td></tr>'
++'<tr><td>F12P4/5</td><td>RDPC-CVD-1 CVD 二课</td><td>三甲矽烷基胺</td><td>TSA</td></tr>'
++'<tr><td>F12P6</td><td>RDPC-PVD-1 PVD 二课</td><td>三异丁基铝</td><td>Triisobutylaluminum (Trident)</td></tr>'
++'<tr><td>F12P4/5</td><td>SMDP CVD/PVD/HK</td><td>三甲基铝</td><td>Trimethylaluminum</td></tr>'
++'<tr><td>FAB2</td><td>TEM 穿透式电镜七课</td><td>双酚 A 环氧树脂</td><td>Epoxy Bond 110 - Part A</td></tr></table>'
++'<span class="stage-name">清单总表（末页）</span>'
++'<p>一张栏位众多（约 20 栏、约 40 列）之清单总表全表截图，画面全程为远景，右侧有两处黄色注解框；表名、栏名与逐格内容于此解析度下均未能辨识〔未辨清〕，不臆录。</p>'}
+];
+
+var FLOWS = [{"title": "化学品泄漏处理流程", "ver": "2", "nodes": [{"id": "signal", "kind": "start", "unit": "ERC", "text": "液体化学品泄漏讯号", "rec": "REVIEWED"}, {"id": "sensor", "kind": "action", "unit": "ERC", "text": "侦测器侦知", "rec": "REVIEWED"}, {"id": "report", "kind": "action", "unit": "事故部门", "text": "人员发现：异味、目击（对泄漏区域管制），通知", "rec": "REVIEWED"}, {"id": "verify", "kind": "action", "unit": "ERC/事故部门", "text": "ERC与事故发生部门值班现场确认泄漏物质，使用PH试纸判断酸碱", "rec": "REVIEWED"}, {"id": "false", "kind": "decision", "unit": "ERC", "text": "是否误报", "rec": "REVIEWED"}, {"id": "falseend", "kind": "end", "unit": "ERC", "text": "报警解除持续观察查找原因", "rec": "REVIEWED"}, {"id": "dispatch", "kind": "action", "unit": "ERC", "text": "召集ERT人员到紧急集合点集合待命，通知事故区域主管担任事故指挥官。", "rec": "REVIEWED"}, {"id": "enough", "kind": "decision", "unit": "IC", "text": "ERT人员是否充足？", "rec": "REVIEWED"}, {"id": "reinforce", "kind": "action", "unit": "IC", "text": "事故指挥官根据实际情况召集其他部门ERT", "rec": "REVIEWED"}, {"id": "erc", "kind": "action", "unit": "ERC", "text": "通知现场人员确认现场状况", "rec": "REVIEWED"}, {"id": "erc-monitor", "kind": "action", "unit": "ERC", "text": "监控系统读值，提供MSDS等供查询准备Portable detector，PPE支持", "rec": "REVIEWED"}, {"id": "erc-cont", "kind": "action", "unit": "ERC", "text": "持续监控现场情况", "rec": "REVIEWED"}, {"id": "erc-report", "kind": "action", "unit": "ERC", "text": "通知RM/厂内主管", "rec": "REVIEWED"}, {"id": "search", "kind": "action", "unit": "ERT", "text": "搜寻被困人员", "rec": "REVIEWED"}, {"id": "transfer", "kind": "action", "unit": "ERT", "text": "转移伤员", "rec": "REVIEWED"}, {"id": "help", "kind": "action", "unit": "ERT", "text": "协助救灾", "rec": "REVIEWED"}, {"id": "locate", "kind": "action", "unit": "ERT", "text": "寻找泄漏点", "rec": "REVIEWED"}, {"id": "valve", "kind": "decision", "unit": "ERT", "text": "确认泄漏点前端阀门已关闭", "rec": "REVIEWED"}, {"id": "valve-manual", "kind": "action", "unit": "ERT", "text": "手动切断泄漏点前端阀门", "rec": "REVIEWED"}, {"id": "vent", "kind": "action", "unit": "ERT", "text": "现实情况增加区域换气频率", "rec": "REVIEWED"}, {"id": "flammable", "kind": "decision", "unit": "ERT", "text": "确认泄漏物质是否易燃", "rec": "REVIEWED"}, {"id": "sourcecontrol", "kind": "action", "unit": "ERT", "text": "控制可能引火源，并准备灭火器材", "rec": "REVIEWED"}, {"id": "monitorflammable", "kind": "action", "unit": "ERT", "text": "监控可燃气体浓度", "rec": "REVIEWED"}, {"id": "corrosive", "kind": "decision", "unit": "ERT", "text": "是否为腐蚀性化学品？", "rec": "REVIEWED"}, {"id": "character", "kind": "action", "unit": "ERT", "text": "确认化学品性质", "rec": "REVIEWED"}, {"id": "ph", "kind": "action", "unit": "ERT", "text": "监测PH值及环境蒸汽浓度", "rec": "REVIEWED"}, {"id": "contain", "kind": "action", "unit": "ERT", "text": "关闭及围堵泄漏物", "rec": "REVIEWED"}, {"id": "absorb", "kind": "action", "unit": "ERT", "text": "对泄漏化学品进行吸附", "rec": "REVIEWED"}, {"id": "restore", "kind": "action", "unit": "ERT", "text": "抢救财物与复工", "rec": "REVIEWED"}, {"id": "safe", "kind": "action", "unit": "IC", "text": "安全无虞", "rec": "REVIEWED"}, {"id": "end", "kind": "end", "unit": "IC", "text": "结束", "rec": "REVIEWED"}, {"id": "control", "kind": "action", "unit": "安保", "text": "事故区域管制", "rec": "REVIEWED"}, {"id": "control-out", "kind": "action", "unit": "安保", "text": "管制人员进出Fab", "rec": "REVIEWED"}, {"id": "road", "kind": "action", "unit": "安保", "text": "外围管制", "rec": "REVIEWED"}, {"id": "road-control", "kind": "action", "unit": "安保", "text": "对厂区道路进行管制", "rec": "REVIEWED"}, {"id": "guard", "kind": "action", "unit": "安保", "text": "厂内警戒、治安保卫", "rec": "REVIEWED"}, {"id": "external", "kind": "action", "unit": "安保", "text": "引导外部救灾车辆入厂", "rec": "REVIEWED"}, {"id": "evacuate", "kind": "action", "unit": "ERT", "text": "引导人员疏散", "rec": "REVIEWED"}, {"id": "assembly", "kind": "action", "unit": "ERT", "text": "引导人员集合打卡", "rec": "REVIEWED"}, {"id": "evac-report", "kind": "action", "unit": "ERT", "text": "疏散情况汇总、上报", "rec": "REVIEWED"}, {"id": "injury", "kind": "action", "unit": "急救组", "text": "对接伤员", "rec": "REVIEWED"}, {"id": "firstaid", "kind": "action", "unit": "急救组", "text": "初步救治", "rec": "REVIEWED"}, {"id": "medicine", "kind": "action", "unit": "急救组", "text": "配备应急药品", "rec": "REVIEWED"}, {"id": "ambulance", "kind": "action", "unit": "急救组", "text": "对接120，移交伤员", "rec": "REVIEWED"}, {"id": "gear", "kind": "action", "unit": "ERT", "text": "准备PPE/SCBA手提式侦测器", "rec": "REVIEWED"}, {"id": "ppe", "kind": "action", "unit": "ERT", "text": "协助穿戴PPE", "rec": "REVIEWED"}, {"id": "warm", "kind": "action", "unit": "ERT", "text": "暖区管制、记录人员进出情况", "rec": "REVIEWED"}, {"id": "decon-person", "kind": "action", "unit": "ERT", "text": "对救灾人员进行除污", "rec": "REVIEWED"}, {"id": "undress", "kind": "action", "unit": "ERT", "text": "协助救灾人员卸装", "rec": "REVIEWED"}, {"id": "decon-gear", "kind": "action", "unit": "ERT", "text": "对救灾装备进行除污", "rec": "REVIEWED"}, {"id": "waste", "kind": "action", "unit": "ERT", "text": "清理、收纳污染物、危废等受污染", "rec": "REVIEWED"}, {"id": "power", "kind": "action", "unit": "FAC", "text": "保证事故区域外电力系统正常运行", "rec": "REVIEWED"}, {"id": "air", "kind": "action", "unit": "FAC", "text": "保证空调系统正常运行", "rec": "REVIEWED"}, {"id": "air-fan", "kind": "action", "unit": "FAC", "text": "开启事故区域事故风机", "rec": "REVIEWED"}, {"id": "air-neighbor", "kind": "action", "unit": "FAC", "text": "开启相邻区域补风机", "rec": "REVIEWED"}, {"id": "gas", "kind": "action", "unit": "FAC", "text": "保证气化系统正常运行", "rec": "REVIEWED"}, {"id": "detector", "kind": "action", "unit": "FAC", "text": "隔离受影响侦测器", "rec": "REVIEWED"}, {"id": "chemical-off", "kind": "action", "unit": "FAC", "text": "协助断开化学品供应", "rec": "REVIEWED"}, {"id": "water", "kind": "action", "unit": "FAC", "text": "保证水系统正常运行", "rec": "REVIEWED"}, {"id": "wastewater", "kind": "action", "unit": "FAC", "text": "事故废水处理", "rec": "REVIEWED"}], "edges": [{"s": "signal", "t": "sensor"}, {"s": "signal", "t": "report"}, {"s": "sensor", "t": "verify"}, {"s": "report", "t": "verify"}, {"s": "verify", "t": "false"}, {"s": "false", "t": "falseend", "l": "是"}, {"s": "false", "t": "dispatch", "l": "否"}, {"s": "dispatch", "t": "enough"}, {"s": "enough", "t": "reinforce", "l": "否"}, {"s": "reinforce", "t": "enough"}, {"s": "enough", "t": "erc", "l": "是"}, {"s": "enough", "t": "search", "l": "是"}, {"s": "enough", "t": "locate", "l": "是"}, {"s": "enough", "t": "control", "l": "是"}, {"s": "enough", "t": "road", "l": "是"}, {"s": "enough", "t": "evacuate", "l": "是"}, {"s": "enough", "t": "injury", "l": "是"}, {"s": "enough", "t": "gear", "l": "是"}, {"s": "enough", "t": "power", "l": "是"}, {"s": "enough", "t": "air", "l": "是"}, {"s": "enough", "t": "gas", "l": "是"}, {"s": "enough", "t": "water", "l": "是"}, {"s": "erc", "t": "erc-monitor"}, {"s": "erc-monitor", "t": "erc-cont"}, {"s": "erc-cont", "t": "erc-report"}, {"s": "search", "t": "transfer"}, {"s": "transfer", "t": "help"}, {"s": "locate", "t": "valve"}, {"s": "valve", "t": "valve-manual", "l": "否"}, {"s": "valve", "t": "vent", "l": "是"}, {"s": "vent", "t": "flammable"}, {"s": "flammable", "t": "sourcecontrol", "l": "是"}, {"s": "sourcecontrol", "t": "monitorflammable"}, {"s": "flammable", "t": "corrosive", "l": "否"}, {"s": "corrosive", "t": "character", "l": "否"}, {"s": "corrosive", "t": "ph", "l": "是"}, {"s": "monitorflammable", "t": "contain"}, {"s": "ph", "t": "contain"}, {"s": "contain", "t": "absorb"}, {"s": "absorb", "t": "restore"}, {"s": "restore", "t": "safe"}, {"s": "safe", "t": "end"}, {"s": "control", "t": "control-out"}, {"s": "road", "t": "road-control"}, {"s": "road-control", "t": "guard"}, {"s": "guard", "t": "external"}, {"s": "evacuate", "t": "assembly"}, {"s": "assembly", "t": "evac-report"}, {"s": "injury", "t": "firstaid"}, {"s": "firstaid", "t": "medicine"}, {"s": "medicine", "t": "ambulance"}, {"s": "gear", "t": "ppe"}, {"s": "ppe", "t": "warm"}, {"s": "warm", "t": "decon-person"}, {"s": "decon-person", "t": "undress"}, {"s": "undress", "t": "decon-gear"}, {"s": "decon-gear", "t": "waste"}, {"s": "air", "t": "air-fan"}, {"s": "air-fan", "t": "air-neighbor"}, {"s": "gas", "t": "detector"}, {"s": "detector", "t": "chemical-off"}, {"s": "water", "t": "wastewater"}], "notes": ["原图化学品性质确认框的后续连线未标明；不补写判断结果。手动切断框的后续汇合线需核对。"]}, {"title": "气体泄漏处理流程", "ver": "2", "nodes": [{"id": "signal", "kind": "start", "unit": "ERC", "text": "特气泄漏讯号", "rec": "REVIEWED"}, {"id": "gms", "kind": "action", "unit": "ERC", "text": "GMS（ENV）", "rec": "REVIEWED"}, {"id": "hi", "kind": "action", "unit": "ERC", "text": "Hi", "rec": "REVIEWED"}, {"id": "hihi", "kind": "action", "unit": "ERC", "text": "HiHi", "rec": "REVIEWED"}, {"id": "verify", "kind": "action", "unit": "事故部门", "text": "事故部门携带便携式气体侦测器现场确认", "rec": "REVIEWED"}, {"id": "reach", "kind": "decision", "unit": "事故部门", "text": "侦测器是否到达HiHi？", "rec": "REVIEWED"}, {"id": "repeat", "kind": "action", "unit": "事故部门", "text": "侦测器是否到达HiHi？", "rec": "REVIEWED"}, {"id": "false", "kind": "end", "unit": "事故部门", "text": "事故调查处理及报告反馈", "rec": "REVIEWED"}, {"id": "dispatch", "kind": "action", "unit": "ERC", "text": "广播通知人员疏散至指定地点，召集ERT，通知事故区域主管担任事故指挥官。", "rec": "REVIEWED"}, {"id": "erc", "kind": "action", "unit": "ERC", "text": "根据事件等级通报事故部门主管", "rec": "REVIEWED"}, {"id": "erc-monitor", "kind": "action", "unit": "ERC", "text": "监控系统读值，提供MSDS等供咨询，准备Portable Detector PPE支持", "rec": "REVIEWED"}, {"id": "erc-report", "kind": "action", "unit": "ERC", "text": "通知厂内主管", "rec": "REVIEWED"}, {"id": "search", "kind": "action", "unit": "ERT", "text": "搜寻被困人员", "rec": "REVIEWED"}, {"id": "transfer", "kind": "action", "unit": "ERT", "text": "转移伤员", "rec": "REVIEWED"}, {"id": "help", "kind": "action", "unit": "ERT", "text": "协助救灾", "rec": "REVIEWED"}, {"id": "cut", "kind": "action", "unit": "ERT", "text": "切断消防周边连锁反应物质，防止连锁反应事故", "rec": "REVIEWED"}, {"id": "valve", "kind": "action", "unit": "ERT", "text": "现场确认供应端阀门状态", "rec": "REVIEWED"}, {"id": "locate", "kind": "action", "unit": "ERT", "text": "持手持式侦测器，寻找泄漏点", "rec": "REVIEWED"}, {"id": "valve-manual", "kind": "action", "unit": "ERT", "text": "现场手动关闭泄漏点前端供应阀门", "rec": "REVIEWED"}, {"id": "gas-valve", "kind": "decision", "unit": "FAC", "text": "确认报警点位上游阀门自动切断（HiHi）", "rec": "REVIEWED"}, {"id": "gas-manual", "kind": "action", "unit": "FAC", "text": "穿戴防护服前往现场，手动关闭报警点位上游阀门", "rec": "REVIEWED"}, {"id": "residue", "kind": "decision", "unit": "ERT", "text": "是否有残留", "rec": "REVIEWED"}, {"id": "air", "kind": "action", "unit": "FAC", "text": "保证事故区域外空调系统运行正常运行", "rec": "REVIEWED"}, {"id": "vent", "kind": "action", "unit": "FAC", "text": "加大热事故区域排风机排风换气频率，直至稳在浓值为0〔部分字句未辨清〕", "rec": "PARTIAL"}, {"id": "safe", "kind": "action", "unit": "IC", "text": "现场气体浓度安全受控", "rec": "REVIEWED"}, {"id": "end", "kind": "end", "unit": "IC", "text": "解除管制、恢复生产、事故调查", "rec": "REVIEWED"}, {"id": "power", "kind": "action", "unit": "FAC", "text": "保证事故区域外电力系统正常运行", "rec": "REVIEWED"}, {"id": "power-off", "kind": "action", "unit": "FAC", "text": "如泄漏气体为自燃气体或易燃气体，救灾前将事故区域内电力系统切断", "rec": "REVIEWED"}, {"id": "water", "kind": "action", "unit": "FAC", "text": "保证水系统正常运行", "rec": "REVIEWED"}, {"id": "wastewater", "kind": "action", "unit": "FAC", "text": "事故废水处理", "rec": "REVIEWED"}, {"id": "gear", "kind": "action", "unit": "ERT", "text": "运送应急物资", "rec": "REVIEWED"}, {"id": "ppe", "kind": "action", "unit": "ERT", "text": "协助穿戴PPE并记录SCBA", "rec": "REVIEWED"}, {"id": "warm", "kind": "action", "unit": "ERT", "text": "暖热区管制，记录人员进出情况", "rec": "REVIEWED"}, {"id": "undress", "kind": "action", "unit": "ERT", "text": "协助救灾人员卸装", "rec": "REVIEWED"}, {"id": "decon-person", "kind": "action", "unit": "ERT", "text": "对救灾人员进行除污", "rec": "REVIEWED"}, {"id": "decon-gear", "kind": "action", "unit": "ERT", "text": "对救灾装备进行除污", "rec": "REVIEWED"}, {"id": "waste", "kind": "action", "unit": "ERT", "text": "清理、收纳污染物、危废等受污染物品", "rec": "REVIEWED"}, {"id": "road", "kind": "action", "unit": "安保", "text": "对厂区道路进行管制", "rec": "REVIEWED"}, {"id": "guard", "kind": "action", "unit": "安保", "text": "厂内警戒、治安保卫", "rec": "REVIEWED"}, {"id": "external", "kind": "action", "unit": "安保", "text": "引导外部救灾车辆入厂", "rec": "REVIEWED"}, {"id": "evacuate", "kind": "action", "unit": "ERT", "text": "引导人员疏散", "rec": "REVIEWED"}, {"id": "assembly", "kind": "action", "unit": "ERT", "text": "引导人员集合打卡", "rec": "REVIEWED"}, {"id": "evac-report", "kind": "action", "unit": "ERT", "text": "疏散情况汇总上报", "rec": "REVIEWED"}, {"id": "injury", "kind": "action", "unit": "急救组", "text": "对接伤员", "rec": "REVIEWED"}, {"id": "firstaid", "kind": "action", "unit": "急救组", "text": "初步救治", "rec": "REVIEWED"}, {"id": "medicine", "kind": "action", "unit": "急救组", "text": "配备应急药品", "rec": "REVIEWED"}, {"id": "ambulance", "kind": "action", "unit": "急救组", "text": "对接120，移交伤员", "rec": "REVIEWED"}], "edges": [{"s": "signal", "t": "gms"}, {"s": "gms", "t": "hi"}, {"s": "gms", "t": "hihi"}, {"s": "hi", "t": "verify"}, {"s": "verify", "t": "reach"}, {"s": "reach", "t": "dispatch", "l": "是"}, {"s": "reach", "t": "repeat", "l": "否"}, {"s": "repeat", "t": "false"}, {"s": "hihi", "t": "dispatch"}, {"s": "dispatch", "t": "erc"}, {"s": "dispatch", "t": "search"}, {"s": "dispatch", "t": "cut"}, {"s": "dispatch", "t": "gas-valve"}, {"s": "dispatch", "t": "air"}, {"s": "dispatch", "t": "power"}, {"s": "dispatch", "t": "water"}, {"s": "dispatch", "t": "gear"}, {"s": "dispatch", "t": "road"}, {"s": "dispatch", "t": "evacuate"}, {"s": "dispatch", "t": "injury"}, {"s": "erc", "t": "erc-monitor"}, {"s": "erc-monitor", "t": "erc-report"}, {"s": "search", "t": "transfer"}, {"s": "transfer", "t": "help"}, {"s": "cut", "t": "valve"}, {"s": "valve", "t": "locate"}, {"s": "locate", "t": "valve-manual"}, {"s": "valve-manual", "t": "residue"}, {"s": "gas-valve", "t": "residue", "l": "是"}, {"s": "gas-valve", "t": "gas-manual", "l": "否"}, {"s": "gas-manual", "t": "residue"}, {"s": "air", "t": "vent"}, {"s": "residue", "t": "vent", "l": "是"}, {"s": "residue", "t": "safe", "l": "否"}, {"s": "vent", "t": "safe"}, {"s": "safe", "t": "end"}, {"s": "power", "t": "power-off"}, {"s": "water", "t": "wastewater"}, {"s": "gear", "t": "ppe"}, {"s": "ppe", "t": "warm"}, {"s": "warm", "t": "undress"}, {"s": "undress", "t": "decon-person"}, {"s": "decon-person", "t": "decon-gear"}, {"s": "decon-gear", "t": "waste"}, {"s": "road", "t": "guard"}, {"s": "guard", "t": "external"}, {"s": "evacuate", "t": "assembly"}, {"s": "assembly", "t": "evac-report"}, {"s": "injury", "t": "firstaid"}, {"s": "firstaid", "t": "medicine"}, {"s": "medicine", "t": "ambulance"}], "notes": ["注释1：易燃、易爆气体泄漏达到爆炸下限，禁止无关人员进入，加大排风，浓度降至爆炸下限50%以下前禁止一切人员进入。", "注释2：各部门确认灾损，确认存在灾损，通知财务部门。", "注释3：排风ENV Hi/HiHi按ENV Hi处理。", "第二个“侦测器是否到达HiHi？”在原图为矩形，保留原形状，不增补是/否分支。"]}, {"title": "电力中断或压降处理流程", "ver": "2", "nodes": [{"id": "signal", "kind": "start", "unit": "FAC", "text": "电力系统中断或压降（注1）", "rec": "REVIEWED"}, {"id": "condition", "kind": "decision", "unit": "IC", "text": "是否符合疏散条件（注2）", "rec": "REVIEWED"}, {"id": "evacuate", "kind": "action", "unit": "ERC", "text": "ERC广播厂内人员疏散至指定户外地点集合", "rec": "REVIEWED"}, {"id": "ert", "kind": "action", "unit": "ERC", "text": "ERC广播ERT人员集合（ERC）", "rec": "REVIEWED"}, {"id": "command", "kind": "action", "unit": "IC", "text": "事故指挥官于ERC成立ERT", "rec": "REVIEWED"}, {"id": "erc", "kind": "action", "unit": "ERC", "text": "检查监控系统正常：1.火警警报系统 2.气体监控系统 3.CCTV系统", "rec": "REVIEWED"}, {"id": "security", "kind": "action", "unit": "安保", "text": "安保厂外交通指挥", "rec": "REVIEWED"}, {"id": "search", "kind": "action", "unit": "ERT", "text": "确认FAB内人员均已疏散；于ERC待命", "rec": "REVIEWED"}, {"id": "repair", "kind": "action", "unit": "Module", "text": "机台设备紧急抢修", "rec": "REVIEWED"}, {"id": "evac-guide", "kind": "action", "unit": "ERT", "text": "引导厂内人员至疏散地点集合", "rec": "REVIEWED"}, {"id": "generator", "kind": "action", "unit": "FAC", "text": "检查发电机", "rec": "REVIEWED"}, {"id": "supply", "kind": "decision", "unit": "FAC", "text": "电力供应是否恢复正常", "rec": "REVIEWED"}, {"id": "wait", "kind": "action", "unit": "FAC", "text": "继续与供电局确认复电时间", "rec": "REVIEWED"}, {"id": "restore", "kind": "action", "unit": "FAC", "text": "厂务于供电局恢复供电后，依复电程序送电", "rec": "REVIEWED"}, {"id": "restart", "kind": "action", "unit": "FAC", "text": "复机检查：1.化学品供应系统 2.气体供应系统 3.空调系统 4.水系统 5.紧急照明系统 6.排气系统", "rec": "REVIEWED"}, {"id": "systemsafe", "kind": "decision", "unit": "FAC", "text": "各系统是否无安全顾虑（注3）", "rec": "REVIEWED"}, {"id": "facility-repair", "kind": "action", "unit": "FAC", "text": "厂务人员紧急抢修", "rec": "REVIEWED"}, {"id": "alarm", "kind": "decision", "unit": "ERC", "text": "各系统是否有报警", "rec": "REVIEWED"}, {"id": "other", "kind": "action", "unit": "ERC", "text": "依个事故处理流程处理", "rec": "REVIEWED"}, {"id": "otherdone", "kind": "action", "unit": "ERC", "text": "异常事故处理完毕", "rec": "REVIEWED"}, {"id": "status", "kind": "action", "unit": "FAC/Module/ERC", "text": "厂务及设备回报现场状况（注5）确认无安全顾虑ERC广播人员继续安心工作", "rec": "REVIEWED"}, {"id": "impact-no", "kind": "action", "unit": "FAC/Module", "text": "厂务设备同仁回报Impact情况", "rec": "REVIEWED"}, {"id": "check", "kind": "action", "unit": "ERT/Module", "text": "ERT人员确认环境安全正常（注4）设备人员同时进行机台Check回报", "rec": "REVIEWED"}, {"id": "impact", "kind": "action", "unit": "FAC/Module", "text": "厂务设备同仁回报Impact情况", "rec": "REVIEWED"}, {"id": "back", "kind": "action", "unit": "ERC", "text": "ERC广播人员回工作岗位", "rec": "REVIEWED"}, {"id": "end", "kind": "end", "unit": "IC", "text": "状况解除", "rec": "REVIEWED"}], "edges": [{"s": "signal", "t": "condition"}, {"s": "condition", "t": "evacuate", "l": "是"}, {"s": "condition", "t": "status", "l": "否"}, {"s": "evacuate", "t": "ert"}, {"s": "ert", "t": "command"}, {"s": "command", "t": "erc"}, {"s": "command", "t": "security"}, {"s": "command", "t": "search"}, {"s": "command", "t": "repair"}, {"s": "command", "t": "evac-guide"}, {"s": "command", "t": "generator"}, {"s": "erc", "t": "alarm"}, {"s": "alarm", "t": "other", "l": "是"}, {"s": "other", "t": "otherdone"}, {"s": "otherdone", "t": "status"}, {"s": "alarm", "t": "check", "l": "否"}, {"s": "search", "t": "check"}, {"s": "generator", "t": "supply"}, {"s": "supply", "t": "restore", "l": "是"}, {"s": "supply", "t": "wait", "l": "否"}, {"s": "restore", "t": "restart"}, {"s": "restart", "t": "systemsafe"}, {"s": "systemsafe", "t": "facility-repair", "l": "否"}, {"s": "facility-repair", "t": "restart"}, {"s": "systemsafe", "t": "check", "l": "是"}, {"s": "check", "t": "impact"}, {"s": "impact", "t": "back"}, {"s": "back", "t": "end"}, {"s": "status", "t": "impact-no"}, {"s": "impact-no", "t": "end"}], "notes": ["注1：压降广播标准：超出SEMI-F47。", "注2：疏散条件（任一项发生）：全厂停电；GMS Alarm；FIRE Alarm；异味；无尘室空调与排气系统宕机。", "注3：安全考虑：GMS；洁净室空调系统；Air Abatement（SEX.GEX.VEX.AEX的FAN必须启动）。", "注4：检查项目（立即回报）：漏水；漏酸；异味；其他状况。", "注5：检查项目：依现场回报状况判断是否成立ERT。", "原图急救组及支援组没有独立任务文字，未自行增加任务。"]}, {"title": "火灾处理流程", "ver": "2", "nodes": [{"id": "signal", "kind": "start", "unit": "ERC", "text": "火警讯号", "rec": "REVIEWED"}, {"id": "sensor", "kind": "action", "unit": "ERC", "text": "火灾报警器侦知（火灾自动报警系统、VESDA）", "rec": "REVIEWED"}, {"id": "manual", "kind": "action", "unit": "ERC", "text": "人为激活（手报、消防触发）", "rec": "REVIEWED"}, {"id": "visual", "kind": "action", "unit": "事故部门", "text": "目击报告", "rec": "REVIEWED"}, {"id": "verify", "kind": "action", "unit": "ERC/事故部门", "text": "ERC及事故发生部门值班现场确认", "rec": "REVIEWED"}, {"id": "firstaid", "kind": "action", "unit": "ERC", "text": "ERC告知在保证个人安全情况下，现场确认人员先期初期救灾，阻止火势进一步扩大", "rec": "REVIEWED"}, {"id": "false", "kind": "decision", "unit": "ERC", "text": "是否为误动作？或已扑灭", "rec": "REVIEWED"}, {"id": "clear", "kind": "action", "unit": "ERC", "text": "ERC解除异常", "rec": "REVIEWED"}, {"id": "investigate", "kind": "end", "unit": "事故部门", "text": "协助事故发生部门查找报警原因", "rec": "REVIEWED"}, {"id": "dispatch", "kind": "action", "unit": "ERC", "text": "召集ERT人员到紧急集合待命，通知事故区域主管担任事故指挥官", "rec": "REVIEWED"}, {"id": "firemen", "kind": "action", "unit": "FAC", "text": "消防工程师", "rec": "REVIEWED"}, {"id": "enough", "kind": "decision", "unit": "IC", "text": "ERT人员是否充足？", "rec": "REVIEWED"}, {"id": "reinforce", "kind": "action", "unit": "IC", "text": "事故指挥官根据实际情况召集其他部门ERT", "rec": "REVIEWED"}, {"id": "erc", "kind": "action", "unit": "ERC", "text": "通知现场人员持续回报现场状况", "rec": "REVIEWED"}, {"id": "erc-monitor", "kind": "action", "unit": "ERC", "text": "监控系统读值，提供MSDS等供咨询，准备Portable Detector、PPE支持，启动防火门等", "rec": "REVIEWED"}, {"id": "erc-report", "kind": "action", "unit": "ERC", "text": "通知消防队/环保局/厂内主管等", "rec": "REVIEWED"}, {"id": "search", "kind": "action", "unit": "ERT", "text": "搜寻被困人员", "rec": "REVIEWED"}, {"id": "transfer", "kind": "action", "unit": "ERT", "text": "转移伤员", "rec": "REVIEWED"}, {"id": "help", "kind": "action", "unit": "ERT", "text": "协助救灾", "rec": "REVIEWED"}, {"id": "isolate", "kind": "action", "unit": "ERT", "text": "隔绝可燃物", "rec": "REVIEWED"}, {"id": "extinguish", "kind": "action", "unit": "ERT", "text": "使用消火栓、灭火器灭火", "rec": "REVIEWED"}, {"id": "system", "kind": "action", "unit": "ERT", "text": "确认事故区域消防系统状态", "rec": "REVIEWED"}, {"id": "controlled", "kind": "decision", "unit": "ERT", "text": "火势易于控制", "rec": "REVIEWED"}, {"id": "extinguish-again", "kind": "action", "unit": "ERT", "text": "使用灭火器、消火栓灭火", "rec": "REVIEWED"}, {"id": "monitor", "kind": "action", "unit": "ERT", "text": "火场监控并回报", "rec": "REVIEWED"}, {"id": "firemenend", "kind": "action", "unit": "ERT", "text": "消防队接手灭火", "rec": "REVIEWED"}, {"id": "out", "kind": "action", "unit": "ERT", "text": "确认现场火源已扑灭", "rec": "REVIEWED"}, {"id": "done", "kind": "action", "unit": "ERT", "text": "完成灭火", "rec": "REVIEWED"}, {"id": "end", "kind": "end", "unit": "IC", "text": "结束", "rec": "REVIEWED"}, {"id": "gear", "kind": "action", "unit": "ERT", "text": "运送应急物资", "rec": "REVIEWED"}, {"id": "ppe", "kind": "action", "unit": "ERT", "text": "协助穿戴PPE", "rec": "REVIEWED"}, {"id": "warm", "kind": "action", "unit": "ERT", "text": "暖热区管制、记录人员进出情况", "rec": "REVIEWED"}, {"id": "undress", "kind": "action", "unit": "ERT", "text": "协助救灾人员卸装", "rec": "REVIEWED"}, {"id": "decon-person", "kind": "action", "unit": "ERT", "text": "对救灾人员进行除污", "rec": "REVIEWED"}, {"id": "decon-gear", "kind": "action", "unit": "ERT", "text": "对救灾装备进行除污", "rec": "REVIEWED"}, {"id": "waste", "kind": "action", "unit": "ERT", "text": "清理、收纳污染物、危废等受污染", "rec": "REVIEWED"}, {"id": "road", "kind": "action", "unit": "安保", "text": "Fab外管制", "rec": "REVIEWED"}, {"id": "road-control", "kind": "action", "unit": "安保", "text": "对厂区道路进行管制", "rec": "REVIEWED"}, {"id": "guard", "kind": "action", "unit": "安保", "text": "厂内警戒、治安保卫", "rec": "REVIEWED"}, {"id": "external", "kind": "action", "unit": "安保", "text": "引导外部救灾车辆入厂", "rec": "REVIEWED"}, {"id": "control", "kind": "action", "unit": "安保", "text": "Fab内管制", "rec": "REVIEWED"}, {"id": "noentry", "kind": "action", "unit": "安保", "text": "禁止非救灾人员进入危险区域及危险场所", "rec": "REVIEWED"}, {"id": "evacuate", "kind": "action", "unit": "ERT", "text": "引导人员疏散", "rec": "REVIEWED"}, {"id": "assembly", "kind": "action", "unit": "ERT", "text": "引导人员集合打卡", "rec": "REVIEWED"}, {"id": "evac-report", "kind": "action", "unit": "ERT", "text": "疏散情况汇总、上报", "rec": "REVIEWED"}, {"id": "injury", "kind": "action", "unit": "急救组", "text": "对接伤员", "rec": "REVIEWED"}, {"id": "aid", "kind": "action", "unit": "急救组", "text": "初步救治", "rec": "REVIEWED"}, {"id": "medicine", "kind": "action", "unit": "急救组", "text": "配备应急药品", "rec": "REVIEWED"}, {"id": "ambulance", "kind": "action", "unit": "急救组", "text": "对接120，移交伤员", "rec": "REVIEWED"}, {"id": "power", "kind": "action", "unit": "FAC", "text": "保证事故区域外电力系统正常运行", "rec": "REVIEWED"}, {"id": "power-off", "kind": "action", "unit": "FAC", "text": "切断事故区域电力系统", "rec": "REVIEWED"}, {"id": "air", "kind": "action", "unit": "FAC", "text": "确认事故区域空调关闭状态", "rec": "REVIEWED"}, {"id": "fan", "kind": "action", "unit": "FAC", "text": "开启相邻区域补风机", "rec": "REVIEWED"}, {"id": "gas", "kind": "action", "unit": "FAC", "text": "保证气化系统正常运行", "rec": "REVIEWED"}, {"id": "detector", "kind": "action", "unit": "FAC", "text": "隔离受影响侦测器", "rec": "REVIEWED"}, {"id": "valve", "kind": "action", "unit": "FAC", "text": "协助关闭供应阀门", "rec": "REVIEWED"}, {"id": "water", "kind": "action", "unit": "FAC", "text": "保证水系统正常运行", "rec": "REVIEWED"}, {"id": "wastewater", "kind": "action", "unit": "FAC", "text": "事故废水处理", "rec": "REVIEWED"}], "edges": [{"s": "signal", "t": "sensor"}, {"s": "signal", "t": "manual"}, {"s": "signal", "t": "visual"}, {"s": "sensor", "t": "verify"}, {"s": "manual", "t": "verify"}, {"s": "visual", "t": "firstaid"}, {"s": "verify", "t": "false"}, {"s": "firstaid", "t": "false"}, {"s": "false", "t": "clear", "l": "是"}, {"s": "clear", "t": "investigate"}, {"s": "false", "t": "dispatch", "l": "否"}, {"s": "dispatch", "t": "enough"}, {"s": "dispatch", "t": "firemen"}, {"s": "enough", "t": "reinforce", "l": "否"}, {"s": "reinforce", "t": "enough"}, {"s": "enough", "t": "erc", "l": "是"}, {"s": "enough", "t": "search", "l": "是"}, {"s": "enough", "t": "isolate", "l": "是"}, {"s": "enough", "t": "gear", "l": "是"}, {"s": "enough", "t": "road", "l": "是"}, {"s": "enough", "t": "control", "l": "是"}, {"s": "enough", "t": "evacuate", "l": "是"}, {"s": "enough", "t": "injury", "l": "是"}, {"s": "enough", "t": "power", "l": "是"}, {"s": "enough", "t": "air", "l": "是"}, {"s": "enough", "t": "gas", "l": "是"}, {"s": "enough", "t": "water", "l": "是"}, {"s": "erc", "t": "erc-monitor"}, {"s": "erc-monitor", "t": "erc-report"}, {"s": "erc-report", "t": "firemenend"}, {"s": "search", "t": "transfer"}, {"s": "transfer", "t": "help"}, {"s": "help", "t": "controlled"}, {"s": "isolate", "t": "extinguish"}, {"s": "extinguish", "t": "system"}, {"s": "system", "t": "controlled"}, {"s": "controlled", "t": "extinguish-again", "l": "是"}, {"s": "controlled", "t": "monitor", "l": "否"}, {"s": "extinguish-again", "t": "out"}, {"s": "monitor", "t": "firemenend"}, {"s": "firemenend", "t": "out"}, {"s": "out", "t": "done"}, {"s": "done", "t": "end"}, {"s": "gear", "t": "ppe"}, {"s": "ppe", "t": "warm"}, {"s": "warm", "t": "undress"}, {"s": "undress", "t": "decon-person"}, {"s": "decon-person", "t": "decon-gear"}, {"s": "decon-gear", "t": "waste"}, {"s": "road", "t": "road-control"}, {"s": "road-control", "t": "guard"}, {"s": "guard", "t": "external"}, {"s": "control", "t": "noentry"}, {"s": "evacuate", "t": "assembly"}, {"s": "assembly", "t": "evac-report"}, {"s": "injury", "t": "aid"}, {"s": "aid", "t": "medicine"}, {"s": "medicine", "t": "ambulance"}, {"s": "power", "t": "power-off"}, {"s": "air", "t": "fan"}, {"s": "gas", "t": "detector"}, {"s": "detector", "t": "valve"}, {"s": "water", "t": "wastewater"}], "notes": ["消防工程师：1.确认事故区域及相邻的火灾预防系统运行状况；2.确认消防系统事故区域动作效果；3.消防系统异常应急处置。"]}, {"title": "漏水处理流程", "ver": "2", "nodes": [{"id": "signal", "kind": "start", "unit": "ERC", "text": "漏水讯号", "rec": "REVIEWED"}, {"id": "sensor", "kind": "action", "unit": "ERC", "text": "侦测器侦知 Leak sensor", "rec": "REVIEWED"}, {"id": "manual", "kind": "action", "unit": "事故部门", "text": "人员目击发现（对泄漏区域管制）", "rec": "REVIEWED"}, {"id": "verify", "kind": "action", "unit": "ERC", "text": "ERC通报人员责任区〔未辨清〕现场确认人员前往检查，确认泄漏物质", "rec": "PARTIAL"}, {"id": "chemical", "kind": "decision", "unit": "ERC", "text": "确认是否为化学品", "rec": "REVIEWED"}, {"id": "chemflow", "kind": "action", "unit": "ERC", "text": "转换化学品泄漏处置流程", "rec": "REVIEWED"}, {"id": "severe", "kind": "decision", "unit": "ERC", "text": "是否严重？漏水面积2〔未辨清〕以上", "rec": "PARTIAL"}, {"id": "small", "kind": "action", "unit": "事故部门", "text": "通知相关责任部门现场止漏", "rec": "REVIEWED"}, {"id": "small-water", "kind": "action", "unit": "事故部门", "text": "清理积水", "rec": "REVIEWED"}, {"id": "small-end", "kind": "end", "unit": "事故部门", "text": "解除异常", "rec": "REVIEWED"}, {"id": "warn", "kind": "action", "unit": "ERC", "text": "应变通报、广播疏散或〔未辨清〕", "rec": "PARTIAL"}, {"id": "ert", "kind": "action", "unit": "ERC", "text": "召集ERT人员到紧急集合点集合待命，通知事故区域主管担任事故指挥官", "rec": "REVIEWED"}, {"id": "enough", "kind": "decision", "unit": "IC", "text": "ERT人员是否充足？", "rec": "REVIEWED"}, {"id": "reinforce", "kind": "action", "unit": "IC", "text": "事故指挥官根据实际情况召集其他部门ERT", "rec": "REVIEWED"}, {"id": "place", "kind": "action", "unit": "ERT", "text": "〔未辨清〕", "rec": "PARTIAL"}, {"id": "facility", "kind": "action", "unit": "FAC", "text": "厂务部门〔未辨清〕", "rec": "PARTIAL"}, {"id": "protect", "kind": "action", "unit": "ERT", "text": "支援组〔未辨清〕", "rec": "PARTIAL"}, {"id": "risk", "kind": "decision", "unit": "IC", "text": "确认现场〔未辨清〕安全无虞", "rec": "PARTIAL"}, {"id": "isolate", "kind": "action", "unit": "ERT", "text": "恢复供电、清理〔未辨清〕", "rec": "PARTIAL"}, {"id": "water", "kind": "action", "unit": "ERT", "text": "清理积水", "rec": "REVIEWED"}, {"id": "investigate", "kind": "action", "unit": "ESH", "text": "事故调查", "rec": "REVIEWED"}, {"id": "end", "kind": "end", "unit": "IC", "text": "结束", "rec": "REVIEWED"}], "edges": [{"s": "signal", "t": "sensor"}, {"s": "signal", "t": "manual"}, {"s": "sensor", "t": "verify"}, {"s": "manual", "t": "verify"}, {"s": "verify", "t": "chemical"}, {"s": "chemical", "t": "chemflow", "l": "是"}, {"s": "chemical", "t": "severe", "l": "否"}, {"s": "severe", "t": "small", "l": "否"}, {"s": "small", "t": "small-water"}, {"s": "small-water", "t": "small-end"}, {"s": "severe", "t": "warn", "l": "是"}, {"s": "warn", "t": "ert"}, {"s": "ert", "t": "enough"}, {"s": "enough", "t": "reinforce", "l": "否"}, {"s": "reinforce", "t": "enough"}, {"s": "enough", "t": "place", "l": "是"}, {"s": "place", "t": "facility"}, {"s": "facility", "t": "protect"}, {"s": "protect", "t": "risk"}, {"s": "risk", "t": "water", "l": "是"}, {"s": "risk", "t": "isolate", "l": "否"}, {"s": "water", "t": "investigate"}, {"s": "investigate", "t": "end"}], "notes": ["漏水面积阈值的单位无法辨清；不从检查表“大漏水（>1个柱位）”反推。"]}, {"title": "地震处理流程", "ver": "2", "nodes": [{"id": "start", "kind": "start", "unit": "ERC", "text": "开始", "rec": "REVIEWED"}, {"id": "level", "kind": "decision", "unit": "ERC", "text": "地震仪判定震度", "rec": "REVIEWED"}, {"id": "low", "kind": "action", "unit": "ERC", "text": "FAB1F<25gal", "rec": "REVIEWED"}, {"id": "mid", "kind": "action", "unit": "ERC", "text": "FAB>25gal,<80gal", "rec": "REVIEWED"}, {"id": "high", "kind": "action", "unit": "ERC", "text": "80gal（含）以上", "rec": "REVIEWED"}, {"id": "broadcast", "kind": "action", "unit": "ERC", "text": "广播〔未辨清〕，用电话通知厂内责任人员检查灾害是否严重", "rec": "PARTIAL"}, {"id": "lowcheck", "kind": "action", "unit": "ERC", "text": "广播〔未辨清〕，广播通知继续安心工作", "rec": "PARTIAL"}, {"id": "midgather", "kind": "action", "unit": "事故部门", "text": "Fab人员〔未辨清〕至紧急集合地点集合，并依ERC指示〔未辨清〕", "rec": "PARTIAL"}, {"id": "command", "kind": "action", "unit": "IC", "text": "事故区域主管至ERC成立ERT，评估人员安全、生命安全系统、厂务系统、机台生产设备等现场状态", "rec": "REVIEWED"}, {"id": "allout", "kind": "action", "unit": "ERC", "text": "广播全厂人员疏散至安全位置至厂外集合地点", "rec": "REVIEWED"}, {"id": "auto", "kind": "action", "unit": "FAC", "text": "Auto remote shutdown气体及化学品系统", "rec": "REVIEWED"}, {"id": "ercgather", "kind": "action", "unit": "ERC", "text": "ERC厂内人员〔未辨清〕集合", "rec": "PARTIAL"}, {"id": "external", "kind": "decision", "unit": "IC", "text": "是否通报ERT外援〔未辨清〕", "rec": "PARTIAL"}, {"id": "parallel", "kind": "action", "unit": "ERC", "text": "ERC广播全厂人员〔未辨清〕至紧急集合地点集合", "rec": "PARTIAL"}, {"id": "ert", "kind": "action", "unit": "IC", "text": "事故指挥官成立ERT，厂内各单位〔未辨清〕", "rec": "PARTIAL"}, {"id": "check", "kind": "action", "unit": "ERT", "text": "事故现场检查，检查及救灾相关专业小组", "rec": "REVIEWED"}, {"id": "other", "kind": "decision", "unit": "ERT", "text": "是否发现其他异常事故", "rec": "REVIEWED"}, {"id": "follow", "kind": "action", "unit": "ERT", "text": "现场其他事故依相应处置", "rec": "REVIEWED"}, {"id": "otherend", "kind": "action", "unit": "ERT", "text": "异常事故处置完毕", "rec": "REVIEWED"}, {"id": "report", "kind": "action", "unit": "ERT", "text": "事故现场回报ERT或ERC", "rec": "REVIEWED"}, {"id": "safe", "kind": "action", "unit": "IC", "text": "事故指挥官确认厂区安全无虞", "rec": "REVIEWED"}, {"id": "return", "kind": "action", "unit": "IC", "text": "事故指挥官下令解除状况，恢复厂区正常运行", "rec": "REVIEWED"}, {"id": "broadcast-end", "kind": "action", "unit": "ERC", "text": "ERC通知〔未辨清〕厂内人员安心工作", "rec": "PARTIAL"}, {"id": "end", "kind": "end", "unit": "IC", "text": "结束", "rec": "REVIEWED"}], "edges": [{"s": "start", "t": "level"}, {"s": "level", "t": "low", "l": "FAB1F<25gal"}, {"s": "level", "t": "mid", "l": "FAB>25gal,<80gal"}, {"s": "level", "t": "high", "l": "80gal（含）以上"}, {"s": "low", "t": "broadcast"}, {"s": "broadcast", "t": "lowcheck"}, {"s": "lowcheck", "t": "external"}, {"s": "mid", "t": "midgather"}, {"s": "midgather", "t": "command"}, {"s": "command", "t": "external"}, {"s": "high", "t": "allout"}, {"s": "allout", "t": "auto"}, {"s": "auto", "t": "ercgather"}, {"s": "ercgather", "t": "ert"}, {"s": "external", "t": "parallel", "l": "是"}, {"s": "parallel", "t": "ert"}, {"s": "ert", "t": "check"}, {"s": "check", "t": "other"}, {"s": "other", "t": "follow", "l": "是"}, {"s": "follow", "t": "otherend"}, {"s": "otherend", "t": "report"}, {"s": "other", "t": "report", "l": "否"}, {"s": "report", "t": "safe"}, {"s": "safe", "t": "return"}, {"s": "return", "t": "broadcast-end"}, {"s": "broadcast-end", "t": "end"}], "notes": ["地震截图左侧小字及两个判断框的部分字句、长线条件不清，均未按常识补写；未辨清分支不用于自动推进。"]}, {"title": "异味处理流程", "ver": "2", "nodes": [{"id": "signal", "kind": "start", "unit": "ERC", "text": "发生异味", "rec": "REVIEWED"}, {"id": "receive", "kind": "action", "unit": "ERC", "text": "ERC〔未辨清〕，异常〔未辨清〕，广播、〔未辨清〕", "rec": "PARTIAL"}, {"id": "facility", "kind": "action", "unit": "ERC", "text": "ERC通知厂务〔未辨清〕", "rec": "PARTIAL"}, {"id": "department", "kind": "action", "unit": "ERC", "text": "ERC通知〔未辨清〕", "rec": "PARTIAL"}, {"id": "erc-ert", "kind": "action", "unit": "ERC", "text": "厂务到ERC〔未辨清〕", "rec": "PARTIAL"}, {"id": "record", "kind": "action", "unit": "ERC", "text": "事故工程师ERC〔未辨清〕", "rec": "PARTIAL"}, {"id": "construction", "kind": "decision", "unit": "ERC", "text": "是否有施工/PM？", "rec": "REVIEWED"}, {"id": "verifywork", "kind": "decision", "unit": "ERC", "text": "停止作业、确认〔未辨清〕", "rec": "PARTIAL"}, {"id": "monitor", "kind": "action", "unit": "FAC", "text": "确认气化〔未辨清〕", "rec": "PARTIAL"}, {"id": "air", "kind": "action", "unit": "FAC", "text": "确认空气〔未辨清〕", "rec": "PARTIAL"}, {"id": "fire", "kind": "action", "unit": "FAC", "text": "确认火灾〔未辨清〕", "rec": "PARTIAL"}, {"id": "locate", "kind": "action", "unit": "ERT", "text": "先进行〔未辨清〕", "rec": "PARTIAL"}, {"id": "evacuate", "kind": "action", "unit": "ERT", "text": "对事故现场〔未辨清〕", "rec": "PARTIAL"}, {"id": "facfix", "kind": "action", "unit": "FAC", "text": "通知FAC〔未辨清〕", "rec": "PARTIAL"}, {"id": "source", "kind": "decision", "unit": "ERT", "text": "是否〔未辨清〕", "rec": "PARTIAL"}, {"id": "known", "kind": "action", "unit": "ERT", "text": "确认〔未辨清〕", "rec": "PARTIAL"}, {"id": "unknown", "kind": "action", "unit": "ERT", "text": "1.持续〔未辨清〕 2.通知人员〔未辨清〕", "rec": "PARTIAL"}, {"id": "erc", "kind": "action", "unit": "ERC", "text": "ERC〔未辨清〕", "rec": "PARTIAL"}, {"id": "normal", "kind": "action", "unit": "ERC", "text": "事故〔未辨清〕", "rec": "PARTIAL"}, {"id": "broadcast", "kind": "action", "unit": "ERC", "text": "广播/解除异常", "rec": "REVIEWED"}, {"id": "end", "kind": "end", "unit": "IC", "text": "厂内〔未辨清〕", "rec": "PARTIAL"}], "edges": [{"s": "signal", "t": "receive"}, {"s": "receive", "t": "facility"}, {"s": "receive", "t": "department"}, {"s": "facility", "t": "erc-ert"}, {"s": "department", "t": "record"}, {"s": "erc-ert", "t": "construction"}, {"s": "record", "t": "construction"}, {"s": "construction", "t": "verifywork", "l": "是"}, {"s": "construction", "t": "monitor", "l": "否"}, {"s": "construction", "t": "air", "l": "否"}, {"s": "construction", "t": "fire", "l": "否"}, {"s": "construction", "t": "locate", "l": "否"}, {"s": "verifywork", "t": "locate", "l": "否"}, {"s": "verifywork", "t": "end", "l": "是"}, {"s": "locate", "t": "evacuate"}, {"s": "evacuate", "t": "facfix"}, {"s": "facfix", "t": "source"}, {"s": "source", "t": "known", "l": "否"}, {"s": "source", "t": "unknown", "l": "是"}, {"s": "known", "t": "erc"}, {"s": "erc", "t": "normal"}, {"s": "normal", "t": "broadcast"}, {"s": "broadcast", "t": "end"}], "notes": ["该截图文字很小，多个节点无法完整辨清，已撤掉原来的概括性补写。带“未辨清”的节点只允许记录待核/受阻。"]}, {"title": "紧急应变指挥官处理流程", "ver": "2", "nodes": [{"id": "incident", "kind": "start", "unit": "IC", "text": "事故发生", "rec": "REVIEWED"}, {"id": "gather", "kind": "action", "unit": "ERC", "text": "1.厂内人员疏散 2.召集ERT", "rec": "REVIEWED"}, {"id": "command", "kind": "action", "unit": "IC", "text": "IC成立ERT", "rec": "REVIEWED"}, {"id": "status", "kind": "action", "unit": "IC", "text": "危害确认", "rec": "REVIEWED"}, {"id": "response", "kind": "action", "unit": "IC", "text": "事故处理", "rec": "REVIEWED"}, {"id": "controlled", "kind": "decision", "unit": "IC", "text": "确认现场已被控制", "rec": "REVIEWED"}, {"id": "normal", "kind": "action", "unit": "IC", "text": "除气清场", "rec": "REVIEWED"}, {"id": "safe", "kind": "decision", "unit": "IC", "text": "确认已无安全威胁", "rec": "REVIEWED"}, {"id": "commandend", "kind": "action", "unit": "IC", "text": "状况解除", "rec": "REVIEWED"}, {"id": "end", "kind": "end", "unit": "IC", "text": "事故检讨", "rec": "REVIEWED"}, {"id": "facility-gather", "kind": "action", "unit": "FAC", "text": "厂务值班责任人至ERC集合", "rec": "REVIEWED"}, {"id": "facility-contact", "kind": "action", "unit": "FAC", "text": "全轮协同应变跨组〔未辨清〕", "rec": "PARTIAL"}, {"id": "facility-systems", "kind": "action", "unit": "FAC", "text": "排气、水、电、气、化系统〔未辨清〕灾害应变", "rec": "PARTIAL"}, {"id": "facility-contact2", "kind": "action", "unit": "FAC", "text": "全轮协同应变跨组〔未辨清〕", "rec": "PARTIAL"}, {"id": "facility-rescue", "kind": "action", "unit": "FAC", "text": "抢救厂务系统设施", "rec": "REVIEWED"}, {"id": "facility-contact3", "kind": "action", "unit": "FAC", "text": "全轮协同应变跨组〔未辨清〕", "rec": "PARTIAL"}, {"id": "ert-gather", "kind": "action", "unit": "ERT", "text": "人员至ERC集合", "rec": "REVIEWED"}, {"id": "ert-organize", "kind": "action", "unit": "ERT", "text": "任务分组人员编制", "rec": "REVIEWED"}, {"id": "ert-assign", "kind": "action", "unit": "ERT", "text": "任务分配部署", "rec": "REVIEWED"}, {"id": "ert-search", "kind": "action", "unit": "ERT", "text": "进行搜寻/抢救", "rec": "REVIEWED"}, {"id": "ert-protect", "kind": "action", "unit": "ERT", "text": "搜寻/急救部署〔首词未辨清〕", "rec": "PARTIAL"}, {"id": "ert-response", "kind": "action", "unit": "ERT", "text": "进行事故处置〔未辨清〕", "rec": "PARTIAL"}, {"id": "residual", "kind": "action", "unit": "ERT", "text": "危害排除/〔未辨清〕状况回报", "rec": "PARTIAL"}, {"id": "ert-stay", "kind": "action", "unit": "ERT", "text": "现场〔未辨清〕留守", "rec": "PARTIAL"}, {"id": "ert-return", "kind": "action", "unit": "ERT", "text": "现场〔未辨清〕回报", "rec": "PARTIAL"}, {"id": "ert-count", "kind": "action", "unit": "ERT", "text": "ERC人员清点回报", "rec": "REVIEWED"}, {"id": "erc-status", "kind": "action", "unit": "ERC", "text": "了解情况", "rec": "REVIEWED"}, {"id": "erc-report", "kind": "action", "unit": "ERC", "text": "状况报告（人、事、时、地、物）/MSDS", "rec": "REVIEWED"}, {"id": "erc-protect", "kind": "action", "unit": "ERC", "text": "供救灾时内通报〔未辨清〕", "rec": "PARTIAL"}, {"id": "erc-notify", "kind": "action", "unit": "ERC", "text": "通报状况回报", "rec": "REVIEWED"}, {"id": "erc-monitor", "kind": "action", "unit": "ERC", "text": "系统监控及后续支援", "rec": "REVIEWED"}, {"id": "count", "kind": "action", "unit": "ERC", "text": "人员清点回报", "rec": "REVIEWED"}, {"id": "erc-environment", "kind": "action", "unit": "ERC", "text": "系统状况回报", "rec": "REVIEWED"}, {"id": "erc-vent", "kind": "action", "unit": "ERC", "text": "系统排气", "rec": "REVIEWED"}, {"id": "erc-detect", "kind": "action", "unit": "ERC", "text": "系统侦测回报", "rec": "REVIEWED"}, {"id": "systembroadcast", "kind": "action", "unit": "ERC", "text": "系统复归及广播", "rec": "REVIEWED"}, {"id": "evacuate", "kind": "action", "unit": "ERT", "text": "引导疏散", "rec": "REVIEWED"}], "edges": [{"s": "incident", "t": "gather"}, {"s": "incident", "t": "ert-gather"}, {"s": "incident", "t": "evacuate"}, {"s": "gather", "t": "command"}, {"s": "ert-gather", "t": "ert-organize"}, {"s": "ert-organize", "t": "command"}, {"s": "command", "t": "status"}, {"s": "command", "t": "erc-status"}, {"s": "erc-status", "t": "erc-report"}, {"s": "ert-organize", "t": "ert-assign"}, {"s": "ert-assign", "t": "status"}, {"s": "erc-report", "t": "status"}, {"s": "status", "t": "response"}, {"s": "status", "t": "ert-search"}, {"s": "status", "t": "erc-protect"}, {"s": "ert-search", "t": "ert-protect"}, {"s": "ert-protect", "t": "ert-response"}, {"s": "erc-protect", "t": "erc-notify"}, {"s": "erc-notify", "t": "erc-monitor"}, {"s": "ert-response", "t": "response"}, {"s": "response", "t": "controlled"}, {"s": "response", "t": "erc-monitor"}, {"s": "evacuate", "t": "count"}, {"s": "erc-monitor", "t": "count"}, {"s": "controlled", "t": "residual"}, {"s": "controlled", "t": "erc-environment"}, {"s": "controlled", "t": "normal"}, {"s": "normal", "t": "ert-stay"}, {"s": "normal", "t": "erc-vent"}, {"s": "normal", "t": "safe"}, {"s": "safe", "t": "ert-return"}, {"s": "ert-return", "t": "ert-count"}, {"s": "safe", "t": "erc-detect"}, {"s": "safe", "t": "commandend"}, {"s": "commandend", "t": "systembroadcast"}, {"s": "commandend", "t": "end"}, {"s": "facility-gather", "t": "facility-contact"}, {"s": "facility-contact", "t": "facility-systems"}, {"s": "facility-systems", "t": "facility-contact2"}, {"s": "facility-contact2", "t": "facility-rescue"}, {"s": "facility-rescue", "t": "facility-contact3"}], "notes": ["两个蓝色判断菱形未标明是/否分支标签，保留为空，不自造否定返回路径。厂务泳道与主线部分小字/连线待核。"]}];
+// ===== 应变流程图（图形呈现：泳道＋方框节点＋箭头连线） =====
+function wrapFlowText(text, per){
+var lines = [], cur = '';
+for(var i=0;i<text.length;i++){
+cur += text[i];
+if(cur.length >= per){
+var cut = -1;
+for(var j=cur.length-1;j>=Math.max(0,cur.length-5);j--){
+if('，、；：,;'.indexOf(cur[j])>=0){ cut = j; break; }
+}
+if(cut>=3 && cut<cur.length-1){ lines.push(cur.slice(0,cut+1)); cur = cur.slice(cut+1); }
+else { lines.push(cur); cur=''; }
+}
+}
+if(cur) lines.push(cur);
+return lines.length? lines : [''];
+}
+var FLOW_SVG_CACHE = {};
+function flowSVG(f, fi){
+if(FLOW_SVG_CACHE[fi]) return FLOW_SVG_CACHE[fi];
+var BW=176, GAPX=42, PAD=14, HEAD=34, VGAP=34, MINROW=104;
+var byId={}, lanes=[], laneIdx={};
+f.nodes.forEach(function(n){
+byId[n.id]=n;
+if(!(n.unit in laneIdx)){ laneIdx[n.unit]=lanes.length; lanes.push(n.unit); }
+});
+// levels: DFS longest path, back edges ignored
+var level={}, visited={};
+f.nodes.forEach(function(n){ level[n.id]=0; });
+var outEdges={};
+f.edges.forEach(function(e){ (outEdges[e.s]=outEdges[e.s]||[]).push(e); });
+function dfs(id, lv, stack){
+if(lv>level[id]) level[id]=lv;
+if(visited[id]) return;
+visited[id]=true; stack[id]=true;
+(outEdges[id]||[]).forEach(function(e){ if(!stack[e.t]) dfs(e.t, level[id]+1, stack); });
+stack[id]=false;
+}
+f.nodes.forEach(function(n){ if(!visited[n.id]) dfs(n.id, level[n.id], {}); });
+// node sizes
+var geom={};
+f.nodes.forEach(function(n){
+var per = n.kind==='decision'? 9 : 11;
+var lines = wrapFlowText(n.text, per);
+var h = 30 + lines.length*17 + 10;
+if(n.kind==='decision') h = Math.round(h*1.32)+12;
+geom[n.id]={lines:lines, h:h, w:BW};
+});
+// positions: per-lane cursor + level floor
+var order = f.nodes.slice().sort(function(a,b){ return (level[a.id]-level[b.id]) || (f.nodes.indexOf(a)-f.nodes.indexOf(b)); });
+var cursor={}, pos={};
+lanes.forEach(function(u){ cursor[u]=PAD+HEAD+8; });
+order.forEach(function(n){
+var g=geom[n.id];
+var y = Math.max(cursor[n.unit], PAD+HEAD+8 + level[n.id]*MINROW);
+var x = PAD + laneIdx[n.unit]*(BW+GAPX);
+pos[n.id]={x:x, y:y, w:g.w, h:g.h, cx:x+g.w/2, cy:y+g.h/2};
+cursor[n.unit]= y + g.h + VGAP;
+});
+var W = PAD*2 + lanes.length*BW + (lanes.length-1)*GAPX;
+var H = 0;
+lanes.forEach(function(u){ H=Math.max(H, cursor[u]-VGAP+PAD); });
+var mid='fm'+fi;
+var s='';
+s+='<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+esc(f.title)+'流程图">';
+s+='<defs><marker id="'+mid+'" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--muted)"></path></marker></defs>';
+// lane bands
+lanes.forEach(function(u,i){
+var x=PAD+i*(BW+GAPX);
+s+='<rect x="'+(x-6)+'" y="'+PAD+'" width="'+(BW+12)+'" height="'+(H-PAD*2)+'" rx="10" fill="var(--surface)" opacity="0.55"></rect>';
+s+='<text x="'+(x+BW/2)+'" y="'+(PAD+22)+'" text-anchor="middle" font-size="13" font-weight="800" fill="var(--muted)">'+esc(u)+'</text>';
+});
+// edges
+f.edges.forEach(function(e){
+var a=pos[e.s], b=pos[e.t]; if(!a||!b) return;
+var d;
+if(b.y > a.y + 4){
+var my = a.y + a.h + (b.y-(a.y+a.h))/2;
+d='M'+a.cx+' '+(a.y+a.h)+' V'+my+' H'+b.cx+' V'+(b.y-2);
+} else {
+var rx = Math.max(a.x+a.w, b.x+b.w) + 26;
+d='M'+(a.x+a.w)+' '+a.cy+' H'+rx+' V'+b.cy+' H'+(b.x+b.w+2);
+}
+s+='<path d="'+d+'" fill="none" stroke="var(--muted)" stroke-width="1.6" marker-end="url(#'+mid+')"></path>';
+if(e.l){
+var lx, ly;
+if(b.y > a.y + 4){ lx=(a.cx+b.cx)/2; ly=a.y+a.h+(b.y-(a.y+a.h))/2 - 5; }
+else { lx=Math.max(a.x+a.w, b.x+b.w)+26; ly=(a.cy+b.cy)/2 - 5; }
+var lw=e.l.length*13+10;
+s+='<rect x="'+(lx-lw/2)+'" y="'+(ly-11)+'" width="'+lw+'" height="16" rx="4" fill="var(--surface)"></rect>';
+s+='<text x="'+lx+'" y="'+(ly+1)+'" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--accent)">'+esc(e.l)+'</text>';
+}
+});
+// nodes
+f.nodes.forEach(function(n){
+var p=pos[n.id], g=geom[n.id];
+var pend = n.rec!=='REVIEWED' || n.text.indexOf('未辨清')>=0;
+var dash = pend? ' stroke-dasharray="6 4"' : '';
+var strokeW = n.kind==='decision'? '2.2':'1.6';
+if(n.kind==='decision'){
+var cx=p.cx, cy=p.cy;
+s+='<polygon points="'+cx+','+p.y+' '+(p.x+p.w)+','+cy+' '+cx+','+(p.y+p.h)+' '+p.x+','+cy+'" fill="var(--amber-soft)" stroke="var(--amber)" stroke-width="'+strokeW+'"'+dash+'></polygon>';
+} else if(n.kind==='start'){
+s+='<rect x="'+p.x+'" y="'+p.y+'" width="'+p.w+'" height="'+p.h+'" rx="22" fill="var(--teal)" stroke="var(--teal)" stroke-width="1.6"'+dash+'></rect>';
+} else if(n.kind==='end'){
+s+='<rect x="'+p.x+'" y="'+p.y+'" width="'+p.w+'" height="'+p.h+'" rx="10" fill="var(--ink)" stroke="var(--ink)" stroke-width="1.6"'+dash+'></rect>';
+} else {
+s+='<rect x="'+p.x+'" y="'+p.y+'" width="'+p.w+'" height="'+p.h+'" rx="8" fill="var(--surface)" stroke="var(--line)" stroke-width="'+strokeW+'"'+dash+'></rect>';
+}
+var dark = (n.kind==='start'||n.kind==='end');
+var unitFill = dark? 'rgba(255,255,255,.75)' : 'var(--muted)';
+var textFill = dark? '#ffffff' : 'var(--ink)';
+var ty = p.y + 20;
+s+='<text x="'+p.cx+'" y="'+ty+'" text-anchor="middle" font-size="10.5" font-weight="700" fill="'+unitFill+'">'+esc(n.unit)+'</text>';
+g.lines.forEach(function(ln, li){
+s+='<text x="'+p.cx+'" y="'+(ty+16+li*17)+'" text-anchor="middle" font-size="12.5" fill="'+textFill+'">'+esc(ln)+'</text>';
+});
+if(pend){
+s+='<text x="'+(p.x+p.w-4)+'" y="'+(p.y-5)+'" text-anchor="end" font-size="10.5" font-weight="800" fill="var(--amber)">待核</text>';
+}
+});
+s+='</svg>';
+FLOW_SVG_CACHE[fi]=s;
+return s;
+}
+function flowBody(f, fi){
+var h='<div class="flow-legend"><span><i class="sw start"></i>起点</span><span><i class="sw"></i>步骤</span><span><i class="sw decision"></i>判断</span><span><i class="sw end"></i>结束</span><span><i class="sw pend"></i>待核（字句未辨清）</span></div>';
+h+='<div class="flow-scroll">'+flowSVG(f, fi)+'</div>';
+h+='<p class="flow-hint">图中栏位依执行单位分列；箭头上的红字为判断分支。图面较宽时可在此框内左右滑动查看。</p>';
+if(f.notes && f.notes.length){
+h+='<div class="notesbox"><h5>注记（待核）</h5><ul>';
+f.notes.forEach(function(t){ h+='<li>'+esc(t)+'</li>'; });
+h+='</ul></div>';
+}
+return h;
+}
+
+// ===== ERO 组织图（图形呈现：方框节点＋连接线的树状编组图） =====
+var ERO = {title:'紧急应变组织（ERO）', ver:'1', nodes:[
+{id:'ic', p:null, t:'事故指挥官'},
+{id:'public', p:'ic', t:'公关'},
+{id:'finance', p:'ic', t:'财务'},
+{id:'safety', p:'ic', t:'安全官'},
+{id:'support', p:'ic', t:'支援组长'},
+{id:'aid', p:'ic', t:'急救组'},
+{id:'rescue', p:'ic', t:'救灾组长'},
+{id:'evac', p:'ic', t:'疏散组长'},
+{id:'facility', p:'ic', t:'厂务组长'},
+{id:'control', p:'ic', t:'管制组长'},
+{id:'support-1', p:'support', t:'支援组员'},
+{id:'support-2', p:'support', t:'支援组员'},
+{id:'support-3', p:'support', t:'支援组员'},
+{id:'support-4', p:'support', t:'支援组员'},
+{id:'rescue-1', p:'rescue', t:'抢救1组'},
+{id:'search-1', p:'rescue', t:'搜寻1组'},
+{id:'rescue-2', p:'rescue', t:'抢救2组'},
+{id:'search-2', p:'rescue', t:'搜寻2组'},
+{id:'rescue-3', p:'rescue', t:'抢救3组'},
+{id:'search-3', p:'rescue', t:'搜寻3组'},
+{id:'rescue-4', p:'rescue', t:'抢救4组'},
+{id:'search-4', p:'rescue', t:'搜寻4组'},
+{id:'facility-mechanical', p:'facility', t:'机械'},
+{id:'facility-power', p:'facility', t:'电力'},
+{id:'facility-water', p:'facility', t:'水课'},
+{id:'facility-gas', p:'facility', t:'气化'},
+{id:'facility-integration', p:'facility', t:'系统整合'}
+]};
+var ORG_SVG_CACHE = null;
+function orgSVG(){
+if(ORG_SVG_CACHE) return ORG_SVG_CACHE;
+var byId={};
+ERO.nodes.forEach(function(n){ byId[n.id]=n; });
+function kidsOf(id){ var r=[]; ERO.nodes.forEach(function(n){ if(n.p===id) r.push(n.id); }); return r; }
+var groups = kidsOf('ic');
+// compact layout: the nine groups are packed into two rows and each group's
+// members stack directly beneath its group box, instead of one wide tree line
+var rows=[[],[]];
+groups.forEach(function(g,i){ rows[i<5?0:1].push(g); });
+var BW=112, GBH=42, MBH=34, MGAP=6, CGAP=14, PITCH=124, X0=42, PAD=16;
+var ICW=140, ICH=46;
+function colH(g){ var k=kidsOf(g); return GBH + (k.length? CGAP + k.length*MBH + (k.length-1)*MGAP : 0); }
+function rowH(r){ var m=0; r.forEach(function(g){ var h=colH(g); if(h>m) m=h; }); return m; }
+var maxCols=0; rows.forEach(function(r){ if(r.length>maxCols) maxCols=r.length; });
+var areaW = maxCols*BW + (maxCols-1)*(PITCH-BW);
+var W = X0 + areaW + PAD;
+function colX(i){ return X0 + i*PITCH; }
+function colCX(i){ return colX(i)+BW/2; }
+var icCX = X0 + areaW/2;
+var icY = PAD;
+var bus1Y = icY + ICH + 22;
+var row1Y = bus1Y + 18;
+var H1 = rowH(rows[0]);
+var bus2Y = row1Y + H1 + 40;
+var row2Y = bus2Y + 18;
+var H2 = rowH(rows[1]);
+var H = row2Y + H2 + PAD;
+var spineX = 20;
+var s='';
+s+='<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="紧急应变组织（ERO）组织图">';
+// connectors: IC trunk, left spine joining both row buses, per-row bus + drops,
+// and a short vertical line from each group box down through its stacked members
+s+='<path d="M'+icCX+' '+(icY+ICH)+' V'+bus1Y+'" fill="none" stroke="var(--muted)" stroke-width="1.6"></path>';
+s+='<path d="M'+spineX+' '+bus1Y+' V'+bus2Y+'" fill="none" stroke="var(--muted)" stroke-width="1.6"></path>';
+rows.forEach(function(r, ri){
+var busY = ri===0? bus1Y : bus2Y;
+var topY = ri===0? row1Y : row2Y;
+s+='<path d="M'+spineX+' '+busY+' H'+colCX(r.length-1)+'" fill="none" stroke="var(--muted)" stroke-width="1.6"></path>';
+r.forEach(function(g, i){
+var cx = colCX(i);
+s+='<path d="M'+cx+' '+busY+' V'+topY+'" fill="none" stroke="var(--muted)" stroke-width="1.6"></path>';
+var k = kidsOf(g);
+if(k.length){
+var lastCenter = topY + GBH + CGAP + (k.length-1)*(MBH+MGAP) + MBH/2;
+s+='<path d="M'+cx+' '+(topY+GBH)+' V'+lastCenter+'" fill="none" stroke="var(--muted)" stroke-width="1.4"></path>';
+}
+});
+});
+// IC box
+s+='<rect x="'+(icCX-ICW/2)+'" y="'+icY+'" width="'+ICW+'" height="'+ICH+'" rx="10" fill="var(--accent)" stroke="var(--accent)" stroke-width="1.6"></rect>';
+s+='<text x="'+icCX+'" y="'+(icY+ICH/2+5)+'" text-anchor="middle" font-size="14" font-weight="900" fill="#ffffff">'+esc(byId['ic'].t)+'</text>';
+// group boxes with their members stacked directly underneath
+rows.forEach(function(r, ri){
+var topY = ri===0? row1Y : row2Y;
+r.forEach(function(g, i){
+var x = colX(i), cx = colCX(i);
+s+='<rect x="'+x+'" y="'+topY+'" width="'+BW+'" height="'+GBH+'" rx="9" fill="var(--surface2)" stroke="var(--ink)" stroke-width="1.6"></rect>';
+s+='<text x="'+cx+'" y="'+(topY+GBH/2+5)+'" text-anchor="middle" font-size="13" font-weight="800" fill="var(--ink)">'+esc(byId[g].t)+'</text>';
+kidsOf(g).forEach(function(m, j){
+var my = topY + GBH + CGAP + j*(MBH+MGAP);
+s+='<rect x="'+x+'" y="'+my+'" width="'+BW+'" height="'+MBH+'" rx="8" fill="var(--surface)" stroke="var(--line)" stroke-width="1.4"></rect>';
+s+='<text x="'+cx+'" y="'+(my+MBH/2+4.5)+'" text-anchor="middle" font-size="12.5" fill="var(--ink)">'+esc(byId[m].t)+'</text>';
+});
+});
+});
+s+='</svg>';
+ORG_SVG_CACHE=s;
+return s;
+}
+function orgBody(){
+var h='<p>事故指挥官在最上层，往下展开各组组长与组员；层级：一级、二级、三级。</p>';
+h+='<div class="flow-scroll">'+orgSVG()+'</div>';
+h+='<p class="flow-hint">图面较宽时可在此框内左右滑动查看。</p>';
+return h;
+}
+var MICRON = [{"title": "应变组织与角色执掌", "text": "引言 — 序\n紧急应变中心(ERC)主要负责管理厂内的消防及紧急应变业务。ERC所建置的防灾整合系统能够连结厂务供应状态，并整合各类防灾警报讯息，作为灾变时的指挥中枢。\n根据《消防法施行细则》第15条第一项自卫消防编组施行细则第五条规定，厂内需建立灭火班、通报班、避难引导班、安全防护班及救护班等自卫消防编组，这些编组任务由紧急应变中心(ERC)训练各组职掌，确保在灾害发生的第一时间能够有效启动救灾任务。\n紧急应变中心(ERC)团队致力于撰写厂区应变紧急指引方针，并建立应变共通语言-灾害现场抢救标准作业程序 H.A.Z.M.A.T 以图文并茂方式，让同仁在平时及灾时能够迅速了解并遵循快速应变指引，确保各阶段的任务分配得以顺利进行，并让同仁了解不同灾害所需应变的技巧及注意事项。\nChapter 01 厂区应变组织介绍\n1.1 紧急应变组织架构图\n\n[TABLE 2 | 3 rows]\n事故阶级 | 一阶事故 | 二阶事故 | 假日/非正常班值班\n指挥官对象 | 事故部门 M2 主管 | 事故部门 M3 主管 | ERC/ERT 值班代理\n三阶事故 | 总指挥官（厂长）进驻，请求外部支援 | 安全幕僚：EHS/ME/CC team | 监控中心：ERC/CCR\n[/TABLE]\n\n组织架构阶层说明：\n最高指挥层：总指挥官（厂长）→ 事故指挥官（事故部门主管），旁设「安全幕僚 (EHS/ME/CC team)」与「监控中心 (ERC/CCR)」。\n平行功能分组：保全组、厂务组（空/水/气/电）、ERT现场指挥官 (ERC/ERT Team)、疏散组（下辖避难引导班、安全防护班）、计划组、公关组、财务组、后勤组。\nERT 现场指挥官下辖紧急应变组 (ERT team)：抢救组、支援组、管制组、急救组、通报组。\n一、二阶事故由厂内应变；三阶事故或灾害扩大时启动「请求外部支援」。\n1.2 各角色任务执掌\n\n[TABLE 3 | 19 rows]\n组织角色 / 编组 | 任务执掌明细\n总指挥官(厂长) | • 进驻监控中心• 掌握异常事件• 确认应变目标\n事故部门指挥官 | • 评估及确认现场风险危害• 确认应变目标• 发展行动计划\n安全幕僚(EHS/ME/CC team) | • 提供指挥官即时应变资讯及建议• 主管机关及外部支援单位通报• 联防支援器材的接收及清点\n监控中心(ERC/CCR) | • 在意外事故紧急处理及控制过程中，负责接收/传递资讯• 依照简讯通报流程发送意外事故/虚惊事件简讯\n保全组 | • 外部支援单位/机关车辆引导• 外部救援单位车辆引导\n厂务组(空/水/气/电) | • 通报EHS污染防治设备故障与修复状况• 通报EHS大量污染物排放状况及控制情形• 视灾区影响区域进行厂内通报\n疏散组 - 避难引导班 | • 引导人员进行逃生疏散• 人员清点与安全回报\n疏散组 - 安全防护班 | • 人员管制• 现场障碍物移除或通报• 关闭楼层防火门\n计划组 | • 研拟营运持续计划 (BCP注2)• 研拟灾后复原计划\n公关组 | • 对外发言及新闻稿发送\n财务组 | • 事故灾害财务损失计算• 编列灾害复原预算• 联系保险公司评估理赔事宜\n后勤组 | • 区域联防应变器材支援\n现场指挥官 | • 现场危害告知• 现场应变人员调度• 即时讯息回报监控\n抢救组 | • 事故现场人员搜救• 事故现场抢救与围堵• 危险物移除与遮断• 重要物资抢救• 支援人员抢救\n支援组 | • 支援事故现场应变器材• 协助抢救组人员著装• 架设除污帐篷协助除污\n管制组 | • 执行冷区区域管制• 人员/外部救援车辆管制及引导• 人员进出管制及记录• 环境浓度检测• 灾区事故看板设置\n急救组 | • 设立救护站• 负责伤患送医前医疗照顾、急救，并判定伤患是否须送医• 抢救组生理评估• 向外医疗单位联系\n通报组 | • 事故点通报\n[/TABLE]", "html": "<h4 class=\"vsub\">引言 — 序</h4><p>紧急应变中心(ERC)主要负责管理厂内的消防及紧急应变业务。ERC所建置的防灾整合系统能够连结厂务供应状态，并整合各类防灾警报讯息，作为灾变时的指挥中枢。</p><p>根据《消防法施行细则》第15条第一项自卫消防编组施行细则第五条规定，厂内需建立灭火班、通报班、避难引导班、安全防护班及救护班等自卫消防编组，这些编组任务由紧急应变中心(ERC)训练各组职掌，确保在灾害发生的第一时间能够有效启动救灾任务。</p><p>紧急应变中心(ERC)团队致力于撰写厂区应变紧急指引方针，并建立应变共通语言-灾害现场抢救标准作业程序 H.A.Z.M.A.T 以图文并茂方式，让同仁在平时及灾时能够迅速了解并遵循快速应变指引，确保各阶段的任务分配得以顺利进行，并让同仁了解不同灾害所需应变的技巧及注意事项。</p><h4 class=\"vsub\">1.1 紧急应变组织架构图</h4><table><tr><th>事故阶级</th><th>一阶事故</th><th>二阶事故</th><th>假日/非正常班值班</th></tr><tr><td>指挥官对象</td><td>事故部门 M2 主管</td><td>事故部门 M3 主管</td><td>ERC/ERT 值班代理</td></tr><tr><td>三阶事故</td><td>总指挥官（厂长）进驻，请求外部支援</td><td>安全幕僚：EHS/ME/CC team</td><td>监控中心：ERC/CCR</td></tr></table><p>组织架构阶层说明：</p><p>最高指挥层：总指挥官（厂长）→ 事故指挥官（事故部门主管），旁设「安全幕僚 (EHS/ME/CC team)」与「监控中心 (ERC/CCR)」。</p><p>平行功能分组：保全组、厂务组（空/水/气/电）、ERT现场指挥官 (ERC/ERT Team)、疏散组（下辖避难引导班、安全防护班）、计划组、公关组、财务组、后勤组。</p><p>ERT 现场指挥官下辖紧急应变组 (ERT team)：抢救组、支援组、管制组、急救组、通报组。</p><p>一、二阶事故由厂内应变；三阶事故或灾害扩大时启动「请求外部支援」。</p><h4 class=\"vsub\">1.2 各角色任务执掌</h4><table><tr><th>组织角色 / 编组</th><th>任务执掌明细</th></tr><tr><td>总指挥官(厂长)</td><td>• 进驻监控中心• 掌握异常事件• 确认应变目标</td></tr><tr><td>事故部门指挥官</td><td>• 评估及确认现场风险危害• 确认应变目标• 发展行动计划</td></tr><tr><td>安全幕僚(EHS/ME/CC team)</td><td>• 提供指挥官即时应变资讯及建议• 主管机关及外部支援单位通报• 联防支援器材的接收及清点</td></tr><tr><td>监控中心(ERC/CCR)</td><td>• 在意外事故紧急处理及控制过程中，负责接收/传递资讯• 依照简讯通报流程发送意外事故/虚惊事件简讯</td></tr><tr><td>保全组</td><td>• 外部支援单位/机关车辆引导• 外部救援单位车辆引导</td></tr><tr><td>厂务组(空/水/气/电)</td><td>• 通报EHS污染防治设备故障与修复状况• 通报EHS大量污染物排放状况及控制情形• 视灾区影响区域进行厂内通报</td></tr><tr><td>疏散组 - 避难引导班</td><td>• 引导人员进行逃生疏散• 人员清点与安全回报</td></tr><tr><td>疏散组 - 安全防护班</td><td>• 人员管制• 现场障碍物移除或通报• 关闭楼层防火门</td></tr><tr><td>计划组</td><td>• 研拟营运持续计划 (BCP注2)• 研拟灾后复原计划</td></tr><tr><td>公关组</td><td>• 对外发言及新闻稿发送</td></tr><tr><td>财务组</td><td>• 事故灾害财务损失计算• 编列灾害复原预算• 联系保险公司评估理赔事宜</td></tr><tr><td>后勤组</td><td>• 区域联防应变器材支援</td></tr><tr><td>现场指挥官</td><td>• 现场危害告知• 现场应变人员调度• 即时讯息回报监控</td></tr><tr><td>抢救组</td><td>• 事故现场人员搜救• 事故现场抢救与围堵• 危险物移除与遮断• 重要物资抢救• 支援人员抢救</td></tr><tr><td>支援组</td><td>• 支援事故现场应变器材• 协助抢救组人员著装• 架设除污帐篷协助除污</td></tr><tr><td>管制组</td><td>• 执行冷区区域管制• 人员/外部救援车辆管制及引导• 人员进出管制及记录• 环境浓度检测• 灾区事故看板设置</td></tr><tr><td>急救组</td><td>• 设立救护站• 负责伤患送医前医疗照顾、急救，并判定伤患是否须送医• 抢救组生理评估• 向外医疗单位联系</td></tr><tr><td>通报组</td><td>• 事故点通报</td></tr></table>"}, {"title": "灾害类型认知", "text": "Chapter 02 灾害类型认知\n2.1 火灾-灾害类型认知\n科技厂房内的火灾风险多样且复杂，这些火灾不仅可能造成重大财产损失，还可能对人员安全构成严重威胁。由于科技厂房通常涉及大量的电子设备、化学品和高精密机械设备，因此火灾的起因和类型也相对多样化。了解科技厂房内常见的火灾类型及其特征，有助于制定有效的防火措施和应变方案，从而减少火灾风险和损失。\n2.1.1 如遇机台火灾时，您需确认以下注意事项，再行灭火：\n火灾初期：1. 立即进行异常事件通报。2. 按下机台EMO(紧急停止按钮)。3. 拿取邻近机台灭火器进行灭火。（如灭火器取用2-3支无法灭火，应尽速离开）\n火灾中期：1. 事故机台断电，并确认机台化学品种类。（PS:禁水性物质禁止使用射水灭火）2. 抢救组射水前，确认是否已完成断电。3. 使用邻近灭火栓(箱)架设水线进行灭火，直至无火源情形。\n稳定阶段：1. 使用热像仪进行事故点确认无复燃情形。2. 关闭该区域ACV闸阀系统。3. 封锁事故现场。\n2.1.2 如遇易燃性气体火灾时\n易燃性气体与空气混合，即使没有火源也会易燃起火，例如：PH3、SiH4、AsH3、H2、B2H6。\n火灾初期：1. 立即进行异常事件通报。2. 按下EMO(紧急停止按钮)。3. 拿取邻近灭火器进行灭火。\n火灾中期：1. 架设水线防护周围，并使用水雾捕捉悬浮微粒分子。2. 使用热像仪进行事故点温度确认直至钢瓶残气自燃为止。\n稳定阶段：1. 使用热像仪进行事故点确认无复燃情形。2. 关闭该区域ACV闸阀系统。3. 封锁事故现场。\n2.1.3 如遇瓦斯减压站火灾时，您需确认以下注意事项，再行灭火：\n火灾初期：1. 立即进行异常事件通报。2. 按下EMO(紧急停止按钮)。3. 架设水线防护周围，并使用水雾捕捉。\n火灾中期：1. 使用热像仪进行事故点温度监测。2. 持续水雾防护。\n稳定阶段：1. 使用热像仪进行事故点确认无复燃、无泄漏情形。2. 封锁事故现场。\n2.1.4 如遇油类车火灾时，您需确认以下注意事项，再行灭火：\n火灾初期：1. 立即进行异常事件通报。2. 按下邻近消防报警器、开启该区消防泡沫手阀。3. 拿取邻近车辆灭火器进行灭火。4. 移除车辆附近可燃物质。\n火灾中期：1. 取用邻近消防栓(箱)进行射水，直至车辆无燃烧情形。2. 使用热像仪进行事故点温度确认。\n稳定阶段：1. 使用热像仪进行事故点确认无复燃情形。2. 关闭该区域ACV闸阀系统(室内)。3. 封锁事故现场。\n2.1.5 如遇电动车火灾时，您需确认以下注意事项，再行灭火：\n火灾初期：1. 现场评估环境、车体、人员安全通报。2. 车辆识别判断车辆品牌及纯电车或混合动力车。3. 进行充电桩电源关闭动作。4. 使用车用灭火毯覆盖及砲塔、底部洒水器水雾防护。5. 开启区域消防排烟系统。\n火灾中期：1. 使用热像仪进行事故点温度确认。\n稳定阶段：1. 使用热像仪进行事故点确认无复燃情形。2. 关闭该区域ACV闸阀系统。3. 封锁事故现场。\n2.1.6 如遇太阳能板火灾时，您需确认以下注意事项，再行灭火：\n火灾初期：1. 进行太阳能板及台电端变电站关闭动作。2. 使用热像仪进行事故点温度确认。3. 使用邻近干粉灭火器进行灭火。\n火灾中期：1. 架设水线，距离需保持6公尺以上，以10公尺为最佳距离，并以射水角度30度水雾射水，瞄子出水压力至少 7 kgf/cm² (100 psi)。2. 使用热像仪进行事故点温度确认。\n稳定阶段：1. 使用热像仪进行事故点确认无复燃情形。2. 关闭该区域ACV闸阀系统。3. 封锁事故现场。\n※事件灾害层级改变，处置作为会有所调整，内容仅供参考。\n2.2 化灾-灾害类型认知\n化学灾害是指由于化学物质的泄漏、爆炸、燃烧或其他意外事件，导致环境污染、财产损失或人员伤亡。这些灾害可能发生在化学品的生产、储存、运输和使用过程中。\n2.2.1 如遇遭受化学品喷溅时，您需确认以下注意事项：\n化学品喷溅初期：1. 立即进行异常事件通报，说明喷溅化学品种类及喷溅部位。2. 脱(剪)除衣物，并至邻近冲身洗眼器冲淋15分钟，使用中和剂进行中和。（六腐灵：适用HF或酸性介质氟类衍生物；敌腐灵：适用TMAH或酸碱类化学品）\n化学品喷溅中期：1. 人员至保健中心进行生理评估。2. 环境清洁处理。\n稳定阶段：1. 保健中心确认受伤人员是否就医。2. 封锁事故现场。\n2.2.2 如遇化学品泄漏时，您需确认以下注意事项：\n化学品泄漏初期：1. 立即进行异常事件通报，确认有无人员受伤。2. 现场判断化学物质，使用pH试纸测得酸碱性。3. 穿著PPE注4，关闭源头，取吸酸棉片(条)进行环境围堵及封锁。（由外向内进行围堵）\n化学品泄漏中期：1. 使用应变器材，进行事故点止漏作业。2. 进行环境清洁，最终环境应为中性(pH=7)。（酸性物质：使用小苏打，碱性物质：柠檬酸，进行中和反应）\n稳定阶段：1. 确认环境复归后，抢救组人员进行除污作业。2. 将有害废弃物物品丢置有害废弃物仓库。（应于外部标记事件等废弃物物品名称）\n2.2.3 如遇气体泄漏时，您需确认以下注意事项：\n气体泄漏初期：1. 立即进行异常事件通报，确认有无人员受伤。2. 进行危害辨识(气体颜色、味道、标示)。3. 抢救组人员、穿著PPE并使用侦检器材进行环境侦检作业。\n气体泄漏中期：1. 抢救组人员，进行源头遮断及止漏作业。2. 事故点及环境点因全程进行侦检作业，以确保抢救组人员安全。\n稳定阶段：1. 抢救组人员进行环境侦检，确认事故点及环境无读值。2. 确认事件结束后，抢救组人员进行除污作业。3. 封锁事故现场。\n2.2.4 如遇化学品复合式灾害时，您需确认以下注意事项：\n化学品复合式灾害初期：1. 立即进行异常事件通报，确认有无人员受伤。2. 进行危害辨识(气体颜色、味道等)。3. 抢救组人员穿著PPE并使用侦检器材进行环境侦检作业及移除。\n化学品复合式灾害中期：1. 抢救组人员，进行源头遮断及防护。2. 事故点及环境点因全程进行侦检作业，以确保抢救组人员安全。\n稳定阶段：1. 抢救组人员进行环境侦检，确认事故点及环境无复燃、无读值。2. 确认事件结束后，抢救组人员进行除污作业。3. 封锁事故现场。\n※事件灾害层级改变，处置作为会有所调整，内容仅供参考。", "html": "<h4 class=\"vsub\">2.1 火灾-灾害类型认知</h4><p>科技厂房内的火灾风险多样且复杂，这些火灾不仅可能造成重大财产损失，还可能对人员安全构成严重威胁。由于科技厂房通常涉及大量的电子设备、化学品和高精密机械设备，因此火灾的起因和类型也相对多样化。了解科技厂房内常见的火灾类型及其特征，有助于制定有效的防火措施和应变方案，从而减少火灾风险和损失。</p><h4 class=\"vsub\">2.1.1 如遇机台火灾时，您需确认以下注意事项，再行灭火：</h4><p>火灾初期：1. 立即进行异常事件通报。2. 按下机台EMO(紧急停止按钮)。3. 拿取邻近机台灭火器进行灭火。（如灭火器取用2-3支无法灭火，应尽速离开）</p><p>火灾中期：1. 事故机台断电，并确认机台化学品种类。（PS:禁水性物质禁止使用射水灭火）2. 抢救组射水前，确认是否已完成断电。3. 使用邻近灭火栓(箱)架设水线进行灭火，直至无火源情形。</p><p>稳定阶段：1. 使用热像仪进行事故点确认无复燃情形。2. 关闭该区域ACV闸阀系统。3. 封锁事故现场。</p><h4 class=\"vsub\">2.1.2 如遇易燃性气体火灾时</h4><p>易燃性气体与空气混合，即使没有火源也会易燃起火，例如：PH3、SiH4、AsH3、H2、B2H6。</p><p>火灾初期：1. 立即进行异常事件通报。2. 按下EMO(紧急停止按钮)。3. 拿取邻近灭火器进行灭火。</p><p>火灾中期：1. 架设水线防护周围，并使用水雾捕捉悬浮微粒分子。2. 使用热像仪进行事故点温度确认直至钢瓶残气自燃为止。</p><p>稳定阶段：1. 使用热像仪进行事故点确认无复燃情形。2. 关闭该区域ACV闸阀系统。3. 封锁事故现场。</p><h4 class=\"vsub\">2.1.3 如遇瓦斯减压站火灾时，您需确认以下注意事项，再行灭火：</h4><p>火灾初期：1. 立即进行异常事件通报。2. 按下EMO(紧急停止按钮)。3. 架设水线防护周围，并使用水雾捕捉。</p><p>火灾中期：1. 使用热像仪进行事故点温度监测。2. 持续水雾防护。</p><p>稳定阶段：1. 使用热像仪进行事故点确认无复燃、无泄漏情形。2. 封锁事故现场。</p><h4 class=\"vsub\">2.1.4 如遇油类车火灾时，您需确认以下注意事项，再行灭火：</h4><p>火灾初期：1. 立即进行异常事件通报。2. 按下邻近消防报警器、开启该区消防泡沫手阀。3. 拿取邻近车辆灭火器进行灭火。4. 移除车辆附近可燃物质。</p><p>火灾中期：1. 取用邻近消防栓(箱)进行射水，直至车辆无燃烧情形。2. 使用热像仪进行事故点温度确认。</p><p>稳定阶段：1. 使用热像仪进行事故点确认无复燃情形。2. 关闭该区域ACV闸阀系统(室内)。3. 封锁事故现场。</p><h4 class=\"vsub\">2.1.5 如遇电动车火灾时，您需确认以下注意事项，再行灭火：</h4><p>火灾初期：1. 现场评估环境、车体、人员安全通报。2. 车辆识别判断车辆品牌及纯电车或混合动力车。3. 进行充电桩电源关闭动作。4. 使用车用灭火毯覆盖及砲塔、底部洒水器水雾防护。5. 开启区域消防排烟系统。</p><p>火灾中期：1. 使用热像仪进行事故点温度确认。</p><p>稳定阶段：1. 使用热像仪进行事故点确认无复燃情形。2. 关闭该区域ACV闸阀系统。3. 封锁事故现场。</p><h4 class=\"vsub\">2.1.6 如遇太阳能板火灾时，您需确认以下注意事项，再行灭火：</h4><p>火灾初期：1. 进行太阳能板及台电端变电站关闭动作。2. 使用热像仪进行事故点温度确认。3. 使用邻近干粉灭火器进行灭火。</p><p>火灾中期：1. 架设水线，距离需保持6公尺以上，以10公尺为最佳距离，并以射水角度30度水雾射水，瞄子出水压力至少 7 kgf/cm² (100 psi)。2. 使用热像仪进行事故点温度确认。</p><p>稳定阶段：1. 使用热像仪进行事故点确认无复燃情形。2. 关闭该区域ACV闸阀系统。3. 封锁事故现场。</p><p>※事件灾害层级改变，处置作为会有所调整，内容仅供参考。</p><h4 class=\"vsub\">2.2 化灾-灾害类型认知</h4><p>化学灾害是指由于化学物质的泄漏、爆炸、燃烧或其他意外事件，导致环境污染、财产损失或人员伤亡。这些灾害可能发生在化学品的生产、储存、运输和使用过程中。</p><h4 class=\"vsub\">2.2.1 如遇遭受化学品喷溅时，您需确认以下注意事项：</h4><p>化学品喷溅初期：1. 立即进行异常事件通报，说明喷溅化学品种类及喷溅部位。2. 脱(剪)除衣物，并至邻近冲身洗眼器冲淋15分钟，使用中和剂进行中和。（六腐灵：适用HF或酸性介质氟类衍生物；敌腐灵：适用TMAH或酸碱类化学品）</p><p>化学品喷溅中期：1. 人员至保健中心进行生理评估。2. 环境清洁处理。</p><p>稳定阶段：1. 保健中心确认受伤人员是否就医。2. 封锁事故现场。</p><h4 class=\"vsub\">2.2.2 如遇化学品泄漏时，您需确认以下注意事项：</h4><p>化学品泄漏初期：1. 立即进行异常事件通报，确认有无人员受伤。2. 现场判断化学物质，使用pH试纸测得酸碱性。3. 穿著PPE注4，关闭源头，取吸酸棉片(条)进行环境围堵及封锁。（由外向内进行围堵）</p><p>化学品泄漏中期：1. 使用应变器材，进行事故点止漏作业。2. 进行环境清洁，最终环境应为中性(pH=7)。（酸性物质：使用小苏打，碱性物质：柠檬酸，进行中和反应）</p><p>稳定阶段：1. 确认环境复归后，抢救组人员进行除污作业。2. 将有害废弃物物品丢置有害废弃物仓库。（应于外部标记事件等废弃物物品名称）</p><h4 class=\"vsub\">2.2.3 如遇气体泄漏时，您需确认以下注意事项：</h4><p>气体泄漏初期：1. 立即进行异常事件通报，确认有无人员受伤。2. 进行危害辨识(气体颜色、味道、标示)。3. 抢救组人员、穿著PPE并使用侦检器材进行环境侦检作业。</p><p>气体泄漏中期：1. 抢救组人员，进行源头遮断及止漏作业。2. 事故点及环境点因全程进行侦检作业，以确保抢救组人员安全。</p><p>稳定阶段：1. 抢救组人员进行环境侦检，确认事故点及环境无读值。2. 确认事件结束后，抢救组人员进行除污作业。3. 封锁事故现场。</p><h4 class=\"vsub\">2.2.4 如遇化学品复合式灾害时，您需确认以下注意事项：</h4><p>化学品复合式灾害初期：1. 立即进行异常事件通报，确认有无人员受伤。2. 进行危害辨识(气体颜色、味道等)。3. 抢救组人员穿著PPE并使用侦检器材进行环境侦检作业及移除。</p><p>化学品复合式灾害中期：1. 抢救组人员，进行源头遮断及防护。2. 事故点及环境点因全程进行侦检作业，以确保抢救组人员安全。</p><p>稳定阶段：1. 抢救组人员进行环境侦检，确认事故点及环境无复燃、无读值。2. 确认事件结束后，抢救组人员进行除污作业。3. 封锁事故现场。</p><p>※事件灾害层级改变，处置作为会有所调整，内容仅供参考。</p>"}, {"title": "通报及处置阶段", "text": "Chapter 03 异常事件通报及处置阶段\n3.1 事件触发及通报要领\n透过防灾监视系统，能主动式预防侦测，并于第一时间掌握异常点：\n风险控制管理系统：火警系统、防灾整合系统、监视系统、极早期侦烟系统、紧急应变系统。\n厂务工程管理系统：FMCS厂务监控系统、气体侦测系统、废水处理系统、VESDA侦测系统、漏液处理系统、空调系统。\n人员于厂区，于第一时间发现不安全情况，都可以透过电话进行通报。通报要领「人、事、时、地、物」：\n\n[TABLE 4 | 6 rows]\n通报要素 | 回报内容明细\n人 (人员) | 姓名、部门、连络电话\n事 (事件) | 不安全情况\n时 (时间) | 发生时间\n地 (地点) | 发生位置（厂区、栋别、柱位、机台）\n物 (事物) | 事件影响范围、是否有人员受伤\n[/TABLE]\n\nTW 厂区紧急通报专线 (Emergency Notification Hotline)\n\n[TABLE 5 | 3 rows]\n通报单位 | Teams 拨打 | 公司手机 | 市话外线 (External Line) | # 指定厂区代码 (# site code)\nERC / CCR(紧急应变中心) | 2119 | 75-2119 | 04-2576-2119 | F11: #1 | F16/O3/W5: #2 | MTB/AATT/O4: #3 | MMTN: #4 | MTT: #5\nHealth Center(保健中心) | 5119 | 75-5119 | 04-2576-5119 | F11: #1 | F16/A3: #2 | MTB: #3 | AATT: #5 | MMTN: #6 | O3/W5: #7 | O4: #8\n[/TABLE]\n\nLive Safe+ TW-EHS：「只要我看到，我就负有责任 (If I see it, I own it)」。厂区避难集结点位置请参考：Alias: TWERT /\n3.2 异常事件处置阶段说明\n处置流程：事件发生（系统触发 / 人员通报）→ 初期处置阶段（事件确认 / 0阶事故）→ 若未控制且人员疏散 → 厂内 ERT 应变阶段（1阶事故 → 灾害扩大 → 2阶事故）→ 若灾害失控 → 外部支援（3阶事故）→ 事件已控制 → 稳定阶段（稳定复归）。\n初期处置阶段：\n任何的事故皆由小灾害开始，未及时处理将随著时间演变成大灾害，如果能在灾害初期(0阶事故)，快速抑制灾情，并能减少灾害扩大。\n来源确认：确认异常事件来源及位置。\n危害性确认：对于各类异常事件需现场立即判断危害来源，包含环境侦检、酸碱性测试、化学品种类判断等。\n影响范围确认：确认异常事件影响范围，如有波及可能应尽速移除物品。\n控制处置：遮断危害源源头，并进行现场异常处理。\nERT 处置阶段：\n当0阶事故无法有效控制时，厂内便会启动ERT应变，并依据事故变化，滚动式调整事故阶级：\n0阶事故：异常事件不需启动ERT，由部门值班人员即可处理。\n1阶事故：小灾害，单一部门ERT足以处理。\n2阶事故：重大灾害，需其他部门ERT支援。\n3阶事故：严重灾害，请求外界支援。", "html": "<h4 class=\"vsub\">3.1 事件触发及通报要领</h4><p>透过防灾监视系统，能主动式预防侦测，并于第一时间掌握异常点：</p><p>风险控制管理系统：火警系统、防灾整合系统、监视系统、极早期侦烟系统、紧急应变系统。</p><p>厂务工程管理系统：FMCS厂务监控系统、气体侦测系统、废水处理系统、VESDA侦测系统、漏液处理系统、空调系统。</p><p>人员于厂区，于第一时间发现不安全情况，都可以透过电话进行通报。通报要领「人、事、时、地、物」：</p><table><tr><th>通报要素</th><th>回报内容明细</th></tr><tr><td>人 (人员)</td><td>姓名、部门、连络电话</td></tr><tr><td>事 (事件)</td><td>不安全情况</td></tr><tr><td>时 (时间)</td><td>发生时间</td></tr><tr><td>地 (地点)</td><td>发生位置（厂区、栋别、柱位、机台）</td></tr><tr><td>物 (事物)</td><td>事件影响范围、是否有人员受伤</td></tr></table><p>TW 厂区紧急通报专线 (Emergency Notification Hotline)</p><table><tr><th>通报单位</th><th>Teams 拨打</th><th>公司手机</th><th>市话外线 (External Line)</th><th># 指定厂区代码 (# site code)</th></tr><tr><td>ERC / CCR(紧急应变中心)</td><td>2119</td><td>75-2119</td><td>04-2576-2119</td><td>F11: #1</td><td>F16/O3/W5: #2</td><td>MTB/AATT/O4: #3</td><td>MMTN: #4</td><td>MTT: #5</td></tr><tr><td>Health Center(保健中心)</td><td>5119</td><td>75-5119</td><td>04-2576-5119</td><td>F11: #1</td><td>F16/A3: #2</td><td>MTB: #3</td><td>AATT: #5</td><td>MMTN: #6</td><td>O3/W5: #7</td><td>O4: #8</td></tr></table><p>Live Safe+ TW-EHS：「只要我看到，我就负有责任 (If I see it, I own it)」。厂区避难集结点位置请参考：Alias: TWERT /</p><h4 class=\"vsub\">3.2 异常事件处置阶段说明</h4><p>处置流程：事件发生（系统触发 / 人员通报）→ 初期处置阶段（事件确认 / 0阶事故）→ 若未控制且人员疏散 → 厂内 ERT 应变阶段（1阶事故 → 灾害扩大 → 2阶事故）→ 若灾害失控 → 外部支援（3阶事故）→ 事件已控制 → 稳定阶段（稳定复归）。</p><p>初期处置阶段：</p><p>任何的事故皆由小灾害开始，未及时处理将随著时间演变成大灾害，如果能在灾害初期(0阶事故)，快速抑制灾情，并能减少灾害扩大。</p><p>来源确认：确认异常事件来源及位置。</p><p>危害性确认：对于各类异常事件需现场立即判断危害来源，包含环境侦检、酸碱性测试、化学品种类判断等。</p><p>影响范围确认：确认异常事件影响范围，如有波及可能应尽速移除物品。</p><p>控制处置：遮断危害源源头，并进行现场异常处理。</p><p>ERT 处置阶段：</p><p>当0阶事故无法有效控制时，厂内便会启动ERT应变，并依据事故变化，滚动式调整事故阶级：</p><p>0阶事故：异常事件不需启动ERT，由部门值班人员即可处理。</p><p>1阶事故：小灾害，单一部门ERT足以处理。</p><p>2阶事故：重大灾害，需其他部门ERT支援。</p><p>3阶事故：严重灾害，请求外界支援。</p>"}, {"title": "H.A.Z.M.A.T 抢救程序", "text": "Chapter 04 灾害现场抢救标准作业程序 H.A.Z.M.A.T.\n灾害现场抢救标准作业程序(H.A.Z.M.A.T.)，起源于20世纪，当时全球工业化快速发展，事故发生时无专业应变处理小组处理，故许多国家建立应变处理小组，而H.A.Z.M.A.T.目前为美国消防(NFPA 注8)、台湾消防(NFA)及多数高科技厂广泛使用的灾害应变战术手法之一，透过指挥战术加以吓阻灾害扩延。\n4.1 Hazard identification - 危害辨识\n掌握灾害现场危害风险等资讯并快速回报：火灾类型(A.B.C.D类)、化学品性质与反应性(依SDS注10)、储存数量及位置、受伤人数、复合式灾害。取得危害辨识资料可透过化学品 SDS、ERG注11、化学品应变对策系统获取资讯。\n安全资料表 (SDS) 十六项揭露资讯（应变时以重点项次作为参考）：\n\n[TABLE 6 | 5 rows]\n项次 1–4 | 项次 5–8 | 项次 9–12 | 项次 13–16\n1. 化学品与厂商资料 | 5. 灭火措施（紧急应变） | 9. 物理及化学性质（预防措施） | 13. 废弃物处置方法\n2. 危害辨识资料（危害辨识） | 6. 泄漏处理方法（紧急应变） | 10. 安定性与反应性（预防措施） | 14. 运送资料\n3. 成分辨识资料 | 7. 安全处置与储存方法 | 11. 毒性资料 | 15. 法规资料\n4. 急救措施（紧急应变） | 8. 暴露预防措施（预防措施） | 12. 生态资料 | 16. 其他资料\n[/TABLE]\n\n紧急应变指南 (ERG) 页面介绍\n黄色：联合国编号 (UN No.)；蓝色：英文名称；紫色：中文名称。\n当黄色、蓝色或紫色框页化学品以底色标记时，表示该化学品为吸入性毒性危害(TIH)物质（如氯气及氨气等）。\n处理原则编号备注「P」者，表示此物质受热或受污染时，会产生剧烈的聚合反应。\n查到处理原则后，便能查到：潜在危害（健康危害、火灾或爆炸）、公共安全（相关资讯、防护衣、疏散）、紧急应变（火灾、泄漏，以及最初医疗急救之行动建议方案）。\n绿色页面：初期隔离和防护行动距离表、危险的禁水性物质（提供初期隔离距离与保护行动距离两种不同类型安全距离建议；保护行动距离分为大小量及日夜间等泄漏情境）、常见的六种吸入性毒性危害物质。\n大量泄漏：大于208公升(55加仑)；小量泄漏：小于或等于208公升(55加仑)。\n化学品应变对策 App (HCARD) 操作说明\n化学品应变App，收集厂内250种化学品种类，汇集化学品SDS及ERG紧急应变指南资讯，透过iPad扫描条码或者手机触碰NFC位置，即可随手可得应变对策，且张贴于厂内高风险区域，让同仁于第一时间能快速应变。\niPad 扫描 QR Code：Step 1 点选 iPad QR Code → Step 2 扫描化学品应变对策上 QR Code → Step 3 输入 email、password → Step 4 开启 Power apps 应用程式 → Step 5 输入关键字搜寻。\n手机触碰 NFC：Step 1 手机触碰 NFC 贴纸（需紧贴触碰）→ Step 2 开启 Power apps 应用程式 → Step 3 输入关键字搜寻。\n系统查询功能：介面功能：① 关键字输入 → ② 关键字相关化学品搜寻浏览 → ③ 检视厂内化学品成分、特征、危害、物化特性、衍生物及不相容物 → ④ 检视应变处理方法及注意事项（火灾处理/泄漏处理/急救方法）→ ⑤ 开启「检视处理原则」可查看该物质 ERG 处理原则与 PPE 建议。\n4.2 Action plan - 行动方案\n行动方案流程：拟定救灾计划 → ERT集结 → 紧急应变器材 → 区域管制划分 → 应变处置。\n救灾计划包含：1. 危害认知；2. ERT成员（监控指挥官、现场指挥官、抢救组、管制组、支援组、救护组）；3. 应变作为（进攻型应变、防守型应变）；4. 区域管制范围（冷、暖、热区封锁线划分）；5. 除污站架设位置；6. 人员是否疏散。\nERT集结：由 ERC/CCR注12 使用口语广播，通知事故部门ERT进行集结，并由现场指挥官下达组织任务（抢救组、管制组、支援组、急救组）。\n各类防护衣级别分类说明\n\n[TABLE 7 | 8 rows]\n分类项目 | Level A | Level B | Level C | 消防衣\n美规分类 | Level A | Level B | Level C | NFPA / EN469\n欧规分类 | Type 1 (液态或气态) | Type 2 (非气密式)Type 3 (液密式) | Type 4 (防喷沫式)Type 5 (防微粒式) | EN469:2020EN 465\n穿戴时机 | 环境为密闭空间且有未知危害，需要最高级别的皮肤、眼睛与呼吸防护设备 | 环境中含氧量低于19.5%，需要最高级别的呼吸防护，但可以接受较低等级的皮肤防护设备 | 已识别危害来源，且确认不会被皮肤吸收或造成皮肤伤害 | 环境有爆炸或燃烧的疑虑\n环境皮肤接触风险 | 剧毒化学固体或液体或气体，气体经皮肤产生 IDLH | 剧毒化学固体或液体或气体，气体经皮肤不产生 IDLH | 有害化学固体或液体或气体 | 火灾\n对应皮肤 PPE | 气密式防护衣 | 连身防护衣(含头罩) | 连身或两件式防护衣(含头罩) | 消防衣\n环境吸入风险 | 缺氧 | 有害的气体或粉尘高于 PEL 值 | 有害的气体或粉尘低于 PEL 值 | 缺氧\n对应呼吸 PPE | 送气呼吸系统 | 送气或过滤呼吸系统 | 送气或过滤呼吸系统 | 送气呼吸系统\n[/TABLE]\n\n各级防护衣与消防衣穿戴配备及注意事项\nA级防护衣：穿戴时机：适用所有浓度未知情况下，物质浓度侦测超过立即危害浓度(IDLH)，可发挥呼吸、皮肤与眼睛最高程度防护。穿戴配备：A级防护衣、A级防护靴、SCBA注13、呼吸面罩、无线电。适用时机：① 气体泄漏处置 ② 化学品泄漏处置 ③ 未知气体处置 ④ 环境侦检。重点：若泄漏之气体有爆炸或燃烧的疑虑，则不可穿著A级防护衣。注意事项：  • 视觉屏蔽：仅有前视野镜面，左右视野遭遮蔽，视野受限。  • SCBA漏气：著装时确认气瓶是否漏气，避免防护衣膨胀。  • SCBA耗氧量：当气瓶压力低于 1/4 (1000 psi) 时，应立即退出事故点。  • 通讯设备异常：至事故现场需进行无线电通联测试，异常时进行无线电端子对接重接。  • 镜面起雾：使用双手或拔除肺力阀进行除雾动作。  • A级防护衣膨胀：SCBA或面罩漏气造成充气膨胀时，立即双手抱腹部内压排出空气，并进行漏气排除。\nB级防护衣：穿戴时机：适用事故物质不会对皮肤造成严重伤害，但会对眼睛及呼吸系统造成严重伤害，亦用于缺氧环境。穿戴配备：C级防护衣、C级防护靴、SCBA、呼吸面罩、抗化手套、安全帽、无线电。适用时机：① 气体泄漏处置 ② 化学品泄漏处置 ③ 环境侦检 ④ 缺氧环境。重点：若泄漏之气体有爆炸或燃烧的疑虑，则不可穿著B级防护衣。\nC级防护衣：穿戴时机：适用空气中有害物气体浓度经侦检低于立即危害浓度时、无直接接触有害物质液体或粉尘及人员除污时。穿戴配备：C级防护衣、C级防护靴、滤毒罐、猪鼻子、护目镜、耐酸碱手套、安全帽。适用时机：① 低浓度灾害处置 ② 环境侦检 ③ 环境复归 ④ 人员除污。重点：若泄漏之气体有爆炸或燃烧的疑虑，则不可穿著C级防护衣。\n消防衣：穿戴时机：适用于高温及有火源之事故现场。穿戴配备：消防衣裤、防焰头套、消防靴、SCBA、呼吸面罩、无线电、消防帽。适用时机：① 各类火灾处置 ② 高温场所异常处置 ③ 易燃性气体异常处置 ④ 环境侦检。重点：若有毒泄漏之气体疑虑，则不可穿著消防衣（同时注意SCBA漏气与通讯设备检查）。\nC级防护衣滤毒罐差异性 (NIOSH 注14 颜色编码系统)\n\n[TABLE 8 | 5 rows]\n颜色标签 | 范例型号 | 适用危害物质\n黑色 | 3M 6001 | 由溶剂产生的有机蒸气（例如：油漆及稀释剂所释出的有机蒸气）\n白色 | 3M 6002 | 氯气、硫化氢、与二氧化硫等酸性气体\n黄色 | 3M 6003 | 有机蒸气与氯气、盐酸、二氧化硫、氢氟酸及其他酸性气体\n绿色 | 3M 6004 | 适用于滤除氨或甲胺(methylamine)等碱性有害物质\n[/TABLE]\n\n滤毒罐破出：滤毒罐在应变过程中，当您吸入异味时，代表滤毒罐内纤维层及活性碳层已饱和，且有破出现象（饱和度 30% → 60% → 破出），必须进行滤毒罐更换确保自身安全。公式：滤毒罐防护时间 = 标准检测浓度 × 实际防护时间 / 现场检测浓度。\n紧急应变器材设置说明与各厂区紧急应变柜点位\n法源依据：一、职安法第37条（事业单位工作场所发生职业灾害，雇主应即采取必要之急救、抢救等措施）；二、Global ERT Standard。设置原则：1. 化学品危害；2. 电器/火灾类危害；3. 集结点考量；4. 无尘室入口为必要设置点位；5. 参考公共危险物品及可燃性高压气体设置区，相邻 200M 可支援器材点位。\n\n[TABLE 9 | 6 rows]\n厂区 | 数量统计 | 详细点位分布\nF11 (MTTW) | 共10组点位(A级5柜、B级2柜、C级59~64柜、消防衣3组) | • 5F：FAB-C、CUB-1B、S/B(FAB-B, FAB-C)• 4F：FAB-A、CUB-1B、CUB-1、CUB-2• 3F：FAB-B、FAB-A、FAB-C、CUB-1A• 2F：FAB-A、FAB-B、FAB-C、CUB-2• 1F：FAB-A、FAB-B、FAB-C、CUB-1B\nFAB16 / F16 (MMT) | 紧急应变柜 28组简易型应变柜 3组(设有灯号提醒) | • Office：OB 4-1、OB 4-2 (定点)• A1 FAB：5F C/R(简易)、2F A1 FAB 2-1(定点)、1F A1 FAB 1-1 / 1-2、1F A1 HPM 1-1、LB1 A1 FAB B1-1• A2 SUP/FAB：5F A2 FAB 5-1、2F A2 FAB 2-1、1F A2 HPM 1-1、LB1 A2 FAB B1-1、5F C/R(简易)、2F C/R(简易)• A3 Phase 1/2：5F A3 HPM 5-1 / A3 FAB 5-1、4F A3 HPM 4-1、3F A3 FAB 3-1/3-2 / A3 HPM 3-1、2F A3 HPM 2-1、1F A3 HPM 1-1 / 1-2、B1F A3 HPM B1-1• 周边栋别：CUB (A1&A2 CUB2-1, CUB2-2)、WH (A1&A2 WH 1-1)、Dormitory (宿舍1-1)、A3 CUP (A3 CUB 3-1, CUB 2-1)、W/H (A3 W/H 1-1)\nMTB | 紧急应变柜 6组(设有灯号提醒) | • FAB 3F：FAB-1、FAB-2 (3F定点)• SB 1F：SB-1、SB-2 (厂务监控室旁)• CUP：2F CUP-2、1F CUP-1\nTCP | 紧急应变柜 4组(设有灯号提醒) | • Office 1F (Lobby大厅)：OB-1、OB-2• CUP 2F：CUP-1、CUP-2\nAATT | 紧急应变柜 5组 | • Office-2：2F Security check point• FAB：5F C/R入口处、3F C/R入口处• CUB：5F 2号梯旁\n[/TABLE]\n\n4.3 Zone - 区域管制与环境侦检\n火灾管制区域划分：楼层划分：以火灾事故点以上楼层为管制区域（Ex: 当4F火灾发生时，管制区域为整栋别，禁止人员进入，由管制组人员使用封锁线于1F出入口进行管制）。栋别划分：火势过大，造成栋别灾害扩大时，则进行该栋别出入口封锁管制（1F各出入口禁止人员进入）。\n\n[TABLE 10 | 4 rows]\n区域名称 | 标示颜色 | 区域定义与装备规定\n热区 (Hot Zone) | 红色 | 又称污染区或禁区，为事故地点周围可能遭受污染区域，化学品浓度可能超过 TWA/STEL/IDLH 造成人员死亡或严重影响健康风险，使用红色热区封锁线。须著消防衣或 A级防护衣。\n暖区 (Warm Zone) | 黄色 | 又称影响区或除污区，为热区与冷区间缓冲区域，化学品浓度低于 TWA/STEL/IDLH 但高于一般背景值，功用为除污区域，使用黄色暖区封锁线。须著 C级防护衣，设除污走道。\n冷区 (Cold Zone) | 蓝色(绿色封锁线) | 又称安全区或支援区，为未受污染或已除污区域，使用绿色冷区封锁线。注意事项：1. 指挥站应设于冷区及上风位置；民众、记者则在冷区之外。2. 管制组对于出入管制区之抢救人员应记录管制，禁止未著适当防护装备人员出入。\n[/TABLE]\n\n首次接近事故现场侦检要领：1. 应变人员安全为第一优先；2. 穿著适当防护衣(PPE)；3. 考量事故点风向，并由上风处靠近事故点，由外至内进行侦检，以降低污染风险；4. 采二进/二出双人小组系统；5. 并依侦检数据划设热、暖、冷区。\n未知化学品连续监测顺序：1. 缺氧/富氧：量测氧气浓度（例：O2 侦测范围 0~25.0%，Alarm1: 19.5 vol%，Alarm2: 18.0 vol%）；2. 易燃性：量测爆炸下限(LEL)；3. 腐蚀性：量测pH值；4. 毒性：量测有毒物质种类及浓度；5. 事故地点：密闭或开放空间；6. 化学品蒸气密度：比空气重或轻。\n侦检三阶段：初期（辨识化学品种类及危害、评估健康危害、选用防护具、决定控制区域、制定员工保护措施）→ 中期（判断泄漏来源、环境浓度、评估作业安全性、确认控制有效性）→ 后期（危害暴露纪录、评估现场是否已无潜在危害、确认环境浓度已无读值）。\n爆炸界限与化学品危害暴露指标：UEL 爆炸上限：可燃性气体、蒸气或粉体与空气混合形成可燃性混合物接触火源，能被引燃或引爆之最高浓度。LEL 爆炸下限：能被引燃或引爆之最低浓度。（参考 SDS 第九项物理及化学特性）PEL 容许浓度：中央主管机关所订定作业环境中有害物质容许暴露标准。PEL-TWA（八小时日时量平均容许浓度）：劳工每天工作八小时，一般劳工重复暴露此浓度下，不致有不良反应。PEL-STEL（短时间时量平均容许浓度）：劳工连续暴露在此浓度任何十五分钟，不致有不可忍受之刺激、慢性或不可逆组织病变、麻醉昏晕作用。IDLH：生命、健康立即危险性，暴露为30分钟内不引起不可恢复健康效应之最大浓度。（参考 SDS 第八项暴露预防措施）\n4.4 Managing - 应变组织\n成立灾害应变组织，并各司其职，各组别指派一名小组长，带领组员细分应变任务并回报：\n指挥官：现场指挥官进行现场危害告知，并分配组别进行抢救任务，随时掌握各组行动并回报监控指挥官直至任务结束。\n抢救组：负责灾害异常处理，含人员搜救等任务，并以通讯设备回报现场指挥官目前抢救任务阶段，直至灾害结束。\n管制组：负责区域管制，执行冷区区域管制及封锁，禁止非相关人员进入至事故现场，严加控管人员出入情形，引导外部支援车辆入厂等。\n支援组：负责提供各种支援，包括应变器材物资供应，确保应变小组在任何情况下都能获得所需的资源和支援。\n急救组：1. 负责伤患救治医疗评估，并依伤患情况判定是否须就医；2. 抢救组、除污人员应于任务结束后，至救护站进行生理评估。\n4.5 Assistance - 外界支援\n灾害超出厂内应变能力时，指挥官决策请求政府/友厂机构援助，并进行事故应变转移。联防组织包含：政府机关/消防队、友厂支援、学者与专家（环境事故专业技术小组）、地区医院。\n指挥权转移：当外部单位成立指挥中心后，指挥权由外部单位权责指挥（EX：火灾-消防局、化灾-环保局）；事故应变转移时，须第一时间通知中部科学园区管理局；公司人员调度仍由区域紧急应变小组指挥官（事故发生部门M3主管或以上职等）负责。\n\n[TABLE 11 | 4 rows]\n厂区 | 外部支援单位及联络电话\nMTTW | • 坪顶消防队：03-3280309• 桃园市政府警察局龟山分局大华派出所：03-3975557• 桃园市政府：03-3322101• 桃园市政府环境保护局：03-3386021• 华亚科技园区服务中心：03-3970000• 北区职业安全卫生中心：02-89956700• 林口长庚纪念医院：03-3281200\nF16 / MTB | • 后里消防队：25562600• 大甲分局后里分驻所：25562037 | 义里派出所：25562333• 内政部警政署保安警察第二总队：25584750• 台中市政府：22289111 | 台中市政府环保局：22289111、22276011• 中部科学园区管理局：25658588• 中区职业安全卫生中心：22550633（毒灾联防小组依 ENVIRONMENTAL PROTECTION SECTION 提供之友厂通讯录）• 邻里长：后里里 杨春明 25573325 | 厚里里 黄金益 25586747 | 公馆里 冯咏淮 25560459 | 广福里 郭明洲 25566205• 医疗单位：中国医药大学附设医院丰原分院 25222538#119 | 中国医药大学附设医院 22052121 | 卫福部丰原医院 25271180#2198 | 台中荣总 23592525#3611\nMTTN | • 台南市消防局：06-2975119 | 土城消防分队(救护车)：06-2575276• 台南市政府警察局第三分局：06-2567666 / 2567005• 台南市政府：06-2991111 | 台南市政府环境保护局：06-2686751• 台南科工区服务中心：06-3840234~5• 南区职业安全卫生中心：07-2354861• 医疗单位：台南市立安南医院 06-3553111 | 奇美医院永康分院 06-2812811 | 成大医院 06-2353535• 妈祖宫里里长 林志英：06-2840205 | 天然气瓦斯(东和)：06-2589512\n[/TABLE]\n\n4.6 Termination - 善后处理\n环境侦检：灾害控制稳定时，为确保无其他危害源再度发生，需进行环境侦检作业。火灾：使用热像仪进行异常点及环境量测，确认现场温度；化灾：使用侦检仪器进行环境侦检无读值或使用pH试纸检测事故点趋近于中性。\n环境除污：受污染环境，应使用中和剂（例：柠檬酸、小苏打、敌腐灵等）进行环境酸碱中和，使用pH试纸检测事故点趋近于中性。\n事故点封锁：使用围篱或封锁线，进行灾害事故点封锁，避免其他人员误入，并张贴『异常事故区域未经EHS许可请勿进入』，后续调查事故真因。\n人员除污：去除或中和在人或设备污染源，降低有害污染区域避免二次污染，防止不相容化学品混合，避免有害物质渗透防护衣。需除污人员为：a. 遭受化学品喷溅污染人员；b. 事故抢救组人员；c. 协助抢救组除污人员。\n人员生理评估、器材清点复归与有害废弃物丢弃：救灾人员长时间处于高压环境可能导致生理负荷，救护人员于救灾结束后进行生理评估（生理数值监控、身体评估）。救灾结束后清点本次救灾器材并记录补齐；沾染有害物质应变器材应丢弃于有害事业废弃物处理桶(袋)妥善处理。", "html": "<p>灾害现场抢救标准作业程序(H.A.Z.M.A.T.)，起源于20世纪，当时全球工业化快速发展，事故发生时无专业应变处理小组处理，故许多国家建立应变处理小组，而H.A.Z.M.A.T.目前为美国消防(NFPA 注8)、台湾消防(NFA)及多数高科技厂广泛使用的灾害应变战术手法之一，透过指挥战术加以吓阻灾害扩延。</p><h4 class=\"vsub\">4.1 Hazard identification - 危害辨识</h4><p>掌握灾害现场危害风险等资讯并快速回报：火灾类型(A.B.C.D类)、化学品性质与反应性(依SDS注10)、储存数量及位置、受伤人数、复合式灾害。取得危害辨识资料可透过化学品 SDS、ERG注11、化学品应变对策系统获取资讯。</p><p>安全资料表 (SDS) 十六项揭露资讯（应变时以重点项次作为参考）：</p><table><tr><th>项次 1–4</th><th>项次 5–8</th><th>项次 9–12</th><th>项次 13–16</th></tr><tr><td>1. 化学品与厂商资料</td><td>5. 灭火措施（紧急应变）</td><td>9. 物理及化学性质（预防措施）</td><td>13. 废弃物处置方法</td></tr><tr><td>2. 危害辨识资料（危害辨识）</td><td>6. 泄漏处理方法（紧急应变）</td><td>10. 安定性与反应性（预防措施）</td><td>14. 运送资料</td></tr><tr><td>3. 成分辨识资料</td><td>7. 安全处置与储存方法</td><td>11. 毒性资料</td><td>15. 法规资料</td></tr><tr><td>4. 急救措施（紧急应变）</td><td>8. 暴露预防措施（预防措施）</td><td>12. 生态资料</td><td>16. 其他资料</td></tr></table><p>紧急应变指南 (ERG) 页面介绍</p><p>黄色：联合国编号 (UN No.)；蓝色：英文名称；紫色：中文名称。</p><p>当黄色、蓝色或紫色框页化学品以底色标记时，表示该化学品为吸入性毒性危害(TIH)物质（如氯气及氨气等）。</p><p>处理原则编号备注「P」者，表示此物质受热或受污染时，会产生剧烈的聚合反应。</p><p>查到处理原则后，便能查到：潜在危害（健康危害、火灾或爆炸）、公共安全（相关资讯、防护衣、疏散）、紧急应变（火灾、泄漏，以及最初医疗急救之行动建议方案）。</p><p>绿色页面：初期隔离和防护行动距离表、危险的禁水性物质（提供初期隔离距离与保护行动距离两种不同类型安全距离建议；保护行动距离分为大小量及日夜间等泄漏情境）、常见的六种吸入性毒性危害物质。</p><p>大量泄漏：大于208公升(55加仑)；小量泄漏：小于或等于208公升(55加仑)。</p><p>化学品应变对策 App (HCARD) 操作说明</p><p>化学品应变App，收集厂内250种化学品种类，汇集化学品SDS及ERG紧急应变指南资讯，透过iPad扫描条码或者手机触碰NFC位置，即可随手可得应变对策，且张贴于厂内高风险区域，让同仁于第一时间能快速应变。</p><p>iPad 扫描 QR Code：Step 1 点选 iPad QR Code → Step 2 扫描化学品应变对策上 QR Code → Step 3 输入 email、password → Step 4 开启 Power apps 应用程式 → Step 5 输入关键字搜寻。</p><p>手机触碰 NFC：Step 1 手机触碰 NFC 贴纸（需紧贴触碰）→ Step 2 开启 Power apps 应用程式 → Step 3 输入关键字搜寻。</p><p>系统查询功能：介面功能：① 关键字输入 → ② 关键字相关化学品搜寻浏览 → ③ 检视厂内化学品成分、特征、危害、物化特性、衍生物及不相容物 → ④ 检视应变处理方法及注意事项（火灾处理/泄漏处理/急救方法）→ ⑤ 开启「检视处理原则」可查看该物质 ERG 处理原则与 PPE 建议。</p><h4 class=\"vsub\">4.2 Action plan - 行动方案</h4><p>行动方案流程：拟定救灾计划 → ERT集结 → 紧急应变器材 → 区域管制划分 → 应变处置。</p><p>救灾计划包含：1. 危害认知；2. ERT成员（监控指挥官、现场指挥官、抢救组、管制组、支援组、救护组）；3. 应变作为（进攻型应变、防守型应变）；4. 区域管制范围（冷、暖、热区封锁线划分）；5. 除污站架设位置；6. 人员是否疏散。</p><p>ERT集结：由 ERC/CCR注12 使用口语广播，通知事故部门ERT进行集结，并由现场指挥官下达组织任务（抢救组、管制组、支援组、急救组）。</p><p>各类防护衣级别分类说明</p><table><tr><th>分类项目</th><th>Level A</th><th>Level B</th><th>Level C</th><th>消防衣</th></tr><tr><td>美规分类</td><td>Level A</td><td>Level B</td><td>Level C</td><td>NFPA / EN469</td></tr><tr><td>欧规分类</td><td>Type 1 (液态或气态)</td><td>Type 2 (非气密式)Type 3 (液密式)</td><td>Type 4 (防喷沫式)Type 5 (防微粒式)</td><td>EN469:2020EN 465</td></tr><tr><td>穿戴时机</td><td>环境为密闭空间且有未知危害，需要最高级别的皮肤、眼睛与呼吸防护设备</td><td>环境中含氧量低于19.5%，需要最高级别的呼吸防护，但可以接受较低等级的皮肤防护设备</td><td>已识别危害来源，且确认不会被皮肤吸收或造成皮肤伤害</td><td>环境有爆炸或燃烧的疑虑</td></tr><tr><td>环境皮肤接触风险</td><td>剧毒化学固体或液体或气体，气体经皮肤产生 IDLH</td><td>剧毒化学固体或液体或气体，气体经皮肤不产生 IDLH</td><td>有害化学固体或液体或气体</td><td>火灾</td></tr><tr><td>对应皮肤 PPE</td><td>气密式防护衣</td><td>连身防护衣(含头罩)</td><td>连身或两件式防护衣(含头罩)</td><td>消防衣</td></tr><tr><td>环境吸入风险</td><td>缺氧</td><td>有害的气体或粉尘高于 PEL 值</td><td>有害的气体或粉尘低于 PEL 值</td><td>缺氧</td></tr><tr><td>对应呼吸 PPE</td><td>送气呼吸系统</td><td>送气或过滤呼吸系统</td><td>送气或过滤呼吸系统</td><td>送气呼吸系统</td></tr></table><p>各级防护衣与消防衣穿戴配备及注意事项</p><p>A级防护衣：穿戴时机：适用所有浓度未知情况下，物质浓度侦测超过立即危害浓度(IDLH)，可发挥呼吸、皮肤与眼睛最高程度防护。穿戴配备：A级防护衣、A级防护靴、SCBA注13、呼吸面罩、无线电。适用时机：① 气体泄漏处置 ② 化学品泄漏处置 ③ 未知气体处置 ④ 环境侦检。重点：若泄漏之气体有爆炸或燃烧的疑虑，则不可穿著A级防护衣。注意事项：  • 视觉屏蔽：仅有前视野镜面，左右视野遭遮蔽，视野受限。  • SCBA漏气：著装时确认气瓶是否漏气，避免防护衣膨胀。  • SCBA耗氧量：当气瓶压力低于 1/4 (1000 psi) 时，应立即退出事故点。  • 通讯设备异常：至事故现场需进行无线电通联测试，异常时进行无线电端子对接重接。  • 镜面起雾：使用双手或拔除肺力阀进行除雾动作。  • A级防护衣膨胀：SCBA或面罩漏气造成充气膨胀时，立即双手抱腹部内压排出空气，并进行漏气排除。</p><p>B级防护衣：穿戴时机：适用事故物质不会对皮肤造成严重伤害，但会对眼睛及呼吸系统造成严重伤害，亦用于缺氧环境。穿戴配备：C级防护衣、C级防护靴、SCBA、呼吸面罩、抗化手套、安全帽、无线电。适用时机：① 气体泄漏处置 ② 化学品泄漏处置 ③ 环境侦检 ④ 缺氧环境。重点：若泄漏之气体有爆炸或燃烧的疑虑，则不可穿著B级防护衣。</p><p>C级防护衣：穿戴时机：适用空气中有害物气体浓度经侦检低于立即危害浓度时、无直接接触有害物质液体或粉尘及人员除污时。穿戴配备：C级防护衣、C级防护靴、滤毒罐、猪鼻子、护目镜、耐酸碱手套、安全帽。适用时机：① 低浓度灾害处置 ② 环境侦检 ③ 环境复归 ④ 人员除污。重点：若泄漏之气体有爆炸或燃烧的疑虑，则不可穿著C级防护衣。</p><p>消防衣：穿戴时机：适用于高温及有火源之事故现场。穿戴配备：消防衣裤、防焰头套、消防靴、SCBA、呼吸面罩、无线电、消防帽。适用时机：① 各类火灾处置 ② 高温场所异常处置 ③ 易燃性气体异常处置 ④ 环境侦检。重点：若有毒泄漏之气体疑虑，则不可穿著消防衣（同时注意SCBA漏气与通讯设备检查）。</p><p>C级防护衣滤毒罐差异性 (NIOSH 注14 颜色编码系统)</p><table><tr><th>颜色标签</th><th>范例型号</th><th>适用危害物质</th></tr><tr><td>黑色</td><td>3M 6001</td><td>由溶剂产生的有机蒸气（例如：油漆及稀释剂所释出的有机蒸气）</td></tr><tr><td>白色</td><td>3M 6002</td><td>氯气、硫化氢、与二氧化硫等酸性气体</td></tr><tr><td>黄色</td><td>3M 6003</td><td>有机蒸气与氯气、盐酸、二氧化硫、氢氟酸及其他酸性气体</td></tr><tr><td>绿色</td><td>3M 6004</td><td>适用于滤除氨或甲胺(methylamine)等碱性有害物质</td></tr></table><p>滤毒罐破出：滤毒罐在应变过程中，当您吸入异味时，代表滤毒罐内纤维层及活性碳层已饱和，且有破出现象（饱和度 30% → 60% → 破出），必须进行滤毒罐更换确保自身安全。公式：滤毒罐防护时间 = 标准检测浓度 × 实际防护时间 / 现场检测浓度。</p><p>紧急应变器材设置说明与各厂区紧急应变柜点位</p><p>法源依据：一、职安法第37条（事业单位工作场所发生职业灾害，雇主应即采取必要之急救、抢救等措施）；二、Global ERT Standard。设置原则：1. 化学品危害；2. 电器/火灾类危害；3. 集结点考量；4. 无尘室入口为必要设置点位；5. 参考公共危险物品及可燃性高压气体设置区，相邻 200M 可支援器材点位。</p><table><tr><th>厂区</th><th>数量统计</th><th>详细点位分布</th></tr><tr><td>F11 (MTTW)</td><td>共10组点位(A级5柜、B级2柜、C级59~64柜、消防衣3组)</td><td>• 5F：FAB-C、CUB-1B、S/B(FAB-B, FAB-C)• 4F：FAB-A、CUB-1B、CUB-1、CUB-2• 3F：FAB-B、FAB-A、FAB-C、CUB-1A• 2F：FAB-A、FAB-B、FAB-C、CUB-2• 1F：FAB-A、FAB-B、FAB-C、CUB-1B</td></tr><tr><td>FAB16 / F16 (MMT)</td><td>紧急应变柜 28组简易型应变柜 3组(设有灯号提醒)</td><td>• Office：OB 4-1、OB 4-2 (定点)• A1 FAB：5F C/R(简易)、2F A1 FAB 2-1(定点)、1F A1 FAB 1-1 / 1-2、1F A1 HPM 1-1、LB1 A1 FAB B1-1• A2 SUP/FAB：5F A2 FAB 5-1、2F A2 FAB 2-1、1F A2 HPM 1-1、LB1 A2 FAB B1-1、5F C/R(简易)、2F C/R(简易)• A3 Phase 1/2：5F A3 HPM 5-1 / A3 FAB 5-1、4F A3 HPM 4-1、3F A3 FAB 3-1/3-2 / A3 HPM 3-1、2F A3 HPM 2-1、1F A3 HPM 1-1 / 1-2、B1F A3 HPM B1-1• 周边栋别：CUB (A1&amp;A2 CUB2-1, CUB2-2)、WH (A1&amp;A2 WH 1-1)、Dormitory (宿舍1-1)、A3 CUP (A3 CUB 3-1, CUB 2-1)、W/H (A3 W/H 1-1)</td></tr><tr><td>MTB</td><td>紧急应变柜 6组(设有灯号提醒)</td><td>• FAB 3F：FAB-1、FAB-2 (3F定点)• SB 1F：SB-1、SB-2 (厂务监控室旁)• CUP：2F CUP-2、1F CUP-1</td></tr><tr><td>TCP</td><td>紧急应变柜 4组(设有灯号提醒)</td><td>• Office 1F (Lobby大厅)：OB-1、OB-2• CUP 2F：CUP-1、CUP-2</td></tr><tr><td>AATT</td><td>紧急应变柜 5组</td><td>• Office-2：2F Security check point• FAB：5F C/R入口处、3F C/R入口处• CUB：5F 2号梯旁</td></tr></table><h4 class=\"vsub\">4.3 Zone - 区域管制与环境侦检</h4><p>火灾管制区域划分：楼层划分：以火灾事故点以上楼层为管制区域（Ex: 当4F火灾发生时，管制区域为整栋别，禁止人员进入，由管制组人员使用封锁线于1F出入口进行管制）。栋别划分：火势过大，造成栋别灾害扩大时，则进行该栋别出入口封锁管制（1F各出入口禁止人员进入）。</p><table><tr><th>区域名称</th><th>标示颜色</th><th>区域定义与装备规定</th></tr><tr><td>热区 (Hot Zone)</td><td>红色</td><td>又称污染区或禁区，为事故地点周围可能遭受污染区域，化学品浓度可能超过 TWA/STEL/IDLH 造成人员死亡或严重影响健康风险，使用红色热区封锁线。须著消防衣或 A级防护衣。</td></tr><tr><td>暖区 (Warm Zone)</td><td>黄色</td><td>又称影响区或除污区，为热区与冷区间缓冲区域，化学品浓度低于 TWA/STEL/IDLH 但高于一般背景值，功用为除污区域，使用黄色暖区封锁线。须著 C级防护衣，设除污走道。</td></tr><tr><td>冷区 (Cold Zone)</td><td>蓝色(绿色封锁线)</td><td>又称安全区或支援区，为未受污染或已除污区域，使用绿色冷区封锁线。注意事项：1. 指挥站应设于冷区及上风位置；民众、记者则在冷区之外。2. 管制组对于出入管制区之抢救人员应记录管制，禁止未著适当防护装备人员出入。</td></tr></table><p>首次接近事故现场侦检要领：1. 应变人员安全为第一优先；2. 穿著适当防护衣(PPE)；3. 考量事故点风向，并由上风处靠近事故点，由外至内进行侦检，以降低污染风险；4. 采二进/二出双人小组系统；5. 并依侦检数据划设热、暖、冷区。</p><p>未知化学品连续监测顺序：1. 缺氧/富氧：量测氧气浓度（例：O2 侦测范围 0~25.0%，Alarm1: 19.5 vol%，Alarm2: 18.0 vol%）；2. 易燃性：量测爆炸下限(LEL)；3. 腐蚀性：量测pH值；4. 毒性：量测有毒物质种类及浓度；5. 事故地点：密闭或开放空间；6. 化学品蒸气密度：比空气重或轻。</p><p>侦检三阶段：初期（辨识化学品种类及危害、评估健康危害、选用防护具、决定控制区域、制定员工保护措施）→ 中期（判断泄漏来源、环境浓度、评估作业安全性、确认控制有效性）→ 后期（危害暴露纪录、评估现场是否已无潜在危害、确认环境浓度已无读值）。</p><p>爆炸界限与化学品危害暴露指标：UEL 爆炸上限：可燃性气体、蒸气或粉体与空气混合形成可燃性混合物接触火源，能被引燃或引爆之最高浓度。LEL 爆炸下限：能被引燃或引爆之最低浓度。（参考 SDS 第九项物理及化学特性）PEL 容许浓度：中央主管机关所订定作业环境中有害物质容许暴露标准。PEL-TWA（八小时日时量平均容许浓度）：劳工每天工作八小时，一般劳工重复暴露此浓度下，不致有不良反应。PEL-STEL（短时间时量平均容许浓度）：劳工连续暴露在此浓度任何十五分钟，不致有不可忍受之刺激、慢性或不可逆组织病变、麻醉昏晕作用。IDLH：生命、健康立即危险性，暴露为30分钟内不引起不可恢复健康效应之最大浓度。（参考 SDS 第八项暴露预防措施）</p><h4 class=\"vsub\">4.4 Managing - 应变组织</h4><p>成立灾害应变组织，并各司其职，各组别指派一名小组长，带领组员细分应变任务并回报：</p><p>指挥官：现场指挥官进行现场危害告知，并分配组别进行抢救任务，随时掌握各组行动并回报监控指挥官直至任务结束。</p><p>抢救组：负责灾害异常处理，含人员搜救等任务，并以通讯设备回报现场指挥官目前抢救任务阶段，直至灾害结束。</p><p>管制组：负责区域管制，执行冷区区域管制及封锁，禁止非相关人员进入至事故现场，严加控管人员出入情形，引导外部支援车辆入厂等。</p><p>支援组：负责提供各种支援，包括应变器材物资供应，确保应变小组在任何情况下都能获得所需的资源和支援。</p><p>急救组：1. 负责伤患救治医疗评估，并依伤患情况判定是否须就医；2. 抢救组、除污人员应于任务结束后，至救护站进行生理评估。</p><h4 class=\"vsub\">4.5 Assistance - 外界支援</h4><p>灾害超出厂内应变能力时，指挥官决策请求政府/友厂机构援助，并进行事故应变转移。联防组织包含：政府机关/消防队、友厂支援、学者与专家（环境事故专业技术小组）、地区医院。</p><p>指挥权转移：当外部单位成立指挥中心后，指挥权由外部单位权责指挥（EX：火灾-消防局、化灾-环保局）；事故应变转移时，须第一时间通知中部科学园区管理局；公司人员调度仍由区域紧急应变小组指挥官（事故发生部门M3主管或以上职等）负责。</p><table><tr><th>厂区</th><th>外部支援单位及联络电话</th></tr><tr><td>MTTW</td><td>• 坪顶消防队：03-3280309• 桃园市政府警察局龟山分局大华派出所：03-3975557• 桃园市政府：03-3322101• 桃园市政府环境保护局：03-3386021• 华亚科技园区服务中心：03-3970000• 北区职业安全卫生中心：02-89956700• 林口长庚纪念医院：03-3281200</td></tr><tr><td>F16 / MTB</td><td>• 后里消防队：25562600• 大甲分局后里分驻所：25562037</td><td>义里派出所：25562333• 内政部警政署保安警察第二总队：25584750• 台中市政府：22289111</td><td>台中市政府环保局：22289111、22276011• 中部科学园区管理局：25658588• 中区职业安全卫生中心：22550633（毒灾联防小组依 ENVIRONMENTAL PROTECTION SECTION 提供之友厂通讯录）• 邻里长：后里里 杨春明 25573325</td><td>厚里里 黄金益 25586747</td><td>公馆里 冯咏淮 25560459</td><td>广福里 郭明洲 25566205• 医疗单位：中国医药大学附设医院丰原分院 25222538#119</td><td>中国医药大学附设医院 22052121</td><td>卫福部丰原医院 25271180#2198</td><td>台中荣总 23592525#3611</td></tr><tr><td>MTTN</td><td>• 台南市消防局：06-2975119</td><td>土城消防分队(救护车)：06-2575276• 台南市政府警察局第三分局：06-2567666 / 2567005• 台南市政府：06-2991111</td><td>台南市政府环境保护局：06-2686751• 台南科工区服务中心：06-3840234~5• 南区职业安全卫生中心：07-2354861• 医疗单位：台南市立安南医院 06-3553111</td><td>奇美医院永康分院 06-2812811</td><td>成大医院 06-2353535• 妈祖宫里里长 林志英：06-2840205</td><td>天然气瓦斯(东和)：06-2589512</td></tr></table><h4 class=\"vsub\">4.6 Termination - 善后处理</h4><p>环境侦检：灾害控制稳定时，为确保无其他危害源再度发生，需进行环境侦检作业。火灾：使用热像仪进行异常点及环境量测，确认现场温度；化灾：使用侦检仪器进行环境侦检无读值或使用pH试纸检测事故点趋近于中性。</p><p>环境除污：受污染环境，应使用中和剂（例：柠檬酸、小苏打、敌腐灵等）进行环境酸碱中和，使用pH试纸检测事故点趋近于中性。</p><p>事故点封锁：使用围篱或封锁线，进行灾害事故点封锁，避免其他人员误入，并张贴『异常事故区域未经EHS许可请勿进入』，后续调查事故真因。</p><p>人员除污：去除或中和在人或设备污染源，降低有害污染区域避免二次污染，防止不相容化学品混合，避免有害物质渗透防护衣。需除污人员为：a. 遭受化学品喷溅污染人员；b. 事故抢救组人员；c. 协助抢救组除污人员。</p><p>人员生理评估、器材清点复归与有害废弃物丢弃：救灾人员长时间处于高压环境可能导致生理负荷，救护人员于救灾结束后进行生理评估（生理数值监控、身体评估）。救灾结束后清点本次救灾器材并记录补齐；沾染有害物质应变器材应丢弃于有害事业废弃物处理桶(袋)妥善处理。</p>"}, {"title": "火灾救灾技术", "text": "Chapter 05 火灾-救灾技术认知\n5.1 火灾浓烟判读 (V-V-C-D)\n浓烟观念：可燃物受热分解出的可燃性气体并混杂许多物质（悬浮粒子、瓦斯、高分子聚合物等），与空气混合后达 LEL~UEL 范围内也是会燃烧。透过浓烟的量、速度、颜色与密度，可得知火场状况、火点位置、建筑物是否坍崩、是否发生闪燃/爆燃及灭火战术使用。\n\n[TABLE 12 | 5 rows]\n判读要素 | 判读标准与火场意义\n第一个 V — 浓烟量 (Volume) | 1. 判断可燃物多寡（可燃物少-浓烟少，可燃物多-浓烟多）。2. 判断火灾初期或全盛期（全盛期-浓烟多）。3. 判断通风良好或不良（通风好-浓烟少，通风不良-浓烟多）。4. 判断可燃物干湿程度（干燥物体-浓烟少，潮湿物体-浓烟多）。\n第二个 V — 浓烟速度 (Velocity) | 1. 由浓烟离开火场的速度可得知火场温度高低。2. 判断是否可能发生闪燃现象。3. 越靠近火点（温度最高地方）烟流越快。\n第三个 C — 浓烟颜色 (Color) | 1. 判断目前火场的燃烧阶段（初期-白、成长期-灰、全盛期-黑）。2. 燃烧木材多为白色、棕色烟；燃烧塑胶多为黑色烟；燃烧特殊化学物品则可能产生黄色、绿色等特殊颜色的烟。3. 越靠近火点，烟流速率越快、颜色越黑。4. 浓烟的颜色越黑则温度越高（热分解越多）。\n第四个 D — 浓烟密度 (Density) | 1. 浓烟内部可燃性物质越多其密度越高越浓（可燃物多）。2. 浓厚烟流的分布情况，可得知是否会引发闪燃、爆燃。\n[/TABLE]\n\n5.2 闪燃、爆燃差异性\n闪燃 (Flashover)：指火场所有物品被瞬间、同时引燃。系指辐射热加剧，当到一定燃点时，瞬间烧起，造成全面燃烧。\n爆燃 (Backdraft)：指火场为缺氧燃烧时，因大量新鲜空气冲入现场，而导致剧烈燃烧，瞬间引爆。\n5.3 火场中性带\n火场中性带是指在火灾现场，烟囱效应导致浓烟蓄积到天花板后开始下降，形成一条明显的分界，即冷热空气对流达平衡的界线。影响因素：a. 温度（室内火灾温度愈高，中性带会往下偏移）；b. 压力（氧气供应不足、通风控制燃烧时，中性带会往上偏移）。判读：温度低、中性带高（浓烟少、冷空气多）；温度高、中性带低（浓烟多、冷空气少）。\n5.4 火场开门程序\n目的：提前预判门后燃烧状态并采取战术，减少因开门制造开口使氧气迅速进入产生对流而引发闪燃、爆燃之风险。\n进行火场开门前：1. 观察门缝是否有浓烟或火焰窜出。2. 判断浓烟窜出的位置与 VVCD。3. 有看到浓烟、火一定要对门板上缘、两侧进行射水降温，可以增加温度辨识度。4. 使用 TIC(热像仪)进行门扇温度差判定（TIC显示：红色-火源、黑色-温度高、白色-温度低）。\n进行火场开门时：1. 开门时，由抢救组 B 员至门上侧边开启门扇，抢救 A 员射水 2 秒后，抢救组 B 员迅速关闭门扇。2. 使用 TIC(热像仪)进行温度差判定。3. 如温度尚未降低，请重复开关门射水动作，直至温度降低为止（射水至火场快速凝结成水蒸气可达冷却效果）。\n5.5 灭火战术\n进攻型灭火：抢救组人员至火场中，以火源起始点（火点-温度最高处），从最外层打至最内层起火点，通常以水柱射水方式进行灭火。\n防守型灭火：抢救组人员不进火场，主要是射水降温、阻隔延烧并移除周围可能延烧之可燃物，避免灾害持续扩大并保护周围建筑物，通常以水柱、水雾方式进行防护。（备注：执行灭火任务时，禁水性物质化学品严禁射水，射水前应确认该区域存放物质。）\n5.6 灭火器介绍及操作\n法规依据：依据消防法『各类场所消防安全设备设置标准』第31条第三项，设有灭火器之楼层，自楼面居室任一点至灭火器之步行距离在二十公尺以下。常见为干粉灭火器与二氧化碳灭火器。操作步骤：1. 拉插销 → 2. 瞄准火源底部 → 3. 压握把 → 4. 扫向火源左右扫射。\n5.7 室内、外消防栓操作\n5.7.1 室内消防栓(箱)：结构包含：启动灯、区域警铃、火警指示灯、手动报警机、PBL盘、消防栓阀、水带、瞄子。操作口诀「按、开、拿、拉、转」：1. 按警铃 → 2. 开室内消防栓箱门 → 3. 拿瞄子 → 4. 拉水带（水带需拉直，避免弯折爆管）→ 5. 转制水阀。\n5.7.3 & 5.7.4 室外消防栓：通常设置于工业厂房或仓库等建筑物，防护范围为建筑物一楼、二楼以及外墙。设备包含地上型消防栓（2-1/2吋出水口）、室外水带箱（水带、瞄子、开关板手）。操作步骤：1. 开消防栓箱门取水带 → 2. 接水带衔接消防栓上 → 3. 水带衔接瞄子或砲塔 → 4. 开启消防栓开关阀 → 5. 消防射水。\n5.8 涡轮式瞄子操作\n主要分为 2-1/2 吋（适用室外消防栓水带）及 1-1/2 吋（适用室内消防栓水带）两种：\n\n[TABLE 13 | 7 rows]\n项次 | 名称 | 功能说明\n1 | 握把 | 稳定功能\n2 | 水流开关 | 控制出水量（前推送水、后推关水）\n3 | 水流速调节旋钮 | 控制流速\n4 | 水分子大小调节旋钮 | 控制水分子大小（逆时针水雾状、顺时针水柱状）\n5 | 快速接头(母接头) | 进水端（与水带公接头连接）\n6 | 前端出水口 | 出水端\n[/TABLE]\n\n5.9 移动式砲塔操作\n因体积小、重量轻、机动性高，常用于抢救组无法接近火场或当下人力不足时使用，也适用于攻击、防护危险物质等情况。\n\n[TABLE 14 | 8 rows]\n项次 | 名称 | 功能说明\n1 | 支撑脚座 | 展开后固定于地板，支撑水柱发射后坐力\n2 | 快速接头(母接头) | 可连接消防栓阀之水带(公接头)\n3 | 控制把手 | 控制水柱方向\n4 | 上下方向控制旋钮 | 旋开后可控制水柱上下移动\n5 | 左右方向控制旋钮 | 旋开后可控制水柱左右移动\n6 | 涡轮瞄子 | 可调整水滴大小（雾状或水柱状）\n7 | 水压压力计 | 确认水压高低\n[/TABLE]\n\n操作步骤：1. 拉起脚座拉环 → 2. 打开脚座 → 3. 装上水带 → 4. 转开旋钮控制方向(上下) → 5. 转开旋钮控制方向(左右) → 6. 确认目标位置 → 7. 调整水雾或水柱。\n5.10 电动车灭火毯 / 底盘洒水器设置及操作\n设置位置：• MTTW：H/Q B1F停车场人员入口处、CUB-6 B1F 消防泵浦室前；• MMT：A3 Parking B1F 北侧 B/16柱位、南侧 C/7柱位；• MTB：OB Parking B3F、OB 南侧梯厅间、B1栋户外草皮上应变推车。\n灭火毯操作方式：1. 灭火毯自携行袋取出 → 2. 红色拉带对准目标车辆，短边中位线对准车辆中线 → 3. 撕开固定带 → 4. 拉开灭火毯红色拉带，中位线对齐车辆中间 → 5. 灭火毯遮盖车辆 → 6. 将灭火毯四周包围，阻隔空气。\n电动车底盘洒水器操作方式：1. 定位(上风处)：建议以车辆两侧底盘为前进目标对齐，如因现场空间受限则以车头、尾为方向 → 2. 接水带：停车场为室内消防栓应接上1.5吋转接头 → 3. 注水、推进：注水后可利用水袋充水结实特性作为支点依目标方向前进 → 4. 搭配车用灭火毯使用时，应先覆盖灭火毯再掀开一侧将底盘洒水器放入车底。", "html": "<h4 class=\"vsub\">5.1 火灾浓烟判读 (V-V-C-D)</h4><p>浓烟观念：可燃物受热分解出的可燃性气体并混杂许多物质（悬浮粒子、瓦斯、高分子聚合物等），与空气混合后达 LEL~UEL 范围内也是会燃烧。透过浓烟的量、速度、颜色与密度，可得知火场状况、火点位置、建筑物是否坍崩、是否发生闪燃/爆燃及灭火战术使用。</p><table><tr><th>判读要素</th><th>判读标准与火场意义</th></tr><tr><td>第一个 V — 浓烟量 (Volume)</td><td>1. 判断可燃物多寡（可燃物少-浓烟少，可燃物多-浓烟多）。2. 判断火灾初期或全盛期（全盛期-浓烟多）。3. 判断通风良好或不良（通风好-浓烟少，通风不良-浓烟多）。4. 判断可燃物干湿程度（干燥物体-浓烟少，潮湿物体-浓烟多）。</td></tr><tr><td>第二个 V — 浓烟速度 (Velocity)</td><td>1. 由浓烟离开火场的速度可得知火场温度高低。2. 判断是否可能发生闪燃现象。3. 越靠近火点（温度最高地方）烟流越快。</td></tr><tr><td>第三个 C — 浓烟颜色 (Color)</td><td>1. 判断目前火场的燃烧阶段（初期-白、成长期-灰、全盛期-黑）。2. 燃烧木材多为白色、棕色烟；燃烧塑胶多为黑色烟；燃烧特殊化学物品则可能产生黄色、绿色等特殊颜色的烟。3. 越靠近火点，烟流速率越快、颜色越黑。4. 浓烟的颜色越黑则温度越高（热分解越多）。</td></tr><tr><td>第四个 D — 浓烟密度 (Density)</td><td>1. 浓烟内部可燃性物质越多其密度越高越浓（可燃物多）。2. 浓厚烟流的分布情况，可得知是否会引发闪燃、爆燃。</td></tr></table><h4 class=\"vsub\">5.2 闪燃、爆燃差异性</h4><p>闪燃 (Flashover)：指火场所有物品被瞬间、同时引燃。系指辐射热加剧，当到一定燃点时，瞬间烧起，造成全面燃烧。</p><p>爆燃 (Backdraft)：指火场为缺氧燃烧时，因大量新鲜空气冲入现场，而导致剧烈燃烧，瞬间引爆。</p><h4 class=\"vsub\">5.3 火场中性带</h4><p>火场中性带是指在火灾现场，烟囱效应导致浓烟蓄积到天花板后开始下降，形成一条明显的分界，即冷热空气对流达平衡的界线。影响因素：a. 温度（室内火灾温度愈高，中性带会往下偏移）；b. 压力（氧气供应不足、通风控制燃烧时，中性带会往上偏移）。判读：温度低、中性带高（浓烟少、冷空气多）；温度高、中性带低（浓烟多、冷空气少）。</p><h4 class=\"vsub\">5.4 火场开门程序</h4><p>目的：提前预判门后燃烧状态并采取战术，减少因开门制造开口使氧气迅速进入产生对流而引发闪燃、爆燃之风险。</p><p>进行火场开门前：1. 观察门缝是否有浓烟或火焰窜出。2. 判断浓烟窜出的位置与 VVCD。3. 有看到浓烟、火一定要对门板上缘、两侧进行射水降温，可以增加温度辨识度。4. 使用 TIC(热像仪)进行门扇温度差判定（TIC显示：红色-火源、黑色-温度高、白色-温度低）。</p><p>进行火场开门时：1. 开门时，由抢救组 B 员至门上侧边开启门扇，抢救 A 员射水 2 秒后，抢救组 B 员迅速关闭门扇。2. 使用 TIC(热像仪)进行温度差判定。3. 如温度尚未降低，请重复开关门射水动作，直至温度降低为止（射水至火场快速凝结成水蒸气可达冷却效果）。</p><h4 class=\"vsub\">5.5 灭火战术</h4><p>进攻型灭火：抢救组人员至火场中，以火源起始点（火点-温度最高处），从最外层打至最内层起火点，通常以水柱射水方式进行灭火。</p><p>防守型灭火：抢救组人员不进火场，主要是射水降温、阻隔延烧并移除周围可能延烧之可燃物，避免灾害持续扩大并保护周围建筑物，通常以水柱、水雾方式进行防护。（备注：执行灭火任务时，禁水性物质化学品严禁射水，射水前应确认该区域存放物质。）</p><h4 class=\"vsub\">5.6 灭火器介绍及操作</h4><p>法规依据：依据消防法『各类场所消防安全设备设置标准』第31条第三项，设有灭火器之楼层，自楼面居室任一点至灭火器之步行距离在二十公尺以下。常见为干粉灭火器与二氧化碳灭火器。操作步骤：1. 拉插销 → 2. 瞄准火源底部 → 3. 压握把 → 4. 扫向火源左右扫射。</p><h4 class=\"vsub\">5.7 室内、外消防栓操作</h4><p>5.7.1 室内消防栓(箱)：结构包含：启动灯、区域警铃、火警指示灯、手动报警机、PBL盘、消防栓阀、水带、瞄子。操作口诀「按、开、拿、拉、转」：1. 按警铃 → 2. 开室内消防栓箱门 → 3. 拿瞄子 → 4. 拉水带（水带需拉直，避免弯折爆管）→ 5. 转制水阀。</p><p>5.7.3 &amp; 5.7.4 室外消防栓：通常设置于工业厂房或仓库等建筑物，防护范围为建筑物一楼、二楼以及外墙。设备包含地上型消防栓（2-1/2吋出水口）、室外水带箱（水带、瞄子、开关板手）。操作步骤：1. 开消防栓箱门取水带 → 2. 接水带衔接消防栓上 → 3. 水带衔接瞄子或砲塔 → 4. 开启消防栓开关阀 → 5. 消防射水。</p><h4 class=\"vsub\">5.8 涡轮式瞄子操作</h4><p>主要分为 2-1/2 吋（适用室外消防栓水带）及 1-1/2 吋（适用室内消防栓水带）两种：</p><table><tr><th>项次</th><th>名称</th><th>功能说明</th></tr><tr><td>1</td><td>握把</td><td>稳定功能</td></tr><tr><td>2</td><td>水流开关</td><td>控制出水量（前推送水、后推关水）</td></tr><tr><td>3</td><td>水流速调节旋钮</td><td>控制流速</td></tr><tr><td>4</td><td>水分子大小调节旋钮</td><td>控制水分子大小（逆时针水雾状、顺时针水柱状）</td></tr><tr><td>5</td><td>快速接头(母接头)</td><td>进水端（与水带公接头连接）</td></tr><tr><td>6</td><td>前端出水口</td><td>出水端</td></tr></table><h4 class=\"vsub\">5.9 移动式砲塔操作</h4><p>因体积小、重量轻、机动性高，常用于抢救组无法接近火场或当下人力不足时使用，也适用于攻击、防护危险物质等情况。</p><table><tr><th>项次</th><th>名称</th><th>功能说明</th></tr><tr><td>1</td><td>支撑脚座</td><td>展开后固定于地板，支撑水柱发射后坐力</td></tr><tr><td>2</td><td>快速接头(母接头)</td><td>可连接消防栓阀之水带(公接头)</td></tr><tr><td>3</td><td>控制把手</td><td>控制水柱方向</td></tr><tr><td>4</td><td>上下方向控制旋钮</td><td>旋开后可控制水柱上下移动</td></tr><tr><td>5</td><td>左右方向控制旋钮</td><td>旋开后可控制水柱左右移动</td></tr><tr><td>6</td><td>涡轮瞄子</td><td>可调整水滴大小（雾状或水柱状）</td></tr><tr><td>7</td><td>水压压力计</td><td>确认水压高低</td></tr></table><p>操作步骤：1. 拉起脚座拉环 → 2. 打开脚座 → 3. 装上水带 → 4. 转开旋钮控制方向(上下) → 5. 转开旋钮控制方向(左右) → 6. 确认目标位置 → 7. 调整水雾或水柱。</p><h4 class=\"vsub\">5.10 电动车灭火毯 / 底盘洒水器设置及操作</h4><p>设置位置：• MTTW：H/Q B1F停车场人员入口处、CUB-6 B1F 消防泵浦室前；• MMT：A3 Parking B1F 北侧 B/16柱位、南侧 C/7柱位；• MTB：OB Parking B3F、OB 南侧梯厅间、B1栋户外草皮上应变推车。</p><p>灭火毯操作方式：1. 灭火毯自携行袋取出 → 2. 红色拉带对准目标车辆，短边中位线对准车辆中线 → 3. 撕开固定带 → 4. 拉开灭火毯红色拉带，中位线对齐车辆中间 → 5. 灭火毯遮盖车辆 → 6. 将灭火毯四周包围，阻隔空气。</p><p>电动车底盘洒水器操作方式：1. 定位(上风处)：建议以车辆两侧底盘为前进目标对齐，如因现场空间受限则以车头、尾为方向 → 2. 接水带：停车场为室内消防栓应接上1.5吋转接头 → 3. 注水、推进：注水后可利用水袋充水结实特性作为支点依目标方向前进 → 4. 搭配车用灭火毯使用时，应先覆盖灭火毯再掀开一侧将底盘洒水器放入车底。</p>"}, {"title": "化灾救灾技术", "text": "Chapter 06 化灾-救灾技术认知\n6.1 防守型、进攻型方法\n依据现场事故规模，分为防守型、进攻型两种应变方式，通常会先以防守型应变行动减少暴露影响范围后，随后再进行进攻型应变行动；若时间充足允许下，两种行动皆可同时进行。\n防守型应变（局限特定区域有效控制及围堵）：• 01 吸收法：借由润湿的程序使液体附著于固体，吸收剂体积随之膨胀，常以木屑、砂土方式进行吸收。• 02 吸附法：指化学品泄漏液体与中和剂表面相互吸附之方法。• 03 覆盖法：一种暂时性的控制方法，利用吸酸棉片进行覆盖。• 04 阻遏法(堤、坝、改道、截流)：以物理性阻隔法去阻止或减少外泄液流入环境的方法(NFPA)，为外泄控制最常使用的方法。• 05 蒸气驱散、压抑法：蒸气驱散法以洒水(水雾法)将蒸气驱散减低危害；蒸气压抑法使用抑制剂减少或消除发散的蒸气。\n进攻型应变（使用应变器材进行止漏、关紧或其他作为）：• 01 填塞与补贴法：填塞是将物质塞入漏洞或裂缝减少泄漏；贴补是将材料黏置于洞上使化学物不漏出，一般采用夹板或黏著剂固牢。• 02 转送(移槽)法：以人工、帮浦或加压输送等方式，将液体、气体或某些型态固体由受损容器(储槽)转移至另一容器。\n6.2 化学品泄漏围堵\n1. 穿著对应防护衣进行围堵及源头遮断，并确认漏液面积。2. 使用吸酸棉条、片由外向内、交叠进行围堵圈围，防止化学品持续扩散。3. 观察化学品泄漏源位置，围堵吓阻防止化学品溢流于低洼处。4. 止漏完成后，应使用中和剂进行环境除污，直至pH趋近于中性为止。5. 将沾染化学品吸酸棉等应变器材，装于有害废弃物处理桶(袋)并通知环保课后丢弃。\n6.3 ERCV 注15 砲车位置及使用时机\n使用时机：1. 适用于50L以下泄漏钢瓶；2. 气体钢瓶泄漏时，ERT小组人员无法对泄漏钢瓶止漏，且有污染环境之虞时立即启用；3. 待ERCV完成操作后，立即移至户外静待厂商收回处理。\n设置位置：• MTTW：FAB-B 1F南侧走道A18-8柱、FAB-C 1F资材库房走道；• MMT：A1 HPM 1F r/3柱位、A2 HPM 1F r/3柱位、A3 FAB 1F m/5柱位。\n注意事项：1. 需著A级防护衣方可操作，禁止地面磨擦影响防护效力；2. 确认ERCV内部已无任何压力，否则严禁开启法兰；3. 法兰开口应朝向开阔处，且45°夹角范围内严禁人员进入；4. 需2员相互作业，勿单独行动。\n禁止使用气体种类：1. 乙炔（超过 1.035 Barg 受撞或受热可能分解爆炸，不得倒置或滚动）；2. 强氧化性气体（如 N2O、ClF3、20%F2/N2、WF6）；3. 自燃性气体（如 SiH4、PH3、SiH2Cl2 等）；4. 爆炸性气体混合物（CH4、CF4、NF3、1%PH3/Ar、PGMEA、AsH3、CH2F2、CO、BF3 等）；5. 液满钢瓶；6. 仅能封装一支钢瓶。\n6.3.4 ERCV Model 5503 操作流程 (20步骤)：1. 按压柄侧辅助并控制碟煞移动ERCV → 2. 马鞍放至适当位置 → 3. 检视压力表转动压力阀确认归(0) → 4. 使用T型板手旋开上方螺帽 → 5. 旋开下方螺帽 → 6. 双手旋开螺帽（若有气体喷出立即锁上，勿以手指遮盖）→ 7. 开启密闭门 → 8. 取出小钢瓶固定架及固定链条 → 9. 保护泄漏钢瓶头阀件（避免防护衣摩擦破损）→ 10. 扶正泄漏钢瓶 → 11. 转紧钢瓶保护盖（若瓶头损坏立即使用Kit止漏）→ 12. 利用马鞍支点杠杆方式放入ERCV内部 → 13. 封装时泄漏源朝下、钢瓶头朝门 → 14. 以固定链条勾住滑轨孔洞避免滑动 → 15. 密闭门关闭前后端排放阀须保持开启 → 16. 检视 O-ring 状况避免附著脏污及损坏 → 17. 锁上并以T型板手旋紧上下安全螺帽 → 18. 关闭后端排放阀，侦检确认无读值 → 19. 环境侦检读值需为0 → 20. 填写标签贴版注明泄漏化学品交由厂商清运。\n6.3.5 ERCV HP 10 操作流程 (18步骤)：1. 用板手将螺帽松开后(泄压)再用手逆时钟转开 → 2. 逆时钟打开阀头进行泄压 → 3. 确认压力表头归0 → 4. 使用通用把手逆时钟转动排气螺杆 → 5. 用手逆时钟松开排气螺杆 → 6. 用通用把手逆时钟松开固定环扩张器 → 7. 将两个固定环向后拉 → 8. 将马鞍顺势取下 → 9. 将两边档板扣环取下 → 10. 钢瓶转至橡胶垫上 → 11. 利用杠杆原理将钢瓶放推入至砲车内 → 12. 推入后使用钢瓶固定板固定（需卡进钢瓶支架）→ 13. 向后拉将舱门开启（开启时人员站在门右方避免伤害）→ 14. 档板把手下拉后沿滑轨取出档板 → 15. 钢瓶放入后将档板把手往上拉固定钢瓶 → 16. 使用通用把手将舱门关回后轻推固定，顺时钟固定扩张环 → 17. 顺时钟锁上排气螺杆（需对准）→ 18. 锁上阀头及螺帽，注明化学品资讯交由厂商出场清运。\n6.4 除污帐篷操作\n设置地点：a. 冷区上风处，暖区至冷区交接点；b. 事故现场邻近冲身洗眼器。考量事项：位置选择(上风处/水源/地势)、除污人数、除污技术类型、天气状况、设备与水源供给、仪器除污可行性。\n厂区除污帐篷器材：C级防护衣、冲淋设备、吸酸棉片(条)、pH石蕊试纸、泄漏处理桶(袋)、消防水带、沉水泵、水管、清洗刷、中和剂、蓝白拖。\n6.4.2 冲身洗眼器除污设置：支援组于冲身洗眼器建置除污区并铺设吸酸棉片，抢救组冲淋后使用pH试纸检测PPE趋近中性，以吸酸棉擦干并脱除PPE；随后支援组自行脱除PPE丢至泄漏处理袋(桶)。\n6.4.3 除污帐篷三阶段除污：划分为三区：第一除污区（第一阶段：先使用清水及刷子清除污染物）→ 第二除污区（第二阶段：使用中和剂处理污染物，再使用清水二次清除污染物）→ 第三除污区（第三阶段：使用吸液棉擦干防护衣，并协助脱除）。\n除污帐篷搭设12步骤：1. 支援组搬运除污帐篷 → 2. 摊开并确认进出方向 → 3. 将钢瓶充气转接阀安装至空气钢瓶上 → 4. 打开帐篷充气口盖子并确认逆止阀 → 5. 充气转接阀安装至充气口并逆时针旋转固定 → 6. 一人扶起帐篷气柱，一人打开钢瓶充气 → 7. 充气完成移除转接阀并盖上盖子 → 8. 固定绳索于地面或稳定物体 → 9. 接上水带、排水管拉至废水收集处 → 10. 检视帐篷内排水口是否有异物堵塞 → 11. 将抽水马达置入帐篷内 → 12. 排水管线拉至废水收集处。", "html": "<h4 class=\"vsub\">6.1 防守型、进攻型方法</h4><p>依据现场事故规模，分为防守型、进攻型两种应变方式，通常会先以防守型应变行动减少暴露影响范围后，随后再进行进攻型应变行动；若时间充足允许下，两种行动皆可同时进行。</p><p>防守型应变（局限特定区域有效控制及围堵）：• 01 吸收法：借由润湿的程序使液体附著于固体，吸收剂体积随之膨胀，常以木屑、砂土方式进行吸收。• 02 吸附法：指化学品泄漏液体与中和剂表面相互吸附之方法。• 03 覆盖法：一种暂时性的控制方法，利用吸酸棉片进行覆盖。• 04 阻遏法(堤、坝、改道、截流)：以物理性阻隔法去阻止或减少外泄液流入环境的方法(NFPA)，为外泄控制最常使用的方法。• 05 蒸气驱散、压抑法：蒸气驱散法以洒水(水雾法)将蒸气驱散减低危害；蒸气压抑法使用抑制剂减少或消除发散的蒸气。</p><p>进攻型应变（使用应变器材进行止漏、关紧或其他作为）：• 01 填塞与补贴法：填塞是将物质塞入漏洞或裂缝减少泄漏；贴补是将材料黏置于洞上使化学物不漏出，一般采用夹板或黏著剂固牢。• 02 转送(移槽)法：以人工、帮浦或加压输送等方式，将液体、气体或某些型态固体由受损容器(储槽)转移至另一容器。</p><h4 class=\"vsub\">6.2 化学品泄漏围堵</h4><p>1. 穿著对应防护衣进行围堵及源头遮断，并确认漏液面积。2. 使用吸酸棉条、片由外向内、交叠进行围堵圈围，防止化学品持续扩散。3. 观察化学品泄漏源位置，围堵吓阻防止化学品溢流于低洼处。4. 止漏完成后，应使用中和剂进行环境除污，直至pH趋近于中性为止。5. 将沾染化学品吸酸棉等应变器材，装于有害废弃物处理桶(袋)并通知环保课后丢弃。</p><h4 class=\"vsub\">6.3 ERCV 注15 砲车位置及使用时机</h4><p>使用时机：1. 适用于50L以下泄漏钢瓶；2. 气体钢瓶泄漏时，ERT小组人员无法对泄漏钢瓶止漏，且有污染环境之虞时立即启用；3. 待ERCV完成操作后，立即移至户外静待厂商收回处理。</p><p>设置位置：• MTTW：FAB-B 1F南侧走道A18-8柱、FAB-C 1F资材库房走道；• MMT：A1 HPM 1F r/3柱位、A2 HPM 1F r/3柱位、A3 FAB 1F m/5柱位。</p><p>注意事项：1. 需著A级防护衣方可操作，禁止地面磨擦影响防护效力；2. 确认ERCV内部已无任何压力，否则严禁开启法兰；3. 法兰开口应朝向开阔处，且45°夹角范围内严禁人员进入；4. 需2员相互作业，勿单独行动。</p><p>禁止使用气体种类：1. 乙炔（超过 1.035 Barg 受撞或受热可能分解爆炸，不得倒置或滚动）；2. 强氧化性气体（如 N2O、ClF3、20%F2/N2、WF6）；3. 自燃性气体（如 SiH4、PH3、SiH2Cl2 等）；4. 爆炸性气体混合物（CH4、CF4、NF3、1%PH3/Ar、PGMEA、AsH3、CH2F2、CO、BF3 等）；5. 液满钢瓶；6. 仅能封装一支钢瓶。</p><p>6.3.4 ERCV Model 5503 操作流程 (20步骤)：1. 按压柄侧辅助并控制碟煞移动ERCV → 2. 马鞍放至适当位置 → 3. 检视压力表转动压力阀确认归(0) → 4. 使用T型板手旋开上方螺帽 → 5. 旋开下方螺帽 → 6. 双手旋开螺帽（若有气体喷出立即锁上，勿以手指遮盖）→ 7. 开启密闭门 → 8. 取出小钢瓶固定架及固定链条 → 9. 保护泄漏钢瓶头阀件（避免防护衣摩擦破损）→ 10. 扶正泄漏钢瓶 → 11. 转紧钢瓶保护盖（若瓶头损坏立即使用Kit止漏）→ 12. 利用马鞍支点杠杆方式放入ERCV内部 → 13. 封装时泄漏源朝下、钢瓶头朝门 → 14. 以固定链条勾住滑轨孔洞避免滑动 → 15. 密闭门关闭前后端排放阀须保持开启 → 16. 检视 O-ring 状况避免附著脏污及损坏 → 17. 锁上并以T型板手旋紧上下安全螺帽 → 18. 关闭后端排放阀，侦检确认无读值 → 19. 环境侦检读值需为0 → 20. 填写标签贴版注明泄漏化学品交由厂商清运。</p><p>6.3.5 ERCV HP 10 操作流程 (18步骤)：1. 用板手将螺帽松开后(泄压)再用手逆时钟转开 → 2. 逆时钟打开阀头进行泄压 → 3. 确认压力表头归0 → 4. 使用通用把手逆时钟转动排气螺杆 → 5. 用手逆时钟松开排气螺杆 → 6. 用通用把手逆时钟松开固定环扩张器 → 7. 将两个固定环向后拉 → 8. 将马鞍顺势取下 → 9. 将两边档板扣环取下 → 10. 钢瓶转至橡胶垫上 → 11. 利用杠杆原理将钢瓶放推入至砲车内 → 12. 推入后使用钢瓶固定板固定（需卡进钢瓶支架）→ 13. 向后拉将舱门开启（开启时人员站在门右方避免伤害）→ 14. 档板把手下拉后沿滑轨取出档板 → 15. 钢瓶放入后将档板把手往上拉固定钢瓶 → 16. 使用通用把手将舱门关回后轻推固定，顺时钟固定扩张环 → 17. 顺时钟锁上排气螺杆（需对准）→ 18. 锁上阀头及螺帽，注明化学品资讯交由厂商出场清运。</p><h4 class=\"vsub\">6.4 除污帐篷操作</h4><p>设置地点：a. 冷区上风处，暖区至冷区交接点；b. 事故现场邻近冲身洗眼器。考量事项：位置选择(上风处/水源/地势)、除污人数、除污技术类型、天气状况、设备与水源供给、仪器除污可行性。</p><p>厂区除污帐篷器材：C级防护衣、冲淋设备、吸酸棉片(条)、pH石蕊试纸、泄漏处理桶(袋)、消防水带、沉水泵、水管、清洗刷、中和剂、蓝白拖。</p><p>6.4.2 冲身洗眼器除污设置：支援组于冲身洗眼器建置除污区并铺设吸酸棉片，抢救组冲淋后使用pH试纸检测PPE趋近中性，以吸酸棉擦干并脱除PPE；随后支援组自行脱除PPE丢至泄漏处理袋(桶)。</p><p>6.4.3 除污帐篷三阶段除污：划分为三区：第一除污区（第一阶段：先使用清水及刷子清除污染物）→ 第二除污区（第二阶段：使用中和剂处理污染物，再使用清水二次清除污染物）→ 第三除污区（第三阶段：使用吸液棉擦干防护衣，并协助脱除）。</p><p>除污帐篷搭设12步骤：1. 支援组搬运除污帐篷 → 2. 摊开并确认进出方向 → 3. 将钢瓶充气转接阀安装至空气钢瓶上 → 4. 打开帐篷充气口盖子并确认逆止阀 → 5. 充气转接阀安装至充气口并逆时针旋转固定 → 6. 一人扶起帐篷气柱，一人打开钢瓶充气 → 7. 充气完成移除转接阀并盖上盖子 → 8. 固定绳索于地面或稳定物体 → 9. 接上水带、排水管拉至废水收集处 → 10. 检视帐篷内排水口是否有异物堵塞 → 11. 将抽水马达置入帐篷内 → 12. 排水管线拉至废水收集处。</p>"}, {"title": "防护衣除污及脱除", "text": "Chapter 07 防护衣除污及脱除技巧\n7.1 除污技巧认知\n快速除污：有冲身洗眼器地方，可供伤患、抢救组人员进行紧急除污作业，减少环境污染风险。\n技术除污：由支援组搭设除污帐篷，伤患、抢救组进行清水除污、中和剂除污、擦拭除污三阶段除污作业，彻底将污染物清除。\n7.2 A级防护衣脱除技巧 (9步骤)\n1. 弃置使用的应变器材 → 2. 使用清水、刷子清洗 → 3. 使用中和剂刷洗 → 4. 使用清水除去中和剂 → 5. 使用pH试纸检测趋近于中性 → 6. 刷洗A级靴底部 → 7. 使用吸酸棉进行擦拭 → 8. 脱除A级防护衣 → 9. 丢弃防护衣至桶内。\n7.3 C级防护衣脱除技巧 (9步骤)\n1. 脱除外部防护具 → 2. 撕除抗化胶带 → 3. 脱除C级帽 → 4. 拉开拉链 → 5. 脱除外层抗化手套 → 6. 由内向外卷防护衣 → 7. 防护衣丢弃至桶内 → 8. 脱除护目镜及防毒面罩 → 9. 脱除内层手套。", "html": "<h4 class=\"vsub\">7.1 除污技巧认知</h4><p>快速除污：有冲身洗眼器地方，可供伤患、抢救组人员进行紧急除污作业，减少环境污染风险。</p><p>技术除污：由支援组搭设除污帐篷，伤患、抢救组进行清水除污、中和剂除污、擦拭除污三阶段除污作业，彻底将污染物清除。</p><h4 class=\"vsub\">7.2 A级防护衣脱除技巧 (9步骤)</h4><p>1. 弃置使用的应变器材 → 2. 使用清水、刷子清洗 → 3. 使用中和剂刷洗 → 4. 使用清水除去中和剂 → 5. 使用pH试纸检测趋近于中性 → 6. 刷洗A级靴底部 → 7. 使用吸酸棉进行擦拭 → 8. 脱除A级防护衣 → 9. 丢弃防护衣至桶内。</p><h4 class=\"vsub\">7.3 C级防护衣脱除技巧 (9步骤)</h4><p>1. 脱除外部防护具 → 2. 撕除抗化胶带 → 3. 脱除C级帽 → 4. 拉开拉链 → 5. 脱除外层抗化手套 → 6. 由内向外卷防护衣 → 7. 防护衣丢弃至桶内 → 8. 脱除护目镜及防毒面罩 → 9. 脱除内层手套。</p>"}, {"title": "疏散认知", "text": "Chapter 08 厂区疏散认知\n8.1 疏散时机与定义\n1. 达火警、化学品泄漏、液体泄漏、地震、异味、台风、无尘室停电处理流程疏散标准时，即进行疏散。2. 劳工执行职务发现有立即发生危险之虞时，得在不危及其他工作者安全情形下，自行停止作业及退避至安全场所，并立即向直属主管报告。\n疏散定义：区域疏散（指同一楼层中不同作业区域间移动）、楼层疏散（指不同楼层间移动；同一回风区间则属同一楼层区块）、栋别/全厂疏散（意同全厂疏散，指人员移动离开指定建筑物）。\n8.2 广播类型与流程\n火灾广播：火警警报（确认阶段：原地静待聆听下一段广播）→ 不需疏散则继续安心工作；需要疏散则由逃生门进行疏散 → 解除阶段（状况解除返回工作岗位）。\n地震广播：厂内地震规模达四级(含)以下未达疏散标准（不需疏散继续安心工作，若有异常依监控中心广播指示）；厂内地震规模达五级以上（确认阶段：至逃生门集结 → 造成危害则由逃生门进行疏散 → 状况解除返回工作岗位）。\n其他异常广播：气体泄漏 / 异味 / 化学品泄漏 → 确认阶段（应变人员确认）→ 不需疏散继续工作 / 需要疏散则由逃生门进行疏散 → 状况解除返回工作岗位。\n8.3 疏散指引及注意事项\n指引标示：避难方向指示灯（人员行走动线或办公室内）、紧急出口指示灯（逃生梯及出入口上方）、避难逃生路线图（楼层行走动线）、户外指引标示牌（厂区外围及集结点）。\n注意事项：1. 听从引导人员指示（勿逗留嬉戏）；2. 不要搭乘电梯逃生（走逃生梯）；3. 地震疏散以手护头（防掉落物砸伤）；4. 听从指挥官指令（疏散过程需刷卡报到，原地安静等待指示直至状况解除）。\n8.4 厂区疏散集结点 (室外 / 室内)\n\n[TABLE 15 | 7 rows]\n厂区 | 8.4.1 户外集结点 (Muster Station) | 8.4.2 室内集结点（限极端恶劣天气使用）\nMTTW (F11) | • 1号集结点：第一停车场• 2号集结点：H/Q 对面篮球场 | • H/Q B1F 餐厅\nMMT (FAB16) | • 1号集结点：1号哨旁厂内道路• 2号集结点：3号哨后方 | • OB 栋 1F 餐厅\nMTB / TCP | • MTB 1号集结点：1号哨旁来宾停车场• MTB 2号集结点：P1停车场• TCP 集结点：1号哨旁、码头区旁 | • MTB：SB 栋 1F 走道• TCP：TCP 栋 1F 走道\nO2 / AATT | • 1号集结点：O2 室外集结点区域• 2号集结点：AATT 室外集结点区域 | • O2 栋 2F 走道\nW5 / O3 | • W5：室外集结点 (Muster Station 1)• O3：室外集结点 (Muster Station 1) | • 依疏散广播及现场引导人员指示集结\nMMTN | • 1号集结点：集结点1(东) 东侧• 2号集结点：集结点2(西) 西侧 | • 依疏散广播及现场引导人员指示集结\n[/TABLE]", "html": "<h4 class=\"vsub\">8.1 疏散时机与定义</h4><p>1. 达火警、化学品泄漏、液体泄漏、地震、异味、台风、无尘室停电处理流程疏散标准时，即进行疏散。2. 劳工执行职务发现有立即发生危险之虞时，得在不危及其他工作者安全情形下，自行停止作业及退避至安全场所，并立即向直属主管报告。</p><p>疏散定义：区域疏散（指同一楼层中不同作业区域间移动）、楼层疏散（指不同楼层间移动；同一回风区间则属同一楼层区块）、栋别/全厂疏散（意同全厂疏散，指人员移动离开指定建筑物）。</p><h4 class=\"vsub\">8.2 广播类型与流程</h4><p>火灾广播：火警警报（确认阶段：原地静待聆听下一段广播）→ 不需疏散则继续安心工作；需要疏散则由逃生门进行疏散 → 解除阶段（状况解除返回工作岗位）。</p><p>地震广播：厂内地震规模达四级(含)以下未达疏散标准（不需疏散继续安心工作，若有异常依监控中心广播指示）；厂内地震规模达五级以上（确认阶段：至逃生门集结 → 造成危害则由逃生门进行疏散 → 状况解除返回工作岗位）。</p><p>其他异常广播：气体泄漏 / 异味 / 化学品泄漏 → 确认阶段（应变人员确认）→ 不需疏散继续工作 / 需要疏散则由逃生门进行疏散 → 状况解除返回工作岗位。</p><h4 class=\"vsub\">8.3 疏散指引及注意事项</h4><p>指引标示：避难方向指示灯（人员行走动线或办公室内）、紧急出口指示灯（逃生梯及出入口上方）、避难逃生路线图（楼层行走动线）、户外指引标示牌（厂区外围及集结点）。</p><p>注意事项：1. 听从引导人员指示（勿逗留嬉戏）；2. 不要搭乘电梯逃生（走逃生梯）；3. 地震疏散以手护头（防掉落物砸伤）；4. 听从指挥官指令（疏散过程需刷卡报到，原地安静等待指示直至状况解除）。</p><h4 class=\"vsub\">8.4 厂区疏散集结点 (室外 / 室内)</h4><table><tr><th>厂区</th><th>8.4.1 户外集结点 (Muster Station)</th><th>8.4.2 室内集结点（限极端恶劣天气使用）</th></tr><tr><td>MTTW (F11)</td><td>• 1号集结点：第一停车场• 2号集结点：H/Q 对面篮球场</td><td>• H/Q B1F 餐厅</td></tr><tr><td>MMT (FAB16)</td><td>• 1号集结点：1号哨旁厂内道路• 2号集结点：3号哨后方</td><td>• OB 栋 1F 餐厅</td></tr><tr><td>MTB / TCP</td><td>• MTB 1号集结点：1号哨旁来宾停车场• MTB 2号集结点：P1停车场• TCP 集结点：1号哨旁、码头区旁</td><td>• MTB：SB 栋 1F 走道• TCP：TCP 栋 1F 走道</td></tr><tr><td>O2 / AATT</td><td>• 1号集结点：O2 室外集结点区域• 2号集结点：AATT 室外集结点区域</td><td>• O2 栋 2F 走道</td></tr><tr><td>W5 / O3</td><td>• W5：室外集结点 (Muster Station 1)• O3：室外集结点 (Muster Station 1)</td><td>• 依疏散广播及现场引导人员指示集结</td></tr><tr><td>MMTN</td><td>• 1号集结点：集结点1(东) 东侧• 2号集结点：集结点2(西) 西侧</td><td>• 依疏散广播及现场引导人员指示集结</td></tr></table>"}, {"title": "救护认知", "text": "Chapter 09 厂区救护认知\n9.1 保健中心介绍\n\n[TABLE 16 | 7 rows]\n厂别 | 厂名 | 保健中心位置 | 服务时间 | Teams 连络电话（市话/手机：04-2576-5119）\n桃园厂 | 一厂 (F11) | 5F | 24小时 | 5119#1\n台北/新竹 | 办公室 | 23F / 7F 柜台设置急救箱 | 仅常日班 | 5119#1\n台中厂 | FAB16 | 4F | 24小时 | 5119#2\n台中厂 | A3 | 3F | 仅常日班 | 5119#4\n台中厂 | MTB | 3F | 24小时 | 5119#3\n台中厂 | AATT | 3F | 仅常日班 | 5119#3\n[/TABLE]\n\n9.2 化学品喷溅救护\n紧急处置4步骤：1. 脱除衣物（使用安全剪刀将受污染衣物剪开减少暴露面积，使用pH试纸判定酸碱，中性液体可直接冲水）→ 2. 吸干身上化学残液（使用吸酸棉片快速擦掉）→ 3. Call Help 保健中心（立即拨打 2119 / 5119 / 7119 并告知人/事/时/地/物）→ 4. 大量清水冲淋（>15分钟，使用六腐灵 or 敌腐灵）。\n9.2.1 冲身洗眼器冲淋：• 局部喷溅眼睛：前推开启洗眼器 → 靠近洗眼器冲淋眼睛 15分钟（护理师救伤评估后送）。• 大小范围喷溅身体：脱除沾染化学品衣物 → 冲淋 15分钟 → 使用纱布覆盖患部 → 尽速送医（备妥SDS）。\n9.2.2 六腐灵、敌腐灵差异：• 六腐灵：用于氢氟酸(HF)或酸性介质氟类衍生物溅触时。皮肤外观由发红轻微水肿 → 中央变白色水泡或浅灰色、周边略带紫色环状 → 转黑紫或灰紫色伴随强烈疼痛。不同浓度 HF 疼痛与红斑延迟时间：≥50% 立即发生（迅速组织破坏）；10%~50% 延迟 0.5–6 小时；<10% 延迟 6–24 小时。• 敌腐灵：用于 TMAH 或酸碱类化学品溅触时。四甲基氢氧化铵(TMAH)危害：1. 1%以上的TMAH具有潜在健康危害(有毒性)，特别是皮肤大面积暴露；2. 高pH值(强碱)形成腐蚀性灼伤；3. 主要经由皮肤接触暴露，会作用于呼吸肌造成呼吸抑制。\n\n[TABLE 17 | 4 rows]\n项目 | 功能 | 设置地点\n500ml 六氟灵冲洗器 | HF 或含氟之化学物质 | 台中厂：冲身洗眼器 / 冲眼器 / 实验室 / 使用 HF 或含 F 化学品区域\n100ml 敌腐灵喷雾器 | 酸碱除污剂 | 台中厂：冲身洗眼器 / 冲眼器 / 实验室 / 使用强酸或强碱化学品区域\n500ml 敌腐灵冲洗器 | 酸碱除污剂 | 台中厂：TMAH operation area (PH)\n[/TABLE]\n\n9.3 AED 注16 点位、心肺复苏术 (CPR 注17 + AED)\n根据法律，对人施予急救适用免责规定。厂区 AED 配置点位摘要：\nMTTW (FAB11) AED 点位：H/Q (10F、5F Health center、3F Clean room entrance、1F Lobby、B1 Guard room)、FAB-B (5F、4F回风区、3F C/R、2F C/R、F11B BAY706、1F Door of CCR)、FAB-A / NSB (4F回风区、3F C/R、2F C/R、F11A 1F Entrance)、CUB-1 / CUB-2 (CUB-2 1F、Bonded warehouse Security Room)、FAB-C (4F回风区、3F C/R、F11C 2F Clean room entrance、F11C BAYC07、1F Door of CCR、Technology 9th Road Security Room)。\nMMT (FAB16 / A3) AED 点位：Office (1F餐厅、1F健身房、2F大厅、3F~8F C梯厅)、FAB16 (4F保健中心、A1/A2 2F~5F中央走道与无尘室电梯口、SUP栋2-1/5-1应变柜旁、SUP 1F大码头、SUP B1F电梯口、B2F南侧停车场)、CUP 2F走道、宿舍 1F柜台旁、A3 (1F大厅、3F保健中心外、2F/4F/5F c/5电梯口、B1F停车场梯厅)。\n其他厂区与 CPR+AED 流程：另包含 MTB、TCP、O2/AATT、MMTN 等各厂区大厅、保健中心及主要走道点位，以及 CPR+AED「叫、叫、压、电」标准急救步骤（确认意识呼吸 → 求救并取AED → 胸部按压100-120次/分、深度5-6公分 → 开机贴片分析电击）。\n9.4 伤患搬运救护 & 9.5 哈姆立克法救护\n9.4 伤患搬运救护：依据伤患意识状态、伤势部位与救援人数，执行单人搬运（扶持法、背负法、抱持法、拖行法）或双人/多人搬运（双人座抬法、前后抬法、担架搬运），移动时须确保呼吸道畅通并避免二次伤害。\n9.5 哈姆立克法救护：针对呼吸道异物哽塞患者：意识清醒时采站立或坐姿环抱腹部法（一手握拳拇指侧置于肚脐上方与胸骨剑突下方之间，另一手包住拳头快速向内向上挤压）；孕妇或肥胖者改压胸骨下半部；若患者失去意识则立即平躺实施 CPR。", "html": "<h4 class=\"vsub\">9.1 保健中心介绍</h4><table><tr><th>厂别</th><th>厂名</th><th>保健中心位置</th><th>服务时间</th><th>Teams 连络电话（市话/手机：04-2576-5119）</th></tr><tr><td>桃园厂</td><td>一厂 (F11)</td><td>5F</td><td>24小时</td><td>5119#1</td></tr><tr><td>台北/新竹</td><td>办公室</td><td>23F / 7F 柜台设置急救箱</td><td>仅常日班</td><td>5119#1</td></tr><tr><td>台中厂</td><td>FAB16</td><td>4F</td><td>24小时</td><td>5119#2</td></tr><tr><td>台中厂</td><td>A3</td><td>3F</td><td>仅常日班</td><td>5119#4</td></tr><tr><td>台中厂</td><td>MTB</td><td>3F</td><td>24小时</td><td>5119#3</td></tr><tr><td>台中厂</td><td>AATT</td><td>3F</td><td>仅常日班</td><td>5119#3</td></tr></table><h4 class=\"vsub\">9.2 化学品喷溅救护</h4><p>紧急处置4步骤：1. 脱除衣物（使用安全剪刀将受污染衣物剪开减少暴露面积，使用pH试纸判定酸碱，中性液体可直接冲水）→ 2. 吸干身上化学残液（使用吸酸棉片快速擦掉）→ 3. Call Help 保健中心（立即拨打 2119 / 5119 / 7119 并告知人/事/时/地/物）→ 4. 大量清水冲淋（&gt;15分钟，使用六腐灵 or 敌腐灵）。</p><p>9.2.1 冲身洗眼器冲淋：• 局部喷溅眼睛：前推开启洗眼器 → 靠近洗眼器冲淋眼睛 15分钟（护理师救伤评估后送）。• 大小范围喷溅身体：脱除沾染化学品衣物 → 冲淋 15分钟 → 使用纱布覆盖患部 → 尽速送医（备妥SDS）。</p><p>9.2.2 六腐灵、敌腐灵差异：• 六腐灵：用于氢氟酸(HF)或酸性介质氟类衍生物溅触时。皮肤外观由发红轻微水肿 → 中央变白色水泡或浅灰色、周边略带紫色环状 → 转黑紫或灰紫色伴随强烈疼痛。不同浓度 HF 疼痛与红斑延迟时间：≥50% 立即发生（迅速组织破坏）；10%~50% 延迟 0.5–6 小时；&lt;10% 延迟 6–24 小时。• 敌腐灵：用于 TMAH 或酸碱类化学品溅触时。四甲基氢氧化铵(TMAH)危害：1. 1%以上的TMAH具有潜在健康危害(有毒性)，特别是皮肤大面积暴露；2. 高pH值(强碱)形成腐蚀性灼伤；3. 主要经由皮肤接触暴露，会作用于呼吸肌造成呼吸抑制。</p><table><tr><th>项目</th><th>功能</th><th>设置地点</th></tr><tr><td>500ml 六氟灵冲洗器</td><td>HF 或含氟之化学物质</td><td>台中厂：冲身洗眼器 / 冲眼器 / 实验室 / 使用 HF 或含 F 化学品区域</td></tr><tr><td>100ml 敌腐灵喷雾器</td><td>酸碱除污剂</td><td>台中厂：冲身洗眼器 / 冲眼器 / 实验室 / 使用强酸或强碱化学品区域</td></tr><tr><td>500ml 敌腐灵冲洗器</td><td>酸碱除污剂</td><td>台中厂：TMAH operation area (PH)</td></tr></table><h4 class=\"vsub\">9.3 AED 注16 点位、心肺复苏术 (CPR 注17 + AED)</h4><p>根据法律，对人施予急救适用免责规定。厂区 AED 配置点位摘要：</p><p>MTTW (FAB11) AED 点位：H/Q (10F、5F Health center、3F Clean room entrance、1F Lobby、B1 Guard room)、FAB-B (5F、4F回风区、3F C/R、2F C/R、F11B BAY706、1F Door of CCR)、FAB-A / NSB (4F回风区、3F C/R、2F C/R、F11A 1F Entrance)、CUB-1 / CUB-2 (CUB-2 1F、Bonded warehouse Security Room)、FAB-C (4F回风区、3F C/R、F11C 2F Clean room entrance、F11C BAYC07、1F Door of CCR、Technology 9th Road Security Room)。</p><p>MMT (FAB16 / A3) AED 点位：Office (1F餐厅、1F健身房、2F大厅、3F~8F C梯厅)、FAB16 (4F保健中心、A1/A2 2F~5F中央走道与无尘室电梯口、SUP栋2-1/5-1应变柜旁、SUP 1F大码头、SUP B1F电梯口、B2F南侧停车场)、CUP 2F走道、宿舍 1F柜台旁、A3 (1F大厅、3F保健中心外、2F/4F/5F c/5电梯口、B1F停车场梯厅)。</p><p>其他厂区与 CPR+AED 流程：另包含 MTB、TCP、O2/AATT、MMTN 等各厂区大厅、保健中心及主要走道点位，以及 CPR+AED「叫、叫、压、电」标准急救步骤（确认意识呼吸 → 求救并取AED → 胸部按压100-120次/分、深度5-6公分 → 开机贴片分析电击）。</p><h4 class=\"vsub\">9.4 伤患搬运救护 &amp; 9.5 哈姆立克法救护</h4><p>9.4 伤患搬运救护：依据伤患意识状态、伤势部位与救援人数，执行单人搬运（扶持法、背负法、抱持法、拖行法）或双人/多人搬运（双人座抬法、前后抬法、担架搬运），移动时须确保呼吸道畅通并避免二次伤害。</p><p>9.5 哈姆立克法救护：针对呼吸道异物哽塞患者：意识清醒时采站立或坐姿环抱腹部法（一手握拳拇指侧置于肚脐上方与胸骨剑突下方之间，另一手包住拳头快速向内向上挤压）；孕妇或肥胖者改压胸骨下半部；若患者失去意识则立即平躺实施 CPR。</p>"}, {"title": "参考资料", "text": "Chapter 10 参考资料来源\n本指引方针依据紧急应变中心 内部标准作业程序、中华民国《消防法》及《消防法施行细则》、《职业安全卫生法》、美国消防协会标准 (NFPA)、紧急应变指南 (ERG)、美国国家职业安全与卫生研究院 (NIOSH) 规范及内政部消防署救灾技术手册编撰（涵盖注1至注17完整法规与技术名词释义）。", "html": "<p>本指引方针依据紧急应变中心 内部标准作业程序、中华民国《消防法》及《消防法施行细则》、《职业安全卫生法》、美国消防协会标准 (NFPA)、紧急应变指南 (ERG)、美国国家职业安全与卫生研究院 (NIOSH) 规范及内政部消防署救灾技术手册编撰（涵盖注1至注17完整法规与技术名词释义）。</p>"}];
+
+// ===== 合并条目：子节并入父条目，子节全文照录 =====
+function sub(t){ return '<h4 class="vsub">' + t + '</h4>'; }
+function gtext(){ var s=''; for(var i=0;i<arguments.length;i++){ s += GUIDE[arguments[i]].title + ' ' + GUIDE[arguments[i]].text + ' '; } return s; }
+function ghtml(){ var s=''; for(var i=0;i<arguments.length;i+=2){ s += sub(arguments[i]) + GUIDE[arguments[i+1]].html; } return s; }
+
+var ENTRIES = [];
+ENTRIES.push({title:'ERC 功能定位与七大重点灾害', text:gtext(0), html:GUIDE[0].html});
+ENTRIES.push({title:'值班', text:gtext(1,4,5,6), html:ghtml('值班台安排',1,'开门七件事与值班分工 R&R',4,'值班工作管制表',5,'紧急应变 R&R',6)});
+ENTRIES.push({title:'监控设备、应变器材与设施', text:gtext(2), html:GUIDE[2].html});
+ENTRIES.push({title:'紧急应变组织图', text:gtext(7) + ' ' + ERO.title + ' ERO 组织图 编组图 ' + ERO.nodes.map(function(n){return n.t;}).join(' '),
+  html: orgBody() + sub('组织编组说明') + GUIDE[7].html});
+(function(){
+  var h = '', t = '应变流程图 流程图 ';
+  FLOWS.forEach(function(f, fi){
+    h += sub(f.title) + flowBody(f, fi);
+    t += f.title + ' ';
+    f.nodes.forEach(function(n){ t += n.text + ' ' + n.unit + ' '; });
+  });
+  ENTRIES.push({title:'应变流程图', text:t, html:h});
+})();
+ENTRIES.push({title:'检查表与应变工具', text:gtext(8), html:GUIDE[8].html});
+ENTRIES.push({title:'巡检', text:gtext(9,14), html:ghtml('ISEP 巡检计划与建物安全责任区',9,'巡检缺失统计与落实工安',14)});
+ENTRIES.push({title:'通报', text:gtext(10,11), html:ghtml('紧急通报规定',10,'人员受伤通报分级（Class 1／2／3）',11)});
+ENTRIES.push({title:'呼叫救护车送医原则', text:gtext(12), html:GUIDE[12].html});
+ENTRIES.push({title:'疏散程序规定', text:gtext(13), html:GUIDE[13].html});
+ENTRIES.push({title:'紧急应变训练', text:gtext(3), html:GUIDE[3].html});
+MICRON.forEach(function(m){ ENTRIES.push({title:m.title, text:m.title + ' ' + m.text, html:m.html}); });
+
+// ===== 渲染：一个搜索框 + 一列条目，点开就地展开全文 =====
+var listEl = document.getElementById('list');
+var searchEl = document.getElementById('q');
+var countEl = document.getElementById('count');
+function render(){
+  var q = searchEl.value.trim().toLowerCase();
+  var parts = [], shown = 0;
+  ENTRIES.forEach(function(e, i){
+    if(q && (e.title + ' ' + e.text).toLowerCase().indexOf(q) < 0) return;
+    shown++;
+    parts.push('<details class="entry" id="e' + i + '"><summary><span>' + esc(e.title) + '</span></summary><div class="entry-body">' + e.html + '</div></details>');
+  });
+  listEl.innerHTML = parts.length ? parts.join('') : '<p class="note">没有符合的条目。</p>';
+  countEl.textContent = '共 ' + ENTRIES.length + ' 条' + (q ? '，符合 ' + shown + ' 条' : '');
+}
+searchEl.addEventListener('input', render);
+render();
+
+})();
+</script>
+<script>
+(function(){
+"use strict";
+// 密码的 SHA-256 杂凑（不明文存放）
+var curHash = "815b88ba75843b1a2335244b33276f12e1bd77d5c8cf6a50c756f0a32f7ec7d7";
+var curFnv = "a976fb71"; // 备用杂凑（环境不支持 WebCrypto 时使用）
+var gate = document.getElementById('gate');
+var wrap = document.getElementById('mainWrap');
+var gateForm = document.getElementById('gateForm');
+var gatePw = document.getElementById('gatePw');
+var gateErr = document.getElementById('gateErr');
+var lockBtn = document.getElementById('lockBtn');
+
+function fnv1a(str){
+  var h = 0x811c9dc5;
+  for(var i = 0; i < str.length; i++){
+    h ^= str.charCodeAt(i);
+    h = (h * 0x01000193) >>> 0;
+  }
+  var s = h.toString(16);
+  while(s.length < 8) s = '0' + s;
+  return s;
+}
+function sha256Hex(str){
+  if(window.crypto && crypto.subtle && window.TextEncoder){
+    return crypto.subtle.digest('SHA-256', new TextEncoder().encode(str)).then(function(buf){
+      var bytes = new Uint8Array(buf), hex = '';
+      for(var i = 0; i < bytes.length; i++){
+        var b = bytes[i].toString(16);
+        if(b.length < 2) b = '0' + b;
+        hex += b;
+      }
+      return hex;
+    });
+  }
+  return Promise.resolve(null);
+}
+function checkPassword(pw){
+  return sha256Hex(pw).then(function(hex){
+    if(hex !== null) return hex === curHash;
+    return fnv1a(pw) === curFnv;
+  });
+}
+function unlock(){
+  gateErr.hidden = true;
+  gatePw.value = '';
+  gate.hidden = true;
+  wrap.hidden = false;
+}
+function lock(){
+  wrap.hidden = true;
+  gate.hidden = false;
+  gatePw.value = '';
+  if(gatePw.focus) gatePw.focus();
+}
+gateForm.addEventListener('submit', function(ev){
+  ev.preventDefault();
+  checkPassword(gatePw.value).then(function(ok){
+    if(ok){ unlock(); }
+    else {
+      gateErr.hidden = false;
+      gatePw.select();
+    }
+  });
+});
+lockBtn.addEventListener('click', lock);
+if(gatePw.focus) gatePw.focus();
+})();
+</script>
+</body>
+</html>
